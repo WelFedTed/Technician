@@ -1,0 +1,1 @@
+rem copy files and start tron from desktop (i think)
