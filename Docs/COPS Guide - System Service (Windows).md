@@ -14,7 +14,9 @@
 - Create a new System Restore point "COPS - Pre System Service"
 - Task Manager
   - Disable unwanted startup items
-- Wintoys
+- [Wintoys](https://apps.microsoft.com/detail/9p8ltpgcbzxd)
+  - Install [Wintoys](https://apps.microsoft.com/detail/9p8ltpgcbzxd)
+    > _`winget install wintoys` or</br>`winget install 9P8LTPGCBZXD` or</br>`ms-windows-store://pdp/?ProductId=9P8LTPGCBZXD`_
   - Performance Tab
     - `Ultimate performance power plan` | Turn ON if Desktop / Turn OFF if Laptop
     - `HAGS (hardware-accelerated GPU scheduling)` | Turn ON
