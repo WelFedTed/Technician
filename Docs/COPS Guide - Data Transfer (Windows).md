@@ -4,7 +4,7 @@
 
 <table>
     <td><em>contributors: <a href="mailto:shaun@copscorp.com.au" title="Buckland, Shaun (shaun@copscorp.com.au)">shaun@</a></em></td>
-    <td><div style='text-align: right;'><em>updated: 04-JUL-2024</em></div></td>
+    <td><div style='text-align: right;'><em>updated: 05-AUG-2024</em></div></td>
 </table>
 
 ## Backup
@@ -49,7 +49,7 @@
   > _Open PowerShell as Administrator and run (update with your export folder location): </br> `Export-WindowsDriver -Online -Destination REPLACE-WITH-EXPORT-FOLDER`_
 - Enable Antivirus
 
-## Prepare New Device (if requireed)
+## Prepare New Device (if required)
 
 - Bypass Network Registration in Windows 11 Out of Box Experience
   > `Shift+F10` to open Command Prompt: </br>
@@ -66,6 +66,24 @@
 - Update Apps via Winget
 - Update Windows
 - Update Office apps
+- Check for Device Manager for bangs(!)
+  > _Check for missing or faulty drivers, and install/update as required (SDIO)_
+- [<font style="color:ORANGE">OPTIONAL</font>] Update remaining Drivers (SDIO)
+- [<font style="color:ORANGE">If you installed/updated any drivers:</font>] Verify Drivers (verifier)
+  - **Turn On Windows Verifier:**
+    - Run `Win+R`: `verifier`
+    - Select `Create standard settings`
+    - Click `Next`
+    - Select `Automatically select all drivers on this computer`
+    - Click `Finish`
+    - Restart Windows (`shutdown -r -f -t 00`)
+      > _Windows Verifier works by stressing out drivers as they're loaded (it is expected that the computer's performance will be impacted while verifier is enabled)
+      > </br>If Windows loads into the desktop OK and does not crash with verifier enabled, then all is good and you can proceed to turn it off_
+  - **Turn Off Windows Verifier:**
+    - Run `Win+R`: `verifier`
+    - Select `Delete existing settings`
+    - Click `Finish`
+    - Restart Windows (`shutdown -r -f -t 00`)
 
 ## Restore
 
