@@ -110,6 +110,6 @@
   - Delete C:\Users\COPS\ folder
   - Empty Recycle Bin
 - Windows Maintenance (run the following commands as Admin)
-  > `winget source update` > `winget upgrade --all --silent` > `sfc /scannow` > `dism /online /cleanup-image /startcomponentcleanup /resetbase` > `dism /online /cleanup-image /restorehealth` > `sfc /scannow`
+  > `winget source update` </br> `winget upgrade --all --silent`</br> `sfc /scannow`</br> `dism /online /cleanup-image /startcomponentcleanup /resetbase`</br> `dism /online /cleanup-image /restorehealth`</br> `sfc /scannow`
 - Restart Windows
 - Create a new System Restore point 'COPS - Completed Data Transfer'
