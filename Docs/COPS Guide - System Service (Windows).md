@@ -60,7 +60,11 @@
   - Disk Cleanup
     - Run `cleanmgr /sageset:10`
     - Click `Clean up system files`
-    - Tick all checkboxes EXCEPT: 'System error memory dump files' + 'System error minidump files' + 'Windows error reports and feedback diagnostics'
+    - Tick all checkboxes EXCEPT:</br>
+    `System error memory dump files`</br>
+    `System error minidump files`</br>
+    `Windows error reports and feedback diagnostics`</br>
+    `User file history`
     - Click `OK`
     - Run `cleanmgr /sagerun:10`
   - Memory Diagnostics
