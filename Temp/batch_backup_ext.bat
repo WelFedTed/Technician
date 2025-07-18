@@ -2,6 +2,9 @@
 
 title Copy File By EXT
 
+rem change back in to current directory (in case run as admin)
+cd /d %~dp0
+
 set "source=C:\Temp"
 
 echo Copying all files with desired file extensions...
