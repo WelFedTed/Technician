@@ -1,4 +1,5 @@
 @echo off
+setlocal enableDelayedExpansion
 
 title Copy File By EXT
 
@@ -20,7 +21,16 @@ for %%e in (%extensions%) do (
     mkdir ".\%%e" 2>nul
     for /r "%source%" %%f in (*.%%e) do (
         echo Copying "%%f" to ".\%%e"
-        copy "%%f" ".\%%e"
+
+        set "fileName=%%~nxf"
+
+        rem append time (_MIN-SEC) if filename conflict
+        if exist ".\%%e\!fileName!" (
+            timeout 1
+            copy "%%f" ".\%%e\%%~nf_!TIME:~3,2!-!TIME:~6,2!%%~xf"
+        ) else (
+            copy "%%f" ".\%%e"
+        )
     )
     echo:
 )
