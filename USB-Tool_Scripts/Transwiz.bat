@@ -4,7 +4,7 @@ title Transwiz
 
 rem check if Windows XP, and run XP one?
 
-set dir="_Data\Apps\Transwiz\"
+set dir="_Data\Apps\ForensiT Transwiz\"
 set app=Transwiz.msi
 
 cd %dir%
