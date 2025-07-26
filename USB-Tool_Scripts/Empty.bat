@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-title Empty Bin
+title Empty Recycle Bin
 
 set "directory=_Data\Scripts"
 set "application=empty-recycle-bin.bat"
