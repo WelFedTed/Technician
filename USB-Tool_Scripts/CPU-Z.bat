@@ -63,7 +63,7 @@ rem ----------------------------------------------------------------------------
 	:x86
 	rem overwrite with x86 variables
 	echo 32-Bit Detected
-	set architecture=x86
+	set architecture=x32
 	goto overwrite
 
 	:x64
