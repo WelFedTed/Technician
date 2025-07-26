@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title CPU-Z
 
-set "directory=_Data\Apps\CPU-Z"
+set "directory=_Data\Apps\CPUID CPU-Z"
 set "application=cpuz.exe"
 
 set skipCheckElevated=0

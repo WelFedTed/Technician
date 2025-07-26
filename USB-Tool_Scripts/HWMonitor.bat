@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title HWMonitor
 
-set "directory=_Data\Apps\HWMonitor"
+set "directory=_Data\Apps\CPUID HWMonitor"
 set "application=HWMonitor.exe"
 
 set skipCheckElevated=0
