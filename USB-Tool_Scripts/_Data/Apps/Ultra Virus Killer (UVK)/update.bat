@@ -31,7 +31,6 @@ for /f "usebackq tokens=*" %%i in (`powershell -command "$version = (Get-Item '%
 for /f "usebackq tokens=*" %%i in (`powershell -command "(Get-Item '%app%').LastWriteTime.ToString('yyyy-MM-dd')"`) do set "date=%%i"
 type NUL > v%version%_%date%.version
 
-
 echo:
 echo Updating checksums...
 del checksums.sfv
@@ -43,7 +42,6 @@ wget https://code.kliu.org/misc/hashutils/%hashutils%.7z -P %TEMP%
 findstr /v checksums.sfv checksums.sfv > checksums.sfv.tmp
 del checksums.sfv
 ren checksums.sfv.tmp checksums.sfv
-
 
 echo:
 echo Updating parity data...
