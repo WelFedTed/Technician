@@ -35,17 +35,18 @@ type NUL > v%version%_%date%.version
 echo:
 echo Updating checksums...
 del checksums.sfv
+del *.par2
 set "hashutils=hashutils-1.2.4-redist"
 wget https://code.kliu.org/misc/hashutils/%hashutils%.7z -P %TEMP%
 %zip% x %TEMP%\%hashutils%.7z -o%TEMP%\%hashutils% -aoa
 %TEMP%\%hashutils%\bin.x86-64\crc32sum.exe -r * > checksums.sfv
-more +1 checksums.sfv > checksums.sfv.tmp
+findstr /v checksums.sfv checksums.sfv > checksums.sfv.tmp
 del checksums.sfv
 ren checksums.sfv.tmp checksums.sfv
 
+
 echo:
 echo Updating parity data...
-del *.par2
 set "par2ver=1.0.0"
 wget https://github.com/Parchive/par2cmdline/releases/download/v%par2ver%/par2cmdline-%par2ver%-win-x64.zip -P %TEMP%
 tar -xf %TEMP%\par2cmdline-%par2ver%-win-x64.zip -C %TEMP%
