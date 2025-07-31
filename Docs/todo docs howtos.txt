@@ -1,0 +1,6 @@
+Rip DVD's/Bluray's      MakeMKV
+Rip Music CD's          EAC (Exact Audio Copy)
+Re-Encode Video         Handbrake
+Checksums               HashCheck Shell Extension
+Parity                  Multipar
+Edit Code               VSCode (Visual Studio Code)
