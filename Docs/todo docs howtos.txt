@@ -22,3 +22,17 @@ Flash SD Cards                      BalenaEtcher
 Image SD Cards                      Win32DiskImager
 Data Recovery (Windows)             Disk Drill (Windows)
 Data Recovery (macOS/iOS/Android)   Disk Drill (macOS)
+Check Drive Health/SMART Data       Clear Disk Info
+Automate Virus/Malware Removal      UVK (Ultra Virus Killer)
+Download YouTube Videos             yt-dlp (Command Line Tool)
+Edit Audio                          Audacity / Adobe Audition
+Edit Video                          Davinci Resolve / Adobe Premiere Pro
+Edit Bitmap Images                  Photopea (website) / Adobe Photoshop
+Edit Vector Images                  Adobe Illustrator
+3D Modelling                        Blender
+Test Network Bandwidth/Throughput   iPerf3 (Command Line Tool)
+Crack Windows / Office              MAS (Microsoft Activiation Scripts)
+Remove Program Remnants (Windows)   Revo Uninstaller Pro
+Fix Windows Update                  WUReset (Reset Windows Update Tool)
+Video Player                        VLC Media Player
+Audio Player                        VLC Media Player
