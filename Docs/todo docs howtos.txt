@@ -4,3 +4,4 @@ Re-Encode Video         Handbrake
 Checksums               HashCheck Shell Extension
 Parity                  Multipar
 Edit Code               VSCode (Visual Studio Code)
+Compression             WinRAR
