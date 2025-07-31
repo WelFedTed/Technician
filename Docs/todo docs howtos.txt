@@ -1,7 +1,24 @@
-Rip DVD's/Bluray's      MakeMKV
-Rip Music CD's          EAC (Exact Audio Copy)
-Re-Encode Video         Handbrake
-Checksums               HashCheck Shell Extension
-Parity                  Multipar
-Edit Code               VSCode (Visual Studio Code)
-Compression             WinRAR
+Rip DVD's/Bluray's                  MakeMKV
+Rip Music CD's                      EAC (Exact Audio Copy)
+Re-Encode Video                     Handbrake
+Checksums                           HashCheck Shell Extension
+Parity                              Multipar
+Edit Code                           VSCode (Visual Studio Code)
+Compression                         WinRAR
+Multi-Image USB Bootloader          Ventoy
+Pre-Made Ventoy Loadout             Medicat
+Format SD Cards                     SD Memory Card Formatter
+Manage Apple Devices (Windows)      Apple Devices
+Manage Apple Devices (macOS)        Apple Configurator 2
+Create macOS Installers             MIST (MaOS Installer Super Tool)
+Custom Fan Curve (macOS)            Macs Fan Control
+Read MarkDown (.md) files           Markdown Viewer (Web Browser Extension)
+Password/Passphrase Generator       Bitwarden Free Password Generator (website)
+Password Manager                    Bitwarden
+Check Email for Breaches            Have I Been Pwned (website)
+Check Battery Health (macOS/iOS)    coconutBattery
+Window Manager (macOS)              Rectangle
+Flash SD Cards                      BalenaEtcher
+Image SD Cards                      Win32DiskImager
+Data Recovery (Windows)             Disk Drill (Windows)
+Data Recovery (macOS/iOS/Android)   Disk Drill (macOS)
