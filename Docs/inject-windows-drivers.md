@@ -3,6 +3,7 @@ title: 'How to Inject Drivers in to a Windows installer'
 author: Buckland, Shaun
 keywords: [inject, windows, driver, installer, offline]
 abstract: This doc will show how to inject driver(s) in to an offline Windows installer such as a Windows 11 USB installer.
+geometry: a4paper,margin=2cm
 ---
 
 <!--
