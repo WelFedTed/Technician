@@ -1,0 +1,727 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Yuki's LaTeX template for Pandoc.
+%
+% Authors:
+%   Rubén Gómez Olivencia (rugoli@gmail.com)
+%     https://twitter.com/rugoli
+%     https://github.com/yuki/yukibook.cls
+%
+% License:
+%   CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%--------------------------------------------------------------------------
+% Class configuration
+%--------------------------------------------------------------------------
+\NeedsTeXFormat{LaTeX2e}
+\documentclass[11pt,titlepage,twoside,openany]{book}
+
+%--------------------------------------------------------------------------
+% Language
+%--------------------------------------------------------------------------
+\RequirePackage[$lang$]{babel}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{csquotes}
+\RequirePackage{pifont}
+\RequirePackage[none]{hyphenat}
+\sloppy
+
+%--------------------------------------------------------------------------
+% Geometry
+%--------------------------------------------------------------------------
+\RequirePackage[a4paper,margin=2cm,footskip=1.4cm]{geometry}
+
+
+%--------------------------------------------------------------------------
+% Paragraph's style
+%--------------------------------------------------------------------------
+\usepackage{parskip}[=v1]
+% \setlength{\parskip}{9pt}
+% \setlength{\parindent}{0pt}
+\renewcommand{\baselinestretch}{1.4}
+
+
+%--------------------------------------------------------------------------
+% Fonts
+%--------------------------------------------------------------------------
+\RequirePackage{fontspec}
+\RequirePackage[default]{sourcesanspro}
+\RequirePackage{sourcecodepro}
+
+\usepackage[dvipsnames,svgnames,x11names,table]{xcolor}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Start my custom styles
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+$if(maincolor)$
+  \definecolor{maincolor}{HTML}{$maincolor$}
+$else$
+  \definecolor{maincolor}{HTML}{28436c}
+$endif$
+
+%--------------------------------------------------------------------------
+% Links
+%--------------------------------------------------------------------------
+\RequirePackage[final,linktoc=all]{hyperref}
+\urlstyle{same}
+\hypersetup{
+    colorlinks=true,
+    % allcolors=maincolor,
+    bookmarks=true,
+    bookmarksopen=true
+}
+% changed because of https://github.com/yegor256/href-ul/issues/45
+% \RequirePackage{href-ul}
+\let\oldhref\href
+\renewcommand{\href}[2]{\oldhref{#1}{\underline{#2}}}
+
+%--------------------------------------------------------------------------
+% TOC
+%--------------------------------------------------------------------------
+\RequirePackage{titletoc}
+
+\makeatletter
+\renewcommand\tableofcontents{
+  \begingroup
+    \hypersetup{hidelinks} % hide links in TOC, too much blue in it
+    \pagestyle{toc}
+    %\chapter*{\contentsname}
+    \setcounter{tocdepth}{2}    % add to TOC subsubsections
+    \setcounter{secnumdepth}{4} % add to subsubsections labels
+    \setlength{\parskip}{0em}
+    \@starttoc{toc}
+    \setlength{\parskip}{1.2em}
+  \endgroup
+  \thispagestyle{toc} % TODO: don't know why I need this here
+  \clearpage
+}
+\makeatother
+
+% inspired by https://www.latextemplates.com/template/the-legrand-orange-book
+% Styling of unnumbered parts in the table of contents
+\newcommand{\tocentrypartunnumbered}[1]{%
+    \setlength\fboxsep{0pt}% Remove box padding
+    \contentslabel[%
+    % Part title box
+    \colorbox{maincolor}{% Background color
+        \strut\parbox[c][.7cm]{\linewidth}{% Box size
+            \centering\Large\sffamily #1% Part title
+        }%
+    }%
+    ]{1.25cm}
+}
+
+\titlecontents{part} % Section type being modified
+  [1.25cm] % Left indentation
+  {\addvspace{20pt}\color{white}\Large\sffamily\bfseries\hypersetup{linkcolor=white}} % Before code
+  {} % Formatting of numbered sections of this type
+  {\tocentrypartunnumbered} % Formatting of numberless sections of this type
+  {} % Formatting of the filler to the right of the heading and the page number
+  [] % After code
+
+
+
+%--------------------------------------------------------------------------
+% Chapters and Titles definitions
+%--------------------------------------------------------------------------
+\RequirePackage[
+explicit, % Specify section names explicitly in \titleformat with #1
+%    newparttoc, % Required for writing the part toc entry number in a standard way (overriding default LaTeX behavior) so the titletoc package can style it
+]{titlesec}
+
+% Command to create and output the parts pages
+% Inspired by “The Legrand Orange Book”: https://www.latextemplates.com/template/the-legrand-orange-book
+\newcommand{\outputpartpage}[2]{
+    \thispagestyle{empty}
+    \begin{tikzpicture}[remember picture, overlay]
+        \node[anchor=center, rectangle, fill=maincolor, inner sep=0pt, minimum height=\paperheight, minimum width=\paperwidth] at (current page.center) {}; % Background color
+    \end{tikzpicture}
+    \begin{tikzpicture}[remember picture, overlay]
+        \node[anchor=north west, inner ysep=0pt] at (current page.north west) {\fontsize{220pt}{220pt}\selectfont\sffamily\bfseries\textcolor{maincolor!40}{#1}}; % Part number
+    \end{tikzpicture}
+    \begin{center}
+        %part title
+        \fontsize{70pt}{70pt}\selectfont\sffamily\bfseries\textcolor{white}{#2}
+    \end{center}
+}
+
+\titleformat{\part}[block] % Shape type, can be: hang, block, display, runin, leftmargin, rightmargin, drop, wrap, frame
+    {\outputpartpage{\thepart}{#1}} % format of title
+    {} % label before title
+    {0em} % Space between the title and label
+    {} % before-code hook
+
+\titleclass{\chapter}{straight} % removes page break after new chapter
+
+\titleformat{\chapter}[block]
+    {\huge\bfseries\color{maincolor}} % format of title
+    {\thechapter. #1} % label before title
+    {0pt} % length of separation between label and title
+    {}    % before-code hook
+\titlespacing*{\chapter} {0pt}{0pt}{0pt} % with 0pt maintains \parskip space
+
+
+\titleformat{\section}
+    {\fontsize{16pt}{16pt}\bfseries\color{maincolor}}
+    {\thesection. #1}
+    {0pt}
+    {}
+\titlespacing*{\section} {0pt}{0pt}{0pt}
+
+
+\titleformat{\subsection}
+    {\fontsize{14pt}{14pt}\bfseries\color{maincolor}}
+    {\thesubsection. #1}
+    {0pt}
+    {}
+
+\titleformat{name=\subsection,numberless}
+    {\fontsize{14pt}{14pt}\bfseries\color{maincolor}}
+    {#1}
+    {0pt}
+    {}
+
+\titlespacing*{\subsection} {0pt}{0pt}{0pt}
+
+
+\titleformat{\subsubsection}
+    {\fontsize{12pt}{12pt}\bfseries\color{maincolor}}
+    {\thesubsubsection. #1}
+    {0pt}
+    {}
+
+\titleformat{name=\subsubsection,numberless}
+    {\fontsize{12pt}{12pt}\bfseries\color{maincolor}}
+    {#1}
+    {0pt}
+    {}
+
+\titlespacing*{\subsubsection}{0pt}{0pt}{0pt}
+
+
+\titleformat{\paragraph}
+    {\fontsize{11pt}{11pt}\bfseries\color{maincolor}}
+    {\theparagraph. #1}
+    {0pt}
+    {\uline}
+\titlespacing*{\paragraph}{0pt}{0pt}{-1em}
+
+\makeatletter
+\@addtoreset{chapter}{part}
+\makeatother
+
+
+
+
+%--------------------------------------------------------------------------
+% Header and footer styling
+%--------------------------------------------------------------------------
+\RequirePackage{tikz}
+\RequirePackage{fancyhdr}
+\RequirePackage{extramarks}
+\pagestyle{fancy}
+
+\fancyhead{} % clear all header fields
+\renewcommand{\headrulewidth}{0pt} %remove the header's rule
+
+
+\directlua{partcount = 0}
+\newcommand*\partnumber{}
+\newcommand*\parttitle{}
+
+\let\origpart\part
+
+\renewcommand*{\part}[2][]{%
+    \ifx\\#1\\% optional argument not present?
+        \origpart{#2}%
+        \renewcommand*\parttitle{#2}%
+    \else
+        \origpart[#1]{#2}%
+        \renewcommand*\parttitle{#1}%
+    \fi
+    \directlua{partcount = partcount + 1}%
+    \renewcommand*\partnumber{\uppercase\expandafter{\romannumeral\directlua{tex.sprint(partcount)}}}%
+}
+
+
+%\partnumber and \parttitle are commands defined in line ~270
+\fancyhead[LE]{
+    \color{maincolor}\footnotesize\textit{\partnumber. \parttitle}
+    \vspace{-5pt}
+
+    \color{maincolor}\hrulefill
+}
+
+\fancyhead[RO]{
+    \color{maincolor}\footnotesize\textit{\nouppercase\firstleftmark}
+    \vspace{-5pt}
+
+    \color{maincolor}\hrulefill
+}
+
+\fancyfoot{} % clear all footer fields
+\fancyfoot[LE]{
+    \begin{tikzpicture}
+        \path [fill=maincolor] (0, 0) rectangle (0.8, 0.8);
+        \node [white] at (0.4,0.4) {\textbf{\thepage}};
+    \end{tikzpicture}
+    \begin{tikzpicture}
+        \path (0, 0);
+        \node at (0,0.35){\color{maincolor}\footnotesize\textit{$degree$}};
+    \end{tikzpicture}
+}
+\fancyfoot[RO]{
+    \begin{tikzpicture}
+        \path (0, 0);
+        \node at (0,0.35){\color{maincolor}\footnotesize\textit{$title$}};
+    \end{tikzpicture}
+    \begin{tikzpicture}
+        \path [fill=maincolor] (0, 0) rectangle (0.8, 0.8);
+        \node [white] at (0.4,0.4) {\textbf{\thepage}};
+    \end{tikzpicture}%
+}
+
+% for TOC
+\fancypagestyle{toc}[fancy]{%
+    \fancyhead[LE,RO]{
+        \color{maincolor}\footnotesize\textit{\contentsname}
+        \vspace{-5pt}
+
+        \color{maincolor}\hrulefill
+    }
+}
+
+
+%--------------------------------------------------------------------------
+% Other required packages
+%--------------------------------------------------------------------------
+
+\RequirePackage{pmboxdraw} % for Systemctl's "box" unicode symbols
+\RequirePackage{graphicx}
+\RequirePackage{svg} % for svg images
+\svgsetup{inkscapelatex=false} % don't treat text in svg as independent: https://tex.stackexchange.com/a/599018/305952
+
+\RequirePackage[export]{adjustbox} % frames in graphics
+\RequirePackage{wrapfig}
+
+\RequirePackage{caption}
+\captionsetup{labelformat=empty,textfont={scriptsize}}
+\RequirePackage[shortcuts]{extdash}
+
+\RequirePackage{enumitem}
+\setlist{topsep=-5pt}
+\providecommand{\tightlist}{} % modified from Pandoc LaTeX template
+
+% to include other files sections by tags
+\usepackage{catchfilebetweentags}
+
+\RequirePackage{blindtext} % to add Lorem Impsum...
+
+\RequirePackage{xstring} % for the Cover's "if png...else svg"
+
+\RequirePackage{codehigh} % to use \fakeverb{} to highlight code in tables and inline verbatim.
+
+%--------------------------------------------------------------------------
+% Custom color BOXES
+%--------------------------------------------------------------------------
+
+\definecolor{error-color}{HTML}{9e0000}
+\definecolor{inline-bg-color}{HTML}{404040}
+\definecolor{inline-code-color}{HTML}{d63384}
+
+\RequirePackage{fontawesome5}
+
+\RequirePackage{tcolorbox}
+\tcbuselibrary{raster,fitting,many,minted,breakable,skins}
+\usetikzlibrary{decorations.pathmorphing}
+\usemintedstyle{friendly}
+% \newtcolorbox{infobox}{colback=cyan!5!white,arc=0pt,outer arc=0pt,colframe=cyan!60!black}
+\newenvironment{custombox}[4]{
+  \begin{tcolorbox}[
+      colframe=#1, colbacktitle=#1,
+      colupper=#1, colback=#2,
+      enhanced, sidebyside, segmentation hidden,
+      lefthand width=1.2cm,
+      title=\textbf{#3},]
+    \centering
+    \color{#1}
+    \fontsize{30pt}{-10pt}#4
+    \tcblower
+    \color{#1}
+}{
+  \end{tcolorbox}
+}
+
+\ifstrequal{$lang$}{basque}
+{
+  \def\infoname{Informazioa}
+  \def\warnname{Adi!}
+  \def\errorname{Kontuz!}
+  \def\questionname{Galdera}
+  \def\exercisename{Ariketa}
+}{
+  \def\infoname{Información}
+  \def\warnname{¡Atención!}
+  \def\errorname{¡Cuidado!}
+  \def\questionname{Pregunta}
+  \def\exercisename{Ejercicio}
+}
+
+
+
+%% Inspired on awesomebox
+\newenvironment{infobox}{
+  \begin{custombox}{cyan!60!black}{cyan!5!white}{\infoname}{\faInfoCircle}
+}{
+  \end{custombox}
+}
+
+\newenvironment{warnbox}{
+  \begin{custombox}{orange!80!black}{orange!5!white}{\warnname}{\faExclamationCircle}
+}{
+  \end{custombox}
+}
+
+\newenvironment{errorbox}{
+  \begin{custombox}{error-color}{red!4!white}{\errorname}{\faExclamationTriangle}
+}{
+  \end{custombox}
+}
+
+\newenvironment{questionbox}{
+  \begin{custombox}{Goldenrod}{white}{\questionname}{\faQuestionCircle}
+}{
+  \end{custombox}
+}
+
+\newenvironment{exercisebox}{
+  \begin{custombox}{teal}{teal!4!white}{\exercisename}{\faCog}
+}{
+  \end{custombox}
+}
+
+\newenvironment{gitbox}{
+  \begin{custombox}{BlueViolet}{BlueViolet!4!white}{GitHub}{\faGithub}
+}{
+  \end{custombox}
+}
+
+\newtcblisting[auto counter,number within=section, list inside=mycommands]
+  {mycode}[3]{
+    listing only,adjusted title={\faTerminal \hspace{10pt}#1}, listing engine=minted,minted language=#2,
+    breakable=true,enhanced jigsaw,
+    minted options={fontsize=#3},colback=white,
+    list entry={\protect\numberline{\thetcbcounter}#1}
+}
+
+\DeclareTotalTCBox{\inlineconsole}{ v }
+  {verbatim,colupper=white,colback=inline-bg-color,colframe=black,enhanced}{#1}
+
+\DeclareTotalTCBox{\commandbox}{ v }
+  {verbatim,colupper=white,colback=inline-bg-color,colframe=black,enhanced}{\faTerminal\hspace{0pt}  #1}
+
+\DeclareTotalTCBox{\configfile}{ v }
+  {verbatim,colupper=white,colback=inline-bg-color,colframe=black,enhanced}{\faFile\hspace{0pt}  #1}
+
+\DeclareTotalTCBox{\configdir}{ v }
+  {verbatim,colupper=white,colback=inline-bg-color,colframe=black,enhanced}{\faFolderOpen\hspace{0pt}  #1}
+
+\DeclareTotalTCBox{\configlink}{ v }
+  {verbatim,colupper=white,colback=inline-bg-color,colframe=black,enhanced}{\faLink\hspace{0pt}  #1}
+
+
+\definecolor{imdb}{HTML}{f5c518}
+\DeclareTotalTCBox{\movie}{ v v}
+  {verbatim,colback=white,colframe=imdb,enhanced}{\faFileVideo\hspace{0pt}  \href{#1}{#2}}
+
+
+
+%--------------------------------------------------------------------------
+% IMAGES
+%--------------------------------------------------------------------------
+
+\newcommand{\itemimage}[6]{
+  % #1 item text
+  % #2 l / r : left or right position of the image
+  % #3 size of the image
+  % #4 image
+  % #5 caption
+  % #6 text
+  \vspace{-1.7em}
+  \parbox[t]{\dimexpr\textwidth-\leftmargin}{%
+    \item[#1]
+    \begin{wrapfigure}{#2}{#3\textwidth}
+        \vspace{-12pt}
+        \includegraphics[width=\linewidth]{#4}
+        \vspace{-29pt}\caption{#5}\vspace{-30pt}
+    \end{wrapfigure}
+    \setlength{\parskip}{0.8em}
+    #6
+  }
+}
+
+%--------------------------------------------------------------------------
+% TABLES
+%--------------------------------------------------------------------------
+
+\RequirePackage{pdflscape} %change page orientation to landscape
+
+% from: https://github.com/jgm/pandoc/issues/7475
+\RequirePackage{tabularray}
+\UseTblrLibrary{varwidth}
+
+\SetTblrInner{
+    vlines,
+    hlines,
+}
+
+\ifstrequal{$lang$}{basque}
+{
+    \DefTblrTemplate{contfoot-text}{default}{Hurrengo orrialdean jarraitzen du}
+}{
+    \DefTblrTemplate{contfoot-text}{default}{Continúa en la siguiente página}
+}
+\DefTblrTemplate{conthead-text}{default}{}
+\DefTblrTemplate{caption}{default}{}
+\DefTblrTemplate{conthead}{default}{}
+\DefTblrTemplate{capcont}{default}{}
+
+
+% FIXME: hay que corregir el tema de las tablas.. pero para no perder, el tiempo, lo dejo así.
+\NewTblrEnviron{yukitblr}
+\SetTblrInner[yukitblr]{
+    vlines,
+    hlines,
+    rowsep=6pt,
+    colsep=12pt,
+    row{odd} = {maincolor!10},
+    row{1} = {bg=maincolor,fg=white,font=\bfseries},
+    cells={c,m},
+%    rowhead=1, %repeat head in new page
+}
+
+\SetTblrOuter[yukitblr]{
+    long,
+    label=none,
+}
+
+\NewTblrEnviron{yukitblrcol}
+\SetTblrInner[yukitblrcol]{
+    vlines,
+    hlines,
+    hline{1}={1}{1}{0pt},
+    vline{1}={1}{1}{0pt},
+    rowsep=6pt,
+    colsep=12pt,
+    row{odd} = {maincolor!10},
+    row{1} = {bg=maincolor,fg=white,font=\bfseries},
+    column{1} = {bg=maincolor,fg=white,font=\bfseries},
+    cells={c,m},
+    cell{1}{1}={bg=white},
+    %    rowhead=1, %repeat head in new page
+}
+
+\SetTblrOuter[yukitblrcol]{
+    long,
+    label=none,
+}
+
+
+\NewTblrEnviron{rubrica}
+\SetTblrInner[rubrica]{
+    vlines,
+    hlines,
+    hline{1}={1}{1}{0pt},
+    vline{1}={1}{1}{0pt},
+    cell{1}{2}={bg=SeaGreen},
+    cell{1}{3}={bg=DarkSeaGreen},
+    cell{1}{4}={bg=SandyBrown},
+    cell{1}{5}={bg=Tomato},
+    column{1} = {bg=maincolor,fg=white,font=\bfseries},
+    cells={l,t},
+    row{1} = {fg=white,font=\bfseries, c},
+    cell{1}{1}={bg=white},
+    %    rowhead=1, %repeat head in new page
+}
+
+\SetTblrOuter[rubrica]{
+    long,
+    label=none,
+}
+
+
+\RequirePackage{multicol}
+
+\NewTblrEnviron{requisitostbl}
+
+\SetTblrInner[requisitostbl]{
+    hspan=minimal,
+    measure=vbox,
+    vlines={maincolor},
+    vline{2,3,4,5}={1,2}{white},
+    hlines={maincolor},
+    hline{2}={0pt},
+    row{1,2} = {
+        bg=maincolor,
+        fg=white,
+        font=\bfseries,
+        halign={c},
+    },
+    row{3}={
+        halign={c},
+        font=\bfseries,
+    },
+    cell{3,4,5,6}{1} = {c=5}{},
+%    width=\linewidth
+}
+
+
+
+%%%%%%%%%%%%%%%%
+%
+% Start the document
+%
+%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%---------------------------------------------------
+% Cover inspired by O'reilly books
+% and from https://github.com/johnjohnlin/oreilly_cover
+%---------------------------------------------------
+\thispagestyle{empty}
+\newgeometry{margin=0pt}
+
+\begin{tcolorbox}[
+    boxrule=0mm,
+    arc=0mm,
+    colframe=maincolor,
+    colback=maincolor,
+    fit to={\paperwidth} and 2.5cm,
+    fit basedim=130pt,
+    halign=flush center,
+    valign=center,
+    top=1mm,bottom=1mm
+    ]
+    \color{white}\textbf{\textit{$degree$}}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    boxrule=0mm,
+    arc=0mm,
+    colframe=white,
+    colback=white,
+    fit to={\paperwidth} and 12.5cm,
+    halign=flush center,
+    valign=center,
+    space to=\myspace,
+    ]
+    \IfEndWith{$cover$}{png}{
+      \includegraphics[width=\linewidth,height=13cm,keepaspectratio]{$cover$}
+    }{
+      \includesvg[pretex=\escapeus,width=\linewidth,height=13cm,keepaspectratio]{$cover$}
+    }\par
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    boxrule=0mm,
+    arc=0mm,
+    colframe=maincolor,
+    colback=maincolor,
+    fit to={\paperwidth} and 8cm,
+    fit basedim=130pt,
+    halign=flush center,
+    valign=center,
+    top=1cm,bottom=1cm,
+    ]
+    \color{white}\textbf{\textit{$title$}}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    boxrule=0mm,
+    colframe=white,
+    colback=white,
+    fit to={\paperwidth} and 2cm,
+    halign=flush right,
+    valign=top,
+    left=8cm,
+    right=1cm
+    ]
+    \Large{\color{maincolor}\textit{$phrase$}} \\
+    \small{\color{maincolor}\textit{$phrase-author$}}
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+    before skip=0cm,
+    boxrule=0mm,
+    colframe=white,
+    colback=white,
+    fit to={\paperwidth} and 2.6cm,
+    fit basedim=210pt,
+    halign=flush left,
+    left=1cm,
+    valign=top
+    ]
+    \color{maincolor}\textbf{$author$} \linebreak
+    \color{maincolor}\textbf{$date$}
+\end{tcolorbox}
+
+
+\restoregeometry
+\clearpage % end cover page
+
+%---------------------------------------------------
+% First page with book license
+%---------------------------------------------------
+% remove header
+\thispagestyle{empty}
+
+\null
+\vfill
+\begin{flushleft}
+    \includesvg[]{img/seal.svg}
+
+    Copyright \textcopyright \ $author$ \hspace{1pt} (\href{mailto:r.gomezolivencia@irakasle.eus}{r.gomezolivencia@irakasle.eus})
+    \begin{itemize}
+        \item Github: \href{https://github.com/yuki}{https://github.com/yuki}
+    \end{itemize}
+
+
+    \vspace{5mm}
+    \textbf{Licencia: } \href{https://creativecommons.org/licenses/by-sa/4.0/deed.es}{Creative Commons BY-SA 4.0}
+
+
+    Este libro se ha relizado teniendo en cuenta la cultura libre. Puedes utilizarlo, modificarlo y compartirlo teniendo en cuenta la licencia \href{https://creativecommons.org/licenses/by-sa/4.0/}{Attribution-ShareAlike} de \textbf{Creative Commons}. Es por eso que:
+
+    \begin{itemize}
+        \item \textbf{Atribución}: Debes darme crédito de manera adecuada e incluir un enlace a la licencia e indicar si se han realizado cambios.
+        \item \textbf{CompartirIgual}: Si reutilizas, modificas o creas a partir de este material, debes distribuir el trabajo bajo la misma licencia.
+    \end{itemize}
+
+
+    Puedes encontrar la última versión de este libro en formato \textbf{HTML} en el siguiente \href{https://yuki.github.io/my-books/}{link}, así como otros libros que he creado. Para descargar el código fuente en formato \textbf{Markdown} visita el repositorio en \href{https://github.com/yuki/my-books}{GitHub}.
+
+    \begin{infobox}
+        Por favor, ponte en contacto conmigo si encuentras algún fallo, falta de ortografía o quieres mejorar de alguna manera este libro. Gracias.
+    \end{infobox}
+    \vspace{5mm}
+\end{flushleft}
+
+\clearpage %end license page
+
+
+\makeatletter
+  \renewcommand\@dotsep{200}
+\makeatother
+
+\tableofcontents
+
+
+$body$
+
+
+\end{document}

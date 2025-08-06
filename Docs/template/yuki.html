@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang$" xml:lang="$lang$"$if(dir)$ dir="$dir$"$endif$ data-bs-theme="auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+$for(author-meta)$
+  <meta name="author" content="$author-meta$">
+$endfor$
+$if(date-meta)$
+  <meta name="dcterms.date" content="$date-meta$">
+$endif$
+$if(keywords)$
+  <meta name="keywords" content="$for(keywords)$$keywords$$sep$, $endfor$">
+$endif$
+$if(description-meta)$
+  <meta name="description" content="$description-meta$">
+$endif$
+  <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    :root, [data-bs-theme=light] {
+      --templatecolor: #$maincolor$;
+      --bs-heading-color: var(--templatecolor);
+    }
+
+    [data-bs-theme=dark] {
+      --bs-heading-color: var(--bs-gray-100);
+    }
+  </style>
+  <link href="template/css/dark_mode.css" rel="stylesheet">
+  <link href="template/css/template.css" rel="stylesheet">
+  <link href="template/css/pygments/friendly.css" rel="stylesheet">
+  <link href="template/css/pygments/github-dark.css" rel="stylesheet">
+
+$for(css)$
+  <link rel="stylesheet" href="$css$">
+$endfor$
+$for(header-includes)$
+  $header-includes$
+$endfor$
+$if(math)$
+  $if(mathjax)$
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  $endif$
+  $math$
+$endif$
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+
+</head>
+  <body>
+
+    <header class="navbar navbar-expand-lg bd-navbar sticky-top" id="header" >
+      <nav id="navbar" class="container-xxl flex-wrap flex-lg-nowrap text-white" aria-label="header">
+
+        <div class="bd-navbar-toggle">
+          <button class="navbar-toggler p-2 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#TOCsidebarMenu" aria-controls="toc" aria-label="Toggle docs navigation">
+            <i class="fa-solid fa-circle-chevron-right"></i>
+          </button>
+        </div>
+
+        <div>
+          $if(title)$
+            <span class="fs-4 d-none d-md-inline">$title$</span>
+            <span class="fs-4 d-md-none d-xs-inline">$title-mini$</span>
+            $if(subtitle)$
+              <span class="subtitle d-none d-lg-inline"> - $subtitle$</span>
+            $endif$
+          $endif$
+        </div>
+
+        <button class="navbar-toggler d-flex d-lg-none order-3 p-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" aria-label="Toggle navigation">
+          <i class="fa-solid fa-ellipsis text-white"></i>
+        </button>
+
+        <!-- RIGHT OFFCANVAS -->
+        <div class="offcanvas offcanvas-end flex-grow-1" tabindex="-1" id="offcanvasRight" aria-labelledby="bdNavbarOffcanvasLabel" data-bs-scroll="true" aria-modal="true" role="dialog">
+          <div class="offcanvas-header px-4 pb-0">
+            <h5 class="offcanvas-title text-white" id="bdNavbarOffcanvasLabel">$title$</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close" data-bs-target="#bdNavbar"></button>
+          </div>
+
+          <div class="offcanvas-body p-4 pt-0 p-lg-0">
+            <ul class="navbar-nav flex-row flex-wrap ms-md-auto">
+              <ul class="navbar-nav flex-row d-flex align-items-center flex-wrap text-white">
+                <li class="d-lg-none me-2 text-white navbar-nav flex-row d-flex align-items-center flex-wrap">Descargar</li>
+                <li class="navbar-nav flex-row d-flex align-items-center flex-wrap text-white">
+                  <a id="pdf-link" href="" class=" btn flex-row d-flex align-items-center flex-wrap text-white download-icon">
+                    <i class="fa-solid fa-cloud-arrow-down"></i>
+                  </a>
+                </li>
+              </ul>
+
+
+              <li class="nav-item py-2 py-lg-1 col-12 col-lg-auto">
+                <div class="vr d-none d-lg-flex h-100 mx-lg-2 text-white"></div>
+                <hr class="d-lg-none my-2 text-white-50">
+              </li>
+
+              <!-- Theme Selector -->
+              <ul class="navbar-nav flex-row d-flex align-items-center flex-wrap text-white" id="theme-selector">
+                <div class="d-lg-none me-2 text-white navbar-nav flex-row d-flex align-items-center flex-wrap">Cambiar tema</div>
+                <li class="nav-item dropdown">
+                  <button class="btn btn-link nav-link text-white dropdown-toggle d-flex align-items-center theme-icon-active" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" href="fa-moon">
+                    <i class="fa-solid fa-moon"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme" style="--bs-dropdown-min-width: 8rem;" id="theme-selector-menu">
+                    <li href="fa-sun" data-bs-theme-value="light">
+                      <button type="button" class="dropdown-item d-flex align-items-center">
+                        <i class="fa-solid fa-sun opacity-50 theme-icon"></i>
+                        Light
+                      </button>
+                    </li>
+                    <li href="fa-moon" data-bs-theme-value="dark">
+                      <button type="button" class="dropdown-item d-flex align-items-center">
+                        <i class="fa-solid fa-moon opacity-50 theme-icon"></i>
+                        Dark
+                      </button>
+                    </li>
+                    <li href="fa-circle-half-stroke" data-bs-theme-value="auto">
+                      <button type="button" class="dropdown-item d-flex align-items-center">
+                        <i class="fa-solid fa-circle-half-stroke opacity-50 theme-icon"></i>
+                        Auto
+                      </button>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+
+              <li class="d-lg-none nav-item py-2 py-lg-1 col-12 col-lg-auto">
+                <div class="vr d-none d-lg-flex h-100 mx-lg-2 text-white"></div>
+                <hr class="d-lg-none my-2 text-white-50">
+              </li>
+
+              <!-- Author and links -->
+              <ul class="d-lg-none navbar-nav flex-row d-flex align-items-center flex-wrap text-white">
+                <li class="d-lg-none me-2 text-white navbar-nav flex-row d-flex align-items-center flex-wrap">$date$, $author$</li>
+                <ul class="nav justify-content-end list-unstyled d-flex">
+                  $if(github-link)$
+                    <li class="ms-3"><a class="text-white" href="$github-link$"><i class="fa-brands fa-github"></i></a></li>
+                  $endif$
+                </ul>
+              </ul>
+
+              <li class="d-lg-none nav-item py-2 py-lg-1 col-12 col-lg-auto">
+                <div class="vr d-none d-lg-flex h-100 mx-lg-2 text-white"></div>
+                <hr class="d-lg-none my-2 text-white-50">
+              </li>
+
+              <ul class="navbar-nav flex-row d-flex align-items-center flex-wrap text-white">
+                <li class="d-lg-none me-2 text-white navbar-nav flex-row d-flex align-items-center flex-wrap">
+                  <a  href="https://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0</a>
+                </li>
+              </ul>
+
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="container-fluid">
+      <div class="row">
+        $if(toc)$
+          <div class="col-lg-2">
+            <aside class="sticky-lg-top offcanvas-lg offcanvas-start offcanvas-body" tabindex="-1" id="TOCsidebarMenu" aria-labelledby="bdsidebaroffcanvaslabel">
+              <div class="offcanvas-lg offcanvas-start show" tabindex="-1" id="bdsidebar" aria-labelledby="bdsidebaroffcanvaslabel" aria-modal="true" role="dialog">
+
+                <div class="offcanvas-header border-bottom d-lg-none">
+                  <h5 class="offcanvas-title" id="bdsidebaroffcanvaslabel"></h5>
+                  <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" aria-label="close" data-bs-target="#TOCsidebarMenu"></button>
+                </div>
+                <div class="offcanvas-body">
+                  <nav class="" id="bd-docs-nav" aria-label="docs navigation">
+                    <div id="toc" class="pb-5">
+                      $toc$
+                    </div>
+                  </nav>
+                </div>
+              </div>
+            </aside>
+          </div>
+        $endif$
+        <div class="col-12 col-lg-8">
+          <main class="bd-main order-1" id="main"  data-bs-spy="scroll" data-bs-target="#toc">
+            <div id="book">
+
+              $if(title)$
+                <div id="cover" class="fw-bold text-center">
+                  <span id="title" >$title$</span>
+                  <div id="cover_img" class="py-5">
+                    <img src="$cover$">
+                  </div>
+                </div>
+              $endif$
+
+$body$
+
+            </div>
+          </main>
+
+          <footer id="footer">
+            <div class="justify-content-between align-items-center py-3 my-4 border-top ms-sm-auto">
+                <div class="row justify-content-between align-items-center">
+                  <div class="col-8 d-flex p-2">
+                    <a href="/" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none"> </a>
+                    <span class="text-body-secondary">$date$, $author$</span>
+                    $if(github-link)$
+                      &nbsp; &nbsp;
+                      <a class="text-body-secondary" href="$github-link$"><i class="fa-brands fa-github"></i></a>
+                    $endif$
+                  </div>
+
+                  <!-- <a class="nav col-2 justify-content-end list-unstyled d-flex" href="https://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0</a> -->
+                  © COPS Pty Ltd
+                </div>
+            </div>
+          </footer>
+        </div> <!-- col -->
+      </div> <!-- row -->
+
+    </div> <!-- container -->
+
+    <!-- The Modal -->
+    <div id="imgModal" class="modal" tabindex="-1">
+      <div class="modal-dialog modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalCaption"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <img class="modal-content" id="img01">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" integrity="sha512-uKQ39gEGiyUJl4AI6L+ekBdGKpGw4xJ55+xyJG7YFlJokPNYegn9KwQ3P8A7aFQAUtUsAQHep+d/lrGqrbPIDQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="template/js/dark_mode.js"></script>
+    <script src="template/js/template.js"></script>
+  </body>
+</html>

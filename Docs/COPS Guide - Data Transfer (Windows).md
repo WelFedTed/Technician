@@ -1,3 +1,4 @@
+<!--
 ---
 title: 'COPS Guide - Data Transfer (Windows)'
 author: Buckland, Shaun
@@ -5,6 +6,7 @@ keywords: [backup, restore, user data, data transfer]
 abstract: This document provides step-by-step instructions on backing up a device's user data and restoring it to a new device.
 geometry: a4paper,margin=2cm
 ---
+-->
 
 <!--
 Render to .PDF using https://md2pdf.netlify.app/ at 75% scaling (Print to PDF)
@@ -19,21 +21,21 @@ Render to .PDF using https://md2pdf.netlify.app/ at 75% scaling (Print to PDF)
 
 ## Backup
 
-- Restart Windows
+- **Restart Windows**\
   > _Force Restart Windows now to provide a clean environment for proceeding_\
   > `shutdown -r -f -t 00`
 - [<font style="color:ORANGE">OPTIONAL</font>] Create a new System Restore point
-- Disable Antivirus
+- **Disable Antivirus**\
   > _Some of our extraction tools prompt false positives in the majority of security software_
-- Create a Job folder on a Transfer Drive\
+- **Create a Job folder on a Transfer Drive**\
   _naming convention:_\
-  `Job#22510`
+  `Job#5000`
   > _Create a new folder with the current job number to save User Data to_
-- Backup User Profiles
+- **Backup User Profiles**\
   > _Copy `C:\Users\` folder to the Job folder on the Transfer Drive_
-- Backup Web Browsers\
+- **Backup Web Browsers**\
   _For each web browser installed complete the following:_
-  - Export Bookmarks\
+  - **Export Bookmarks**\
     _naming convention:_\
     `Web Browser - Google Chrome - Bookmarks - 2024-07-15.html`\
     or\
@@ -43,7 +45,7 @@ Render to .PDF using https://md2pdf.netlify.app/ at 75% scaling (Print to PDF)
     > _AVG Secure Browser URL:_ `secure://bookmarks`\
     > _Mozilla Firefox Hotkey:_ `Ctrl+Shift+O`\
     > _Microsoft Internet Explorer:_ `%USERPROFILE%\Favorites`
-  - Export Passwords\
+  - **Export Passwords**\
     _naming convention:_\
     `Web Browser - Google Chrome - Passwords - 2024-07-15.csv`\
     or\
@@ -53,7 +55,7 @@ Render to .PDF using https://md2pdf.netlify.app/ at 75% scaling (Print to PDF)
     > _AVG Secure Browser URL:_ `secure://password-manager` or `secure://settings/passwords` (older Secure Browser versions)\
     > _Mozilla Firefox URL:_ `about:logins`\
     > _Microsoft Internet Explorer:_ use [Nirsoft IE PassView](https://www.nirsoft.net/utils/internet_explorer_password.html)
-  - Sync Accounts\
+  - **Sync Accounts**\
     _Try to sync each browser with their relevant accounts if available_\
     _Manual exports of Bookmarks + Passwords is good, but syncing the entire browser is better_
     - _Google Chrome:_ `Google Account`
@@ -69,13 +71,13 @@ Render to .PDF using https://md2pdf.netlify.app/ at 75% scaling (Print to PDF)
       > _TODO (but it's similar to Chrome)_\
     - Mozilla Firefox:_ `Mozilla Account`
       > _TODO_
-- Export Installed Programs List\
+- **Export Installed Programs List**\
   _naming convention:_\
   `Installed Programs - Nirsoft Uninstallview - 2024-07-15.html`\
   or\
   `installed-programs_nirsoft-uninstallview_2024-07-15.html`
   > _use Nirsoft UninstallView, save all as Horizontal HTML_
-- Export Winget\
+- **Export Winget**\
   _naming convention:_\
   `Winget - Export - 2024-07-15.json`\
   or\
@@ -86,36 +88,36 @@ Render to .PDF using https://md2pdf.netlify.app/ at 75% scaling (Print to PDF)
   > Export Winget's list of installed programs `winget export -o "REPLACE-WITH-TARGET-FILE"`\
   _(update REPLACE-WITH-TARGET-FILE with the target winget export file on the transfer drive)_\
   > Optionally export a list of all programs that Winget does cannot re-install at the same time with this extended command `winget export -o "REPLACE-WITH-TARGET-FILE" >> "winget_unnavailable.txt"`
-- Export License Keys\
+- **Export License Keys**\
   _naming convention:_\
   `License Keys - Nirsoft Product Key Scanner - 2024-07-15.html`\
   or\
   `license-keys_nirsoft-product-key-scanner_2024-07-15.html`
   > _use Nirsoft Product Key Scanner or Nirsoft ProduKey, save all as Horizontal HTML_
-- Export Emails
+- **Export Emails**
   - Extract Passwords and Server Settings
     - Nirsoft Mail PassView
     - Nirsoft WinMailPassRec
     - Nirsoft PstPassword
   - Backup any accounts set up as POP
     > [_How to export emails to file in Outlook_](https://support.microsoft.com/en-au/office/back-up-your-email-e5845b0b-1aeb-424f-924c-aa1c33b18833)
-- Check C: Drive for unusual files/folders
-  > _copy to Job folder copying the C: Drive file structure (TransferDrive:\Job#5000\C\FolderToSave)_
+- **Check C: Drive for unusual files/folders**
+  > _copy to Job folder copying the C: Drive file structure (TransferDrive:\\Job\#5000\\C\\FolderToSave)_
 - [<font style="color:ORANGE">OPTIONAL</font>] Create Winget Install Script
   > _https://winstall.app/ - Select Desired Programs - Generate Script - Download both Batch (.bat) and PowerShell (.ps1) scripts_
-- Export Drivers\
+- **Export Drivers**\
   `TRANSFERDRIVE:\\Job#5000\Drivers - 2024-07-15\`\
   or\
   `TRANSFERDRIVER:\\Job#5000\drivers_2024-07-15\`
   > _Open `PowerShell` as an Administrator and run the following script:_\
   `Export-WindowsDriver -Online -Destination "REPLACE-WITH-TARGET-FOLDER"`\
   _(update REPLACE-WITH-TARGET-FOLDER with the target drivers folder on the transfer drive)_
-- Enable Antivirus
+- **Enable Antivirus**
 
 ## Prepare New Device _(if required)_
 
-- Create a Local Account during Windows 10/11 Out of Box Experience (OOBE)
-  - Option 1: No Internet Connected\
+- **Create a Local Account during Windows 10/11 Out of Box Experience (OOBE)**
+  - **Option 1: No Internet Connected**\
     Bypass Network Registration
     > _Open Command Prompt:_ `Shift+F10` _(may require pressing `Fn` on some devices)_\
     > _Run command:_ `OOBE\BYPASSNRO` _(this will restart the OOBE if successful)_\
@@ -124,7 +126,7 @@ Render to .PDF using https://md2pdf.netlify.app/ at 75% scaling (Print to PDF)
     > _Select_ `Continue with limited setup`\
     > _Create a Local Account:_ `COPS` (no password)\
     > _Complete the OOBE as normal_
-  - Option 2: Internet Connected\
+  - **Option 2: Internet Connected**\
     Force Local Account Creation
     > _Proceed though OOBE like normal until you get to the Login with a Microsoft Account screen_\
     > _Open Command Prompt:_ `Shift+F10` _(may require pressing `Fn` on some devices)_\
@@ -141,32 +143,35 @@ Render to .PDF using https://md2pdf.netlify.app/ at 75% scaling (Print to PDF)
     > _Run_ `ms-windows-store://pdp/?productid=BF712690PMLF&OCID=windowssmodesupportpage`\
     > _Follow the prompts to Switch Out of S Mode\
     (this will change the Windows edition installed to Windows 10/11 Home or Pro as per it's installed license)_
-- Configure System Restore
-- Check installed Windows' Edition
+- **Configure System Restore**\
+- **Check installed Windows' Edition**\
   > _Run_ `winver`
-- Create a new System Restore point `COPS - Fresh Windows 10/11 Home/Pro Install` (use 10 or 11 and Home or Pro as per `winver`)
-- Connect to the Internet (if not already)
-- Check Windows is activated TODO: `ms-settings:activation` or `ms-settings:activation?activationSource=SMC-Article-12440`
-- Configure Time/Date
-- Configure Windows Update
+- **Create a new System Restore point**\
+  `COPS - Fresh Windows 10/11 Home/Pro Install` (use 10 or 11 and Home or Pro as per `winver`)
+- **Connect to the Internet** (if not already)
+- **Check Windows is activated**\
+  TODO: `ms-settings:activation` or `ms-settings:activation?activationSource=SMC-Article-12440`
+- **Configure Time/Date**
+- **Configure Windows Update**
   > _Enable_ `TODO: Update other Microsoft products`\
   > _Disable_ `TODO: get me up to date`\
   > _Enable_ `TODO: Notify me when updates are ready`\
   > _Enable_ `TODO: Optimize, download from LAN`
-- Update Apps via `Microsoft Store`
-- Update Apps via `Winget`
-- Update Windows
-- Update Office apps
+- **Update Apps**\
+  via `Microsoft Store`\
+  via `Winget`
+- **Update Windows**
+- **Update Office apps**
 > Run `"C:\Program Files\Common Files\microsoft shared\ClickToRun\OfficeC2RClient.exe" /update user forceappshutdown=true`
-- Check Drivers\
+- **Check Drivers**\
   Bangs(!) exclamation marks in Device Manager indicates missing, incorrect, or corrupt drivers
   > Open `Device Manager` to check for Bangs(!)\
   > Run `Snappy Driver Installer Origin (SDIO)` as an Administrator\
   > Select `TODO: Create a new system restore point`\
   > Select all missing/incorrect/corrupt drivers (as per bangs! in Device Manager)
   > Click `Install`
-- [<font style="color:ORANGE">OPTIONAL</font>] Update Outdated Drivers
-- [<font style="color:ORANGE">If you installed/updated any drivers:</font>] Verify Drivers (verifier)
+- **[<font style="color:ORANGE">OPTIONAL</font>] Update Outdated Drivers**
+- **Verify Drivers**
   - **Turn On Windows Verifier:**
     - Run `verifier`
     - Select `Create standard settings`
@@ -185,39 +190,43 @@ Render to .PDF using https://md2pdf.netlify.app/ at 75% scaling (Print to PDF)
 
 ## Restore
 
-- Install Programs
+- **Install Programs**
   > you can use the winget install script for this if you made one \ > _install programs before restoring the user profile, as otherwise some required registry entries may not exist yet_
-- Restore User Profile using Transwiz
+- **Restore User Profiles**
   > make Administrator, make default user, set no password and set password does NOT expire
-- Copy over any C: Drive files/folders that were backed up
-- Restart Windows (this should log in to the restored user profile)
+- **Copy over any C: Drive files/folders that were backed up**
+- **Restart Windows** (this should log in to the restored user profile)
   > open a command prompt window (or similar) as Administrator to ensure account has admin priviledges
-- Install Printer Drivers
-  > If you can not install the printer drivers + software without the printer present, save the printer package installer to C:\COPS\ and create a shortcut to it on the customer's desktop
-- Check Web Browsers and restore Bookmarks and Passwords from backups as required
-- Activate software using extracted keys or accounts as required
-- Configure email accounts as required
-- Install additional drivers as required
-- Move any USB Dongles from the old device (Wireless mice, wifi, blue adapters, etc...)
-- Update Apps via Microsoft Store
-- Update Windows
-- Update Office apps if present
-- Restart Windows
-- Remove 'COPS' user account
+- **Install Printer Drivers**
+  > If you can not install the printer drivers + software without the printer present, save the printer package installer to `C:\COPS\` and create a shortcut to it on the customer's desktop
+- **Check Web Browsers and restore Bookmarks and Passwords from backups as required**
+- **Activate software using extracted keys or accounts as required**
+- **Configure email accounts as required**
+- **Install additional drivers as required**
+- **Move any USB Dongles from the old device (Wireless mice, wifi, blue adapters, etc...)**
+- **Update Apps**\
+  via `Microsoft Store`\
+  via `Winget`
+- **Update Windows**
+- **Update Office apps** (if installed)
+- **Restart Windows**
+- **Remove 'COPS' user account**
   - Run: `netplwiz` - Select `COPS` - Click `Remove`
   - Delete `C:\Users\COPS\` folder\
   _(Windows may prevent you from removing this folder if it's currently accessing it in the background, if this happens just restart Windows and try to remove it again)_
   - Empty Recycle Bin
-- Windows Maintenance\
+- **System Maintenance**\
   Open `Powershell` or `Command Prompt` as an Administrator and run the follow commands:
-  > `winget source reset --force`\
-  > `winget source update`\
-  > `winget upgrade --all --silent`\
-  > `sfc /scannow`\
-  > `dism /online /cleanup-image /startcomponentcleanup /resetbase`\
-  > `dism /online /cleanup-image /restorehealth`\
-  > `sfc /scannow`\
-  > `defrag /c /o`\
-  > `chkdsk c: /r /scan /perf`
-- Restart Windows
-- Create a new System Restore point 'COPS - Completed Data Transfer'
+  ```batch
+  winget source reset --force
+  winget source update
+  winget upgrade --all --silent
+  sfc /scannow
+  dism /online /cleanup-image /startcomponentcleanup /resetbase
+  dism /online /cleanup-image /restorehealth
+  sfc /scannow
+  defrag /c /o
+  chkdsk c: /r /scan /perf
+  ```
+- **Restart Windows**
+- **Create a new System Restore point** `COPS - Completed Data Transfer`

@@ -1,0 +1,629 @@
+html {
+  scroll-padding-top: 65px;
+}
+
+#header, #navbar {
+  background-color: var(--templatecolor);
+}
+
+body {
+  line-height: 2;
+  text-align: justify;
+  margin-top: var(--top-spacing);
+}
+
+#book  p {
+  line-height: 2;
+}
+
+[data-bs-theme=light] #book a{
+  color: var(--templatecolor);
+}
+
+#abstract {
+  padding-bottom: 2rem;
+}
+
+.footnotesize {
+  font-size: 0.8rem;
+}
+
+#cover {
+  font-size: 3rem;
+  color: var(--templatecolor);
+}
+
+#cover_img img{
+  max-width: 100%;
+}
+
+/*
+ *
+ * Headers
+ *
+ * */
+.toc-section-number::after, .header-section-number::after {
+  content: ".";
+}
+
+.header-section-number {
+  padding-right: 0.5rem;
+}
+
+h1, h2, h3, h4, h5, h6{
+  padding-top: 2rem;
+  font-weight: bold;
+  clear: both;
+  text-align: start;
+}
+
+h5#modalCaption {
+  padding-top: 0rem;
+}
+
+/* 
+ *
+ * TOC SIDEBAR & RIGHT SIDEBAR
+ *
+ * */
+
+#offcanvasRight {
+  background-color: var(--templatecolor);
+}
+
+.offcanvas-header {
+  border-bottom: 0.3rem solid white!important;
+  padding-bottom: 1rem!important;
+  margin-bottom: 1rem!important;
+}
+
+.offcanvas-header h5{
+  padding-top: 0;
+}
+
+
+/* 
+ *
+ * TOC
+ *
+ * */
+
+#TOCsidebarMenu {
+  border-right: 2px solid var(--templatecolor);
+  top: 4rem;
+  height: calc(100vh - 4rem);
+  overflow-y: auto;
+}
+
+.navbar ul {
+  margin-top: 0em;
+  
+}
+
+#toc .nav {
+  padding-left: 2rem!important;
+  display: block!important;
+}
+
+#toc > ul, #toc > .nav {
+  padding-left: 0em!important;
+  font-size: 0.8rem;
+}
+
+#toc li {
+  list-style: none;
+  text-align: start;
+}
+
+#toc li a {
+  padding: 5px;
+  padding-left: 15px;
+  color: var(--bs-body-color);
+}
+
+#toc a.active {
+  border: 3px solid;
+  border-radius: 0.5rem;
+  background-color: var(--templatecolor);
+  border-color: var(--bs-body-color);
+  color: var(--bs-white);
+}
+
+
+#toc li.toc_part a, #toc li.toc_part a.active{
+  text-align: center;
+  background-color: var(--templatecolor);
+  color: var(--bs-white);
+  display: block;
+  padding: 1rem 15px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+[data-bs-theme=dark] #toc li.toc_part a, [data-bs-theme=dark] #toc li.toc_part a.active{
+  background-color: var(--bs-heading-color);
+  color: var(--templatecolor);
+}
+
+:lang(basque) #bdsidebaroffcanvaslabel::after {
+  content: "Aurkibidea";
+}
+:lang(spanish) #bdsidebaroffcanvaslabel::after {
+  content: "Índice";
+}
+
+/*
+ *
+ * Theme selector
+ *
+ * */
+
+#theme-selector-menu {
+  padding: 0;
+}
+
+#theme-selector li {
+  margin: 0.25rem;
+}
+
+#theme-selector li.active, #theme-selector-menu button:focus, #theme-selector-menu button:hover {
+  border-radius: 0.25rem;
+  background-color: var(--templatecolor);
+  color: var(--bs-gray-100);
+}
+
+#theme-selector li.active > button {
+  color: var(--bs-gray-100);
+}
+
+.theme-icon {
+  width: 1rem;
+  padding-right: 0.5rem;
+}
+
+/* 
+ *
+ * PARTS and LINKS
+ *
+ * */
+
+[data-bs-theme=dark] p:has(.part){
+  color: var(--templatecolor);
+  background-color: var(--bs-gray-100);
+}
+
+p:has(.part){
+  font-weight: bold;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  text-align: center;
+  background-color: var(--templatecolor);
+  color: var(--bs-gray-100);
+  margin: 3rem 0;
+  border-radius: 0.5rem;
+}
+
+.roman-number {
+  padding-right: 2rem;
+}
+
+.anchor-link {
+  font-size: 20px;
+  margin-left: -25px;
+  visibility: hidden;
+  height: 20px;
+}
+
+
+p:has(.part) .anchor-link {
+  color: var(--templatecolor)!important;
+  font-size: 20px;
+  padding-top: 30px;
+}
+
+[data-bs-theme=light] p:has(.part) .anchor-link {
+  color: var(--bs-gray-100)!important;
+}
+
+
+/* 
+ *
+ * IMAGES
+ *
+ * */
+
+img:hover {
+  cursor: zoom-in!important ;
+}
+
+.center {
+    text-align: center;
+}
+
+figure{
+  margin:auto;
+}
+
+[data-inline="true"]{
+  display: inline;
+}
+
+figure img, p > img{
+  display: block;
+  margin: auto;
+}
+
+figcaption {
+  padding: 0.5rem 0 2rem;
+}
+
+[data-framed="true"], .frame figure img {
+  border: 1px solid black!important;
+}
+
+figcaption{
+  font-size: 0.8rem;
+  width: fit-content;
+  margin:auto;
+}
+
+/* 
+ *
+ * CODE BOXES
+ *
+ * */
+
+.mycode {
+  border: 2px solid var(--bs-gray-700);
+  border-radius: 0.5rem;
+  margin-bottom: 2em;
+}
+
+.mycode > p {
+  background-color: var(--bs-gray-700);
+  border-radius: 5px 5px 0 0;
+  color: white;
+  padding: 0.1em 1em;
+  margin-bottom: 0;
+}
+
+.mycode > p::before {
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  content: "\f120";
+  padding-right: 1em;
+}
+
+.mycode div.sourceCode {
+  margin: 1em;
+}
+
+.mycode div.sourceCode .highlight pre{
+  line-height: 2!important;
+}
+
+/* 
+ *
+ * INLINE COMMANDS
+ *
+ * */
+
+.inlineconsole, .commandbox, .configfile, .configdir {
+  border: 2px solid var(--bs-black);
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--bs-gray-700);
+  color: var(--bs-white);
+}
+
+.commandbox::before, .configfile::before, .configdir::before {
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  padding-right: 1em;
+}
+
+.commandbox::before {
+  content: "\f120";
+}
+
+.configfile::before {
+  content: "\f15b";
+}
+
+.configdir::before {
+  content: "\f07c";
+}
+
+.movie {
+  border: 2px solid var(--bs-warning);
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.movie::before {
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  content: "\f1c8";
+  padding-right: 1em;
+}
+
+#book > section > p > code {
+  color: var(--bs-body-color);
+}
+
+.verbatim {
+  font-family: monospace;
+  color: var(--bs-code-color);
+}
+
+
+/* 
+ *
+ * CUSTOM BOXES
+ *
+ * */
+
+.infobox, .warnbox, .errorbox, .questionbox, .exercisebox, .gitbox {
+  border-radius: 0.5rem;
+  margin-bottom: 2em;
+}
+
+.infobox > p, .warnbox > p, .errorbox > p, .questionbox > p, .exercisebox > p, .gitbox > p {
+  margin: 0;
+  /*display: flex;*/
+  align-items: center!important;
+  margin: 0 2rem;
+}
+
+.infobox > p > *, .warnbox > p > *, .errorbox > p > *, .questionbox > p > *, .exercisebox > p > *, .gitbox > p > * {
+  display: inline;
+}
+
+.infobox::before, .warnbox::before, .errorbox::before, .questionbox::before, .exercisebox::before, .gitbox::before {
+  display: block;
+  border-radius: 5px 5px 0 0;
+  color: var(--bs-white)!important;
+  font-weight: bold;
+  line-height: 2;
+  padding: 0.1em 1em;
+  margin-bottom: 0;
+}
+
+.infobox::before {
+  background-color: var(--bs-info-text-emphasis);
+  content: "Información";
+}
+
+:lang(basque) .infobox::before {
+  content: "Informazioa";
+}
+
+.infobox {
+  border: 2px solid var(--bs-info-text-emphasis);
+  background-color: var(--bs-info-bg-subtle);
+  color: var(--bs-info-text-emphasis);
+}
+
+.warnbox::before {
+  background-color: var(--bs-orange);
+  content: "¡Atención!";
+}
+
+:lang(basque) .warnbox::before {
+  content: "Adi!";
+}
+
+.warnbox {
+  border: 2px solid var(--bs-orange);
+  background-color: #fd7e1405;
+  color: var(--bs-orange)
+}
+
+.errorbox::before {
+  background-color: var(--bs-danger-text-emphasis);
+  content: "¡Cuidado!";
+}
+
+:lang(basque) .errorbox::before {
+  content: "Kontuz!";
+}
+
+.errorbox {
+  border: 2px solid var(--bs-danger-text-emphasis);
+  background-color: var(--bs-danger-bg-subtle);
+  color: var(--bs-danger-text-emphasis);
+}
+
+.questionbox::before {
+  background-color: var(--bs-warning-text-emphasis);
+  content: "Pregunta";
+}
+
+:lang(basque) .questionbox::before {
+  content: "Galdera";
+}
+
+.questionbox {
+  border: 2px solid var(--bs-warning-text-emphasis);
+  background-color: var(--bs-warning-bg-subtle);
+  color: var(--bs-warning-text-emphasis);
+}
+
+.exercisebox::before {
+  background-color: var(--bs-success-text-emphasis);
+  content: "Ejercicio";
+}
+
+:lang(basque) .exercisebox::before {
+  content: "Ariketa";
+}
+
+.exercisebox {
+  border: 2px solid var(--bs-success-text-emphasis);
+  background-color: var(--bs-success-bg-subtle);
+  color: var(--bs-success-text-emphasis);
+}
+
+.gitbox::before {
+  background-color: var(--bs-purple);
+  content: "GitHub";
+}
+
+.gitbox {
+  border: 2px solid var(--bs-purple);
+  background-color: var(--bs-gray-100);
+  color: var(--bs-purple);
+}
+
+
+.infobox > p::before, .warnbox > p::before, .errorbox > p::before, .questionbox > p::before, .exercisebox > p::before, .gitbox > p::before  {
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  margin: 0 2rem 0 0;
+  font-size: 3rem;
+  vertical-align: middle;
+}
+
+.infobox p::before {
+  content: "\f05a";
+}
+
+.warnbox p::before {
+  content: "\f06a";
+}
+
+.errorbox p::before {
+  content: "\f071";
+}
+
+.questionbox p::before {
+  content: "\f059";
+}
+
+.exercisebox p::before {
+  content: "\f013";
+}
+
+.gitbox p::before {
+  content: "\f09b";
+}
+
+
+/*
+ *
+ * Columns
+ *
+ * */
+
+/* From original template */
+div.columns {
+  display: flex;
+  gap: min(4vw, 1.5em);
+  align-items: center;
+}
+
+div.column {
+  flex: auto;
+  overflow-x: auto;
+}
+
+/*
+ *
+ * Lists
+ *
+ * */
+
+dl {
+  display: grid;
+  grid-template-columns: max-content auto;
+}
+
+dt {
+  grid-column-start: 1;
+  padding-right: 1rem;
+}
+
+dd {
+  grid-column-start: 2;
+}
+
+
+/* 
+ *
+ * Tables
+ *
+ * */
+
+ [data-tablename="rubrica"] {
+  text-align: left;
+ }
+
+ [data-tablename="rubrica"] thead {
+  text-align: center;
+ }
+
+[data-tablename="yukitblrcol"].table-bordered thead,
+[data-tablename="yukitblrcol"].table-bordered thead tr,
+[data-tablename="rubrica"].table-bordered thead,
+[data-tablename="rubrica"].table-bordered thead tr {
+  border: 0px!important;
+}
+
+[data-tablename="yukitblrcol"] td:first-child,
+[data-tablename="rubrica"] td:first-child  {
+  background-color: var(--templatecolor);
+  color: white!important;
+  font-weight: bold;
+}
+
+[data-tablename="yukitblrcol"].table-bordered tr.header th:nth-child(n),
+[data-tablename="rubrica"].table-bordered tr.header th:nth-child(n){
+  border: 1px solid var(--bs-secondary-border-subtle)!important;
+}
+
+[data-tablename="yukitblrcol"].table>:not(caption)>*>th:first-child,
+[data-tablename="rubrica"].table>:not(caption)>*> th:first-child {
+  background-color: transparent!important;
+  border: 0px!important;
+}
+
+[data-tablename="rubrica"].table>:not(caption)>*>th:nth-child(2)  {
+  background-color: SeaGreen!important;
+}
+
+[data-tablename="rubrica"].table>:not(caption)>*>th:nth-child(3)  {
+  background-color: DarkSeaGreen!important;
+}
+
+[data-tablename="rubrica"].table>:not(caption)>*>th:nth-child(4)  {
+  background-color: SandyBrown!important;
+}
+
+[data-tablename="rubrica"].table>:not(caption)>*>th:nth-child(5)  {
+  background-color: Tomato!important;
+}
+
+th {
+  background-color: var(--templatecolor)!important;
+  color: white!important;
+}
+
+
+table caption {
+  text-align: center;
+}
+
+[data-tablename="requisito"] thead tr th{
+  background-color: var(--templatecolor)!important;
+  color: white!important;
+  text-align:center
+}
