@@ -1,23 +1,4 @@
-<!--
----
-title: 'COPS Guide - Data Transfer (Windows)'
-author: Buckland, Shaun
-keywords: [backup, restore, user data, data transfer]
-abstract: This document provides step-by-step instructions on backing up a device's user data and restoring it to a new device.
-geometry: a4paper,margin=2cm
----
--->
-
-<!--
-Render to .PDF using https://md2pdf.netlify.app/ at 75% scaling (Print to PDF)
--->
-
-# COPS Guide - Data Transfer (Windows)
-
-<table>
-    <td><em>contributors: <a href="mailto:shaun@copscorp.com.au" title="Buckland, Shaun (shaun@copscorp.com.au)">shaun@copscorp.com.au</a></em></td>
-    <td><div style='text-align: right;'><em>updated: 06-AUG-2025</em></div></td>
-</table>
+# Data Transfer (Windows)
 
 ## Backup
 
