@@ -14,7 +14,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | App | Install | Description | Use Case |
 | :-- | :-- | :-- | :-- |
 | [AMD Adrenalin](https://www.amd.com/en/products/software/adrenalin.html) ||||
-| [Apple iTunes]() | `winget install Apple.iTunes` || <u>DEPRECATED</U></br>Use `Apple Devices` instead |
+| [Apple iTunes](https://www.apple.com/au/itunes/) | `winget install Apple.iTunes` || <u>DEPRECATED</U></br>Use `Apple Devices` instead |
 | [Apple Devices](https://support.apple.com/en-au/guide/devices-windows/mchl5ded2763/windows) | `winget install "Apple Devices"` |||
 | [Clear Disk Info](https://www.carifred.com/cleardiskinfo/) | `winget install Carifred.ClearDiskInfo` |||
 | [CPUID CPU-Z](https://www.cpuid.com/softwares/cpu-z.html) | `winget install CPUID.CPU-Z` |||
