@@ -1,7 +1,7 @@
 <!-- COPS Technician Manual -->
 
-This document is a Work-In-Progress and may contain some errors, typo's, etc..\
-If you encounter anything that is incorrect or wish to recommend additions, please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au)
+This document is a Work-In-Progress and may contain errors, typo's, etc..\
+Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corrections or to request any additions or changes
 
 # App Cheat Sheet
 

@@ -11,7 +11,7 @@ maincolor: dc3545
 # lang: english
 keywords: [backup, restore, user data, data transfer]
 abstract: This document provides step-by-step instructions on backing up a device's user data and restoring it to a new device.
-# cover: 'img/cover.png'
+cover: 'images/computer-repair.png'
 # github-link: 'https://github.com/cops-sb/'
 geometry: a4paper,margin=2cm
 ...
