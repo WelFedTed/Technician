@@ -1,2 +1,2 @@
-pandoc "COPS Guide - Data Transfer (Windows).md" -o z.html -d defaults.yaml --embed-resources=true
-pandoc "COPS Guide - Data Transfer (Windows).md" -o z.pdf -d defaults.yaml
+pandoc "manual.md" -o manual.html -d defaults.yaml --embed-resources=true
+pandoc "manual.md" -o manual.pdf -d defaults.yaml

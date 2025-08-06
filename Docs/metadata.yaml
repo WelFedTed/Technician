@@ -8,10 +8,16 @@ date: '2025-10-06'
 maincolor: dc3545
 # phrase: 'This is a good phrase'
 # phrase-author: 'Phrase author'
-lang: english
+# lang: english
 keywords: [backup, restore, user data, data transfer]
 abstract: This document provides step-by-step instructions on backing up a device's user data and restoring it to a new device.
 # cover: 'img/cover.png'
 # github-link: 'https://github.com/cops-sb/'
 geometry: a4paper,margin=2cm
+header-includes: |
+  \usepackage{graphicx}
+  \usepackage{float}
+  \usepackage{titling}
+  \pretitle{\begin{center}\includegraphics[width=0.3\linewidth]{Logo.pdf}\[\bigskipamount]}
+  \posttitle{\end{center}}
 ...
