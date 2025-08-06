@@ -607,3 +607,63 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
   - Update Apps via `Galaxy Store`
 - Update `Android OS`\
   This may take multiple updates and reboots, as customers often neglect updating their devices
+
+
+# OS Install Media Creation
+
+## Windows <!-- TODO: flesh this out -->
+
+---
+
+### Download
+
+- Download from [massgrave.dev](https://massgrave.dev/genuine-installation-media)
+
+### Verify
+
+- Verify checksums against [rg-adguard.net](https://files.rg-adguard.net/)
+
+### Flash
+
+- Flash image to USB using [Rufus](https://rufus.ie/en/)\
+  `winget install rufus.rufus`
+
+### Inject Drivers
+
+#### Prep
+
+- Have a folder with extracted drivers ready to go\
+`C:\drivers\` for this example
+- Create an empty directory ready to mount the Windows image to for editing\
+`C:\mount\` for this example
+- Have a Windows image ready to go\
+`F:\sources\install.wim` for this example
+
+#### Mount
+
+- Open Powershell as admin
+- Find index of the Windows image you want to mount\
+`Get-WindowsImage -ImagePath F:\sources\install.wim`
+- `Mount-WindowsImage -Path C:\mount\ -ImagePath F:\sources\install.wim -Index 1`
+
+#### Add Drivers
+
+- `Add-WindowsDriver -Path C:\mount\ -Driver C:\drivers\ -Recurse -ForceUnsigned`
+
+#### Unmount
+
+- `Dismount-WindowsImage -Path C:\mount\ –Save`
+
+# USB Tool <!-- TODO: flesh this out -->
+
+---
+
+## Ventoy
+
+## Medicat
+
+## Bootable Tools
+
+## Windows Tools
+
+## COPS Extras (scripts, etc..)
