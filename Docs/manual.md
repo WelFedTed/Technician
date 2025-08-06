@@ -1,6 +1,6 @@
 <!-- COPS Technician Manual -->
 
-# Application Cheat Sheet
+# Application Cheat Sheet (Windows)
 
 ## CPU
 
@@ -49,8 +49,7 @@
 | Remote Access                          | [UltraViewer](https://www.ultraviewer.net/en/)                                                         | winget install DucFabulous.UltraViewer   |                  ✕                   | _Alternative to TeamViewer_                                                     |
 | User Profile (Backup/Migrate)          | [Transwiz](https://www.forensit.com/move-computer.html)                                                | -                                        |                  ✕                   |                                                                                 |
 
-
-<!-- Render to .PDF using https://md2pdf.netlify.app/ at 75% scaling (Print to PDF) -->
+<!-- leave this comment here, it's stopping the above table from breaking the following category -->
 
 # System Service (Windows)
 
@@ -355,29 +354,40 @@
 
 ## Pre
 
-- [<font style="color:RED">**IMPORTANT**</font>] [Air Gap Device](## "AAA")
+- [<font style="color:RED">**IMPORTANT**</font>] **Air Gap Device**
   > _Ensure device is disconnected from all networks before RKill is run successfully and RATs ( Remote Access Tools ) removed, to ensure malicious actors do not re-connect to the device while it's still compromised_
 - Enable System Restore (set to 7% allocation if enough free disk space)
-- [<font style="color:ORANGE">OPTIONAL</font>] Create a new [System Restore](https://support.microsoft.com/en-gb/windows/create-a-system-restore-point-77e02e2a-3298-c869-9974-ef5658ea3be9) point "**COPS - Pre Virus/Malware Removal**"
+- [<font style="color:ORANGE">OPTIONAL</font>] **Create a new [System Restore](https://support.microsoft.com/en-gb/windows/create-a-system-restore-point-77e02e2a-3298-c869-9974-ef5658ea3be9) point** `COPS - Pre Virus/Malware Removal`
   > _This System Restore point will be wiped out in a later step (post-virus/malware removal), as malware can persist in old System Restore points_
-- Restart Windows
+- **Restart Windows**
   > _Force Restart Windows (`shutdown -r -f -t 00`) now to provide a clean slate for proceeding_
-- Create [COPS Folder](## "'%SYSTEMDRIVE%\\COPS' ( likely 'C:\COPS' )")
-- Add [COPS Folder](## "'%SYSTEMDRIVE%\\COPS' ( likely 'C:\COPS' )") to installed [antivirus exclusions list(s)](https://support.microsoft.com/en-au/windows/add-an-exclusion-to-windows-security-811816c0-4dfd-af4a-47e4-c301afe13b26 "How to add an exclusion to Windows Security")
-- Copy RKill folder from USB Tool to "%SYSTEMDRIVE%\COPS" (RKill can't run from a write-blocked drive)
-- [<font style="color:RED">**IMPORTANT**</font>] Run an RKill executable as Administrator
-- Move RKill.txt from "%USERPROFILE%\Desktop" to "%SYSTEMDRIVE%\COPS"
-- Revo Uninstaller
-  - xxx
-- Disk Cleanup
-  - Run `Win+R`: `cleanmgr /sageset:10`
-    > _This will open the Disk Cleanup utility to create settings for Profile 10_
+- **COPS Folder**\
+  Create a new folder in system root directory named `COPS`\
+  `C:\COPS\`\
+  or\
+  `%SYSTEMDRIVE%\COPS\`
+  - [<font style="color:ORANGE">OPTIONAL</font>] Add COPS folder to the installed antivirus's exclusion list\
+    [Trend Micro](https://helpcenter.trendmicro.com/en-us/article/tmka-14498 "How to add an exclusion to Trend Micro")\
+    [Windows Security](https://support.microsoft.com/en-au/windows/add-an-exclusion-to-windows-security-811816c0-4dfd-af4a-47e4-c301afe13b26 "How to add an exclusion to Windows Security")\
+- **RKill**
+  - Copy `RKill` folder from your USB Tool to the `COPS` folder\
+    RKill can't run from a write-blocked drive, so you'll usually need to copy the executables out first
+  - [<font style="color:RED">**IMPORTANT**</font>] Run any RKill executable as Admininstrator
+  - Wait for RKill to complete, it will then generate a report `RKill.txt` on the current user's desktop
+  - Move `RKill.txt` from `%USERPROFILE%\Desktop` to `COPS` folder
+- **Revo Uninstaller**
+  <!-- TODO: add revo instructions -->
+- **Disk Cleanup**
+  - Run `cleanmgr /sageset:10`\
+    _This will open the Disk Cleanup utility to create settings for Profile 10_
   - Click `Clean up system files`
-  - Select all checkboxes except for the two **System error** options
-    > _`System error memory dump files` + `System error minidump files`_ >_</br>(you can click on an option, and then use the UP + DOWN Arrows + Space Bar to quickly check or uncheck options)_
+  - Select all checkboxes except for the following system error options:\
+    `System error memory dump files`\
+    `System error minidump files`\
+    _You can click on an option, and then use the UP + DOWN Arrows + Space Bar to quickly check or uncheck options_
   - Click `OK`
-  - Run `Win+R`: `cleanmgr /sagerun:10`
-    > _This will run the Disk Cleanup utility to using Profile 10's settings`_
+  - Run `cleanmgr /sagerun:10`\
+    _This will run the Disk Cleanup utility to using Profile 10's settings_
 
 ## Main
 
