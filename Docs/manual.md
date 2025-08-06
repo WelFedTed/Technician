@@ -528,15 +528,23 @@
 ### Pre
 
 - **Remove Intrusive Full-Screen Pop-Ups**\
-  These relentless pop-ups make the device impossible to work with, so deal with these first _(if applicable)_
+  These relentless pop-ups make the device impossible to work with, so deal with these first _(if applicable)_\
+  <details>
+    <summary>More Info</summary>
+    These full screen pop-ups/ads aren't a sign of an injection, but merely a malicious use of the native Android notification system.\
+    Users don't intentionally give these apps permission to do this, but it's often caused by [Tapjacking](https://developer.android.com/privacy-and-security/risks/tapjacking) or simply users ignorantly agreeing to permission prompts.
+  </details>
   - Open `Play Store`
     - Install [Ad Virus Cleaner - ROX Security](https://play.google.com/store/apps/details?id=com.tafayor.roxapp&pcampaignid=web_share "ROX Security app")
   - Open `Ad Virus Cleaner - ROX Security`
     - Tap `Scan` <!-- TODO: verify steps are correct and spelt correctly -->
     - Wait for the scan to complete
     - Tap on `Pop-up Ad Detector`
-      - Tap on `Give Permissions`
-        - Enable `ROX Security
+      - Tap on `Give Permissions`\
+        This will open a required permissions settings panel
+        - Enable `ROX Security`
+        - Tap `<` _(back button)_
+
 
 - **Safe Mode**\
   Reboot the device in Safe-Mode _(if available)_
