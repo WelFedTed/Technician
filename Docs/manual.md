@@ -3,18 +3,20 @@
 This document is a Work-In-Progress and may contain errors, typo's, etc..\
 Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corrections or to request any additions or changes
 
-# App Cheat Sheet
+# Cheat Sheet
+
+## Apps
 
 ---
 
-## CPU
+### CPU
 
 | TASK   | APPLICATION                                         | WINGET      | DISABLE ANTIVIRUS | NOTES |
 | :----- | :-------------------------------------------------- | :---------- | :---------------: | :---- |
 | Info   | [CPU-Z](https://www.cpuid.com/softwares/cpu-z.html) | CPUID.CPU-Z |         X         |       |
 | Stress | [CPU-Z](https://www.cpuid.com/softwares/cpu-z.html) | CPUID.CPU-Z |         X         |       |
 
-## GPU
+### GPU
 
 | TASK                   | APPLICATION                                                                                              | WINGET                               | DISABLE ANTIVIRUS | NOTES                        |
 | :--------------------- | :------------------------------------------------------------------------------------------------------- | :----------------------------------- | :---------------: | :--------------------------- |
@@ -25,7 +27,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | Info                   | [GPU-z](https://www.techpowerup.com/download/techpowerup-gpu-z/)                                         | TechPowerUp.GPU-Z                    |         X         |                              |
 | Stress                 | [Furmark](https://www.geeks3d.com/furmark/)                                                              | Geeks3D.FurMark                      |         X         |                              |
 
-## STORAGE
+### STORAGE
 
 | TASK      | APPLICATION                                                              | WINGET                          | DISABLE ANTIVIRUS | NOTES                              |
 | :-------- | :----------------------------------------------------------------------- | :------------------------------ | :---------------: | :--------------------------------- |
@@ -34,13 +36,13 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | Info      | [CrystalDiskInfo](https://crystalmark.info/en/software/crystaldiskinfo/) | CrystalDewWorld.CrystalDiskInfo |         X         |                                    |
 | Info      | [Clear Disk Info](https://www.carifred.com/cleardiskinfo/)               | -                               |         X         |                                    |
 
-## SYSTEM
+### SYSTEM
 
 | TASK         | APPLICATION                                                 | WINGET          | DISABLE ANTIVIRUS | NOTES |
 | :----------- | :---------------------------------------------------------- | :-------------- | :---------------: | :---- |
 | Temperatures | [HWMonitor](https://www.cpuid.com/softwares/hwmonitor.html) | CPUID.HWMonitor |         X         |       |
 
-## WINDOWS
+### WINDOWS
 
 | TASK                                   | APPLICATION                                                                                            | WINGET                                   |          DISABLE ANTIVIRUS           | NOTES                                                                           |
 | :------------------------------------- | :----------------------------------------------------------------------------------------------------- | :--------------------------------------- | :----------------------------------: | :------------------------------------------------------------------------------ |
@@ -55,13 +57,60 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | User Profile (Backup/Migrate)          | [Transwiz](https://www.forensit.com/move-computer.html)                                                | -                                        |                  X                   |                                                                                 |
 <!-- leave this comment here, it's stopping the above table from breaking the following category -->
 
-## Android
+### Android
 
 | App   | Description   | Use Case  |
 | :---  | :---          | :---      |
 | [Appwatch](https://play.google.com/store/apps/details?id=com.tafayor.appwatch&hl=en_AU) | Snitch on app activity | <u>DEPRECATED</u></br>Use `Rox Security` instead<hr>_Identify apps that are responsible for instrusive full-screen pop-ups_ |
 | [Rox Security](https://play.google.com/store/apps/details?id=com.tafayor.roxapp&hl=en_AU&pli=1) | Multi-tool for identifying unusual/unwanted app behaviour, including snitching on app activity | Identify apps that are responsible for instrusive full-screen pop-ups |
 
+## Commands
+
+---
+
+### Windows
+
+| Command                   | Description                                         | Use Case  |
+| :---                      | :---                                                | :---      |
+| `appwiz.cpl`              | Opens `Programs and Features` control panel window  ||
+| `cmd`                     | Opens `Command Prompt` app ||
+| `compmgmt.msc`            | Opens `Computer Management` snap in ||
+| `control`                 | Opens `Control Panel` ||
+| `control printers`        | Opens `Bluetooth & devices` settings window         | Quick access to `Printers & scanners` |
+| `control update`          | Opens `Windows Update` settings window              ||
+| `desk.cpl`                | Opens `Display` settings window ||
+| `devmgmt.msc`             | Opens `Device Manager` snap in                      ||
+| `diskmgmt.msc`            | Opens `Disk Management` snap in ||
+| `eventvwr.msc`            | Opens `Event Viewer` snap in ||
+| `explorer`                | Opens `Windows Explorer` ||
+| `fonts`                   | Opens `Fonts` folder ||
+| `gpedit.msc`              | Opens `Local Group Policy Editor` snap in ||
+| `inetcpl.cpl`             | Opens `Internet Properties` window                  | Quick access to `Proxy server` settings |
+| `lusrmgr.msc`             | Opens `Local Users and Groups` snap in              | Powerful control over User Accounts and Groups, but does <u>not</u> work on Windows Home editions |
+| `main.cpl`                | Opens `Mouse Properties` window ||
+| `mmc`                     | Opens empty `Microsoft Management Console` snap in  ||
+| `mmsys.cpl`               | Opens `Sound` window ||
+| `mstsc`                   | Opens `Remote Desktop Connection` app ||
+| `ms-windows-store:`       | Opens `Microsoft Store` app                         ||
+| `ncpa.cpl`                | Opens `Network Connections` control panel window    ||
+| `netplwiz`                | Opens `User Accounts` window                        | Less powerful control over User Accounts, but does work on Windows Home editions |
+| `notepad`                 | Opens `Notepad` app                                 ||
+| `powercfg.cpl`            | Opens `Power Options` control panel window          ||
+| `powershell`              | Opens `Powershell` app ||
+| `services.msc`            | Opens `Services` snap in ||
+| `shell:recyclebinfolder`  | Opens `Recycle Bin` folder                          ||
+| `shell:startup`           | Opens `Startup` folder                              ||
+| `sysdm.cpl`               | Opens `System Properties` window                    | Quick access to `System Restore` |
+| `taskmgr`                 | Opens `Task Manager` app ||
+| `taskschd.msc`            | Opens `Task Scheduler` snap in ||
+| `timedate.cpl`            | Opens `Date and Time` window ||
+| `winver`                  | Opens `About Windows` window                        | Quick way to check installed Windows edition _(Home/Pro/Enterprise)_, version, and build |
+| `wt`                      | Opens `Windows Terminal` app                        ||
+| `%APPDATA%`               | Opens `AppData\Roaming` folder ||
+| `%SYSTEMDRIVE%`           | Opens the root folder of the system drive ||
+| `%TEMP%`                  | Opens the current user's `Temp` folder ||
+| `%USERPROFILE%`           | Opens current user's profile folder ||
+| `%WINDIR%`                | Opens `Windows` folder ||
 
 # System Service
 
