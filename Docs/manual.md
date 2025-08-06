@@ -55,12 +55,14 @@
 
 ## Software
 
-- Restart Windows
-- Configure System Restore</br>_Try to set at least 7% allocation_
+- **Restart Windows**\
+  Force Restart Windows (`shutdown -r -f -t 00`) now to provide a clean environment befor proceeding
+- **System Restore**\
+  _Check System Restore configuration and try to set at least 7% allocation_
 - Create a new System Restore point</br>_Name it something like "COPS - Pre System Service"_
-- Task Manager
+- **Task Manager**
   - Disable unwanted startup items
-- [Wintoys](https://apps.microsoft.com/detail/9p8ltpgcbzxd)
+- **Wintoys**
   - Install [Wintoys](https://apps.microsoft.com/detail/9p8ltpgcbzxd)\
     `winget install wintoys`\
     or\
@@ -68,7 +70,9 @@
     or\
     `ms-windows-store://pdp/?ProductId=9P8LTPGCBZXD`
   - Performance Tab
-    - `Ultimate performance power plan` | Turn ON if Desktop / Turn OFF if Laptop
+    - `Ultimate performance power plan`\
+      Turn ON if Desktop\
+      Turn OFF if Laptop
     - `HAGS (hardware-accelerated GPU scheduling)` | Turn ON
     - `VBS (virtualization-base security)` | Turn ON
     - `Startup apps` | Disable unwanted startup items
@@ -132,8 +136,7 @@
 ## Backup
 
 - **Restart Windows**\
-  - _Force Restart Windows now to provide a clean environment for proceeding_\
-  - `shutdown -r -f -t 00`
+  Force Restart Windows (`shutdown -r -f -t 00`) now to provide a clean environment befor proceeding
 - [<font style="color:ORANGE">OPTIONAL</font>] Create a new System Restore point
 - **Disable Antivirus**\
   - _Some of our extraction tools prompt false positives in the majority of security software_
@@ -192,7 +195,8 @@
   `Winget - Export - 2024-07-15.json`\
   or\
   `winget_export_2024-07-15.json`
-  - Open `Powershell` or `Command Prompt` as an Administrator\
+  - Open a Terminal as Administrator\
+    Run `wt` or `powershell` or `cmd`
   - Check Winget is installed `winget -v` (this will throw an error if winget is unavailable)\
   - Update Winget `winget source update`
   - Export Winget's list of installed programs `winget export -o "REPLACE-WITH-TARGET-FILE"`\
@@ -263,13 +267,29 @@
   TODO: `ms-settings:activation` or `ms-settings:activation?activationSource=SMC-Article-12440`
 - **Configure Time/Date**
 - **Configure Windows Update**
-  - _Enable_ `TODO: Update other Microsoft products`\
-  - _Disable_ `TODO: get me up to date`\
-  - _Enable_ `TODO: Notify me when updates are ready`\
-  - _Enable_ `TODO: Optimize, download from LAN`
-- **Update Apps**\
-  via `Microsoft Store`\
-  via `Winget`
+  - Open Windows Update\
+    Run `control update`
+  - Click `Resume updates` if updates are currently paused
+  - Disable `Get the latest updates as soon as they're available`
+  - Advanced options
+    - Enable `Receive update for other Microsoft products`
+    - Disable `Get me up to date`
+    - Enable `Notify me when a restart is required to finish updating`
+    - Delivery Optimization
+      - Enable `Allow downloads from other devices`
+        - Select `Devices on my local network`
+- **Update Microsoft Store Apps**\
+  - Open Microsoft Store\
+    Run `ms-windows-store:`
+    - Click `Downloads`
+    - Click `Check for updates`
+    - Click `Update all`
+- **Update Winget Apps**\
+  - Open a Terminal\
+    Run `wt` or `powershell` or `cmd`
+  - Run the following commands:\
+    `winget source update`\
+    `winget upgrade --all --silent`\
 - **Update Windows**
 - **Update Office apps**\
   - Run `"C:\Program Files\Common Files\microsoft shared\ClickToRun\OfficeC2RClient.exe" /update user forceappshutdown=true`
@@ -323,21 +343,25 @@
 - **Remove 'COPS' user account**
   - Run: `netplwiz` - Select `COPS` - Click `Remove`
   - Delete `C:\Users\COPS\` folder\
-  _(Windows may prevent you from removing this folder if it's currently accessing it in the background, if this happens just restart Windows and try to remove it again)_
+  _Windows may prevent you from removing this folder if it's currently accessing it in the background, if this happens just restart Windows and try to remove it again_
   - Empty Recycle Bin
-- **System Maintenance**\
-  Open `Powershell` or `Command Prompt` as an Administrator and run the follow commands:
-  ```batch
-  winget source reset --force
-  winget source update
-  winget upgrade --all --silent
-  sfc /scannow
-  dism /online /cleanup-image /startcomponentcleanup /resetbase
-  dism /online /cleanup-image /restorehealth
-  sfc /scannow
-  defrag /c /o
-  chkdsk c: /r /scan /perf
-  ```
+- **System Maintenance/Repair**\
+  - Open a Terminal as Administrator\
+    Run `wt` or `powershell` or `cmd`
+  - Run the following commands:\
+    `winget source reset --force`\
+    `winget source update`\
+    `winget upgrade --all --silent`\
+    `sfc /scannow`\
+    `dism /online /cleanup-image /startcomponentcleanup /resetbase`\
+    `dism /online /cleanup-image /restorehealth`\
+    `sfc /scannow`\
+    `defrag /c /o`\
+    `chkdsk c: /r /scan /perf`\
+    <details>
+      <summary>Useful Tip</summary>
+      You can queue up multiple commands in PowerShell by pressing `Shift+Enter` to add a new line before pressing `Enter` to execute the all of the queued up commands one after another
+  </details>
 - **Restart Windows**
 - **Create a new System Restore point** `COPS - Completed Data Transfer`
 
@@ -359,16 +383,16 @@
 - Enable System Restore (set to 7% allocation if enough free disk space)
 - [<font style="color:ORANGE">OPTIONAL</font>] **Create a new [System Restore](https://support.microsoft.com/en-gb/windows/create-a-system-restore-point-77e02e2a-3298-c869-9974-ef5658ea3be9) point** `COPS - Pre Virus/Malware Removal`
   > _This System Restore point will be wiped out in a later step (post-virus/malware removal), as malware can persist in old System Restore points_
-- **Restart Windows**
-  > _Force Restart Windows (`shutdown -r -f -t 00`) now to provide a clean slate for proceeding_
+- **Restart Windows**\
+  Force Restart Windows (`shutdown -r -f -t 00`) now to provide a clean environment befor proceeding
 - **COPS Folder**\
-  Create a new folder in system root directory named `COPS`\
-  `C:\COPS\`\
-  or\
-  `%SYSTEMDRIVE%\COPS\`
-  - [<font style="color:ORANGE">OPTIONAL</font>] Add COPS folder to the installed antivirus's exclusion list\
+  Create `C:\COPS\` folder on the system
+  - [<font style="color:ORANGE">OPTIONAL</font>] Add `C:\COPS\` to the installed antivirus's exclusion list\
     [Trend Micro](https://helpcenter.trendmicro.com/en-us/article/tmka-14498 "How to add an exclusion to Trend Micro")\
     [Windows Security](https://support.microsoft.com/en-au/windows/add-an-exclusion-to-windows-security-811816c0-4dfd-af4a-47e4-c301afe13b26 "How to add an exclusion to Windows Security")\
+- **Disable Antivirus**\
+  [Trend Micro](https://helpcenter.trendmicro.com/en-us/article/tmka-10319 "How to disable Trend Micro")\
+  [Windows Security](https://support.microsoft.com/en-au/windows/virus-and-threat-protection-in-the-windows-security-app-1362f4cd-d71a-b52a-0b66-c2820032b65e "How to disable Windows Security")\
 - **RKill**
   - Copy `RKill` folder from your USB Tool to the `COPS` folder\
     RKill can't run from a write-blocked drive, so you'll usually need to copy the executables out first
@@ -431,9 +455,12 @@
 - Update Windows (no preview updates)
 - Update Apps via Microsoft Store
 - Update Apps via Windows Package Manager (winget)
-  > _You can queue up multiple commands using PowerShell by pressing `Shift+Enter` to add a new line before pressing `Enter` to executre the commands_
-  - winget source update
-  - winget upgrade --all --silent
+  `winget source update`\
+  `winget upgrade --all --silent`\
+  <details>
+    <summary>Tip</summary>
+    You can queue up multiple commands in PowerShell by pressing `Shift+Enter` to add a new line before pressing `Enter` to execute the all of the queued up commands one after another
+  </details>
 - [<font style="color:ORANGE">OPTIONAL</font>] Create a new System Restore point "**COPS - Pre Driver Update**"
 - Update Drivers (SDIO)
 - Verify Drivers
@@ -452,16 +479,20 @@
     - Click `Finish`
     - Restart Windows (`shutdown -r -f -t 00`)
 - **System Maintenance/Repair**\
-  _You can queue up multiple commands using PowerShell by pressing `Shift+Enter` to add a new line before pressing `Enter` to executre the commands_
-  ```batch
-  winget source reset --force
-  winget source update
-  winget upgrade --all --silent
-  sfc /scannow
-  dism /online /cleanup-image /startcomponentcleanup /resetbase
-  dism /online /cleanup-image /restorehealth
-  sfc /scannow
-  defrag /c /o
-  chkdsk c: /r /scan /perf
-  ```
+  - Open a Terminal as Administrator\
+    Run `wt` or `powershell` or `cmd`
+  - Run the following commands:\
+    `winget source reset --force`\
+    `winget source update`\
+    `winget upgrade --all --silent`\
+    `sfc /scannow`\
+    `dism /online /cleanup-image /startcomponentcleanup /resetbase`\
+    `dism /online /cleanup-image /restorehealth`\
+    `sfc /scannow`\
+    `defrag /c /o`\
+    `chkdsk c: /r /scan /perf`\
+    <details>
+      <summary>Useful Tip</summary>
+      You can queue up multiple commands in PowerShell by pressing `Shift+Enter` to add a new line before pressing `Enter` to execute the all of the queued up commands one after another
+    </details>
 - Create a new System Restore point "**COPS - Post Virus/Malware Removal**"
