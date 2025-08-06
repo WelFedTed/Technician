@@ -1,5 +1,8 @@
 <!-- COPS Technician Manual -->
 
+This document is a Work-In-Progress and may contain some errors, typo's, etc..\
+If you encounter anything that is incorrect or wish to recommend additions, please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au)
+
 # App Cheat Sheet
 
 ---
@@ -8,48 +11,48 @@
 
 | TASK   | APPLICATION                                         | WINGET      | DISABLE ANTIVIRUS | NOTES |
 | :----- | :-------------------------------------------------- | :---------- | :---------------: | :---- |
-| Info   | [CPU-Z](https://www.cpuid.com/softwares/cpu-z.html) | CPUID.CPU-Z |         ✕         |       |
-| Stress | [CPU-Z](https://www.cpuid.com/softwares/cpu-z.html) | CPUID.CPU-Z |         ✕         |       |
+| Info   | [CPU-Z](https://www.cpuid.com/softwares/cpu-z.html) | CPUID.CPU-Z |         X         |       |
+| Stress | [CPU-Z](https://www.cpuid.com/softwares/cpu-z.html) | CPUID.CPU-Z |         X         |       |
 
 ## GPU
 
 | TASK                   | APPLICATION                                                                                              | WINGET                               | DISABLE ANTIVIRUS | NOTES                        |
 | :--------------------- | :------------------------------------------------------------------------------------------------------- | :----------------------------------- | :---------------: | :--------------------------- |
-| Driver (Update-AMD)    | [AMD Adrenalin](https://www.amd.com/en/products/software/adrenalin.html)                                 | -                                    |         ✕         |                              |
-| Driver (Update-INTEL)  | [Intel HD Graphics](https://www.intel.com/content/www/us/en/support/products/80939/graphics.html)        | -                                    |         ✕         |                              |
-| Driver (Update-NVIDIA) | [Nvidia App](https://www.nvidia.com/en-au/software/nvidia-app/)                                          | -                                    |         ✕         |                              |
-| Driver (Uninstall)     | [Display Driver Uninstaller (DDU)](https://www.guru3d.com/download/display-driver-uninstaller-download/) | Wagnardsoft.DisplayDriverUninstaller |         ✕         | _Boot into Safe Mode to use_ |
-| Info                   | [GPU-z](https://www.techpowerup.com/download/techpowerup-gpu-z/)                                         | TechPowerUp.GPU-Z                    |         ✕         |                              |
-| Stress                 | [Furmark](https://www.geeks3d.com/furmark/)                                                              | Geeks3D.FurMark                      |         ✕         |                              |
+| Driver (Update-AMD)    | [AMD Adrenalin](https://www.amd.com/en/products/software/adrenalin.html)                                 | -                                    |         X         |                              |
+| Driver (Update-INTEL)  | [Intel HD Graphics](https://www.intel.com/content/www/us/en/support/products/80939/graphics.html)        | -                                    |         X         |                              |
+| Driver (Update-NVIDIA) | [Nvidia App](https://www.nvidia.com/en-au/software/nvidia-app/)                                          | -                                    |         X         |                              |
+| Driver (Uninstall)     | [Display Driver Uninstaller (DDU)](https://www.guru3d.com/download/display-driver-uninstaller-download/) | Wagnardsoft.DisplayDriverUninstaller |         X         | _Boot into Safe Mode to use_ |
+| Info                   | [GPU-z](https://www.techpowerup.com/download/techpowerup-gpu-z/)                                         | TechPowerUp.GPU-Z                    |         X         |                              |
+| Stress                 | [Furmark](https://www.geeks3d.com/furmark/)                                                              | Geeks3D.FurMark                      |         X         |                              |
 
 ## STORAGE
 
 | TASK      | APPLICATION                                                              | WINGET                          | DISABLE ANTIVIRUS | NOTES                              |
 | :-------- | :----------------------------------------------------------------------- | :------------------------------ | :---------------: | :--------------------------------- |
-| Benchmark | [CrystalDiskMark](https://crystalmark.info/en/software/crystaldiskmark/) | CrystalDewWorld.CrystalDiskMark |         ✕         |                                    |
-| Clone     | [MiniTool Partition Wizard](https://www.partitionwizard.com/)            | MiniTool.PartitionWizard.Free   |         ✕         | _Bootable full version on Medicat_ |
-| Info      | [CrystalDiskInfo](https://crystalmark.info/en/software/crystaldiskinfo/) | CrystalDewWorld.CrystalDiskInfo |         ✕         |                                    |
-| Info      | [Clear Disk Info](https://www.carifred.com/cleardiskinfo/)               | -                               |         ✕         |                                    |
+| Benchmark | [CrystalDiskMark](https://crystalmark.info/en/software/crystaldiskmark/) | CrystalDewWorld.CrystalDiskMark |         X         |                                    |
+| Clone     | [MiniTool Partition Wizard](https://www.partitionwizard.com/)            | MiniTool.PartitionWizard.Free   |         X         | _Bootable full version on Medicat_ |
+| Info      | [CrystalDiskInfo](https://crystalmark.info/en/software/crystaldiskinfo/) | CrystalDewWorld.CrystalDiskInfo |         X         |                                    |
+| Info      | [Clear Disk Info](https://www.carifred.com/cleardiskinfo/)               | -                               |         X         |                                    |
 
 ## SYSTEM
 
 | TASK         | APPLICATION                                                 | WINGET          | DISABLE ANTIVIRUS | NOTES |
 | :----------- | :---------------------------------------------------------- | :-------------- | :---------------: | :---- |
-| Temperatures | [HWMonitor](https://www.cpuid.com/softwares/hwmonitor.html) | CPUID.HWMonitor |         ✕         |       |
+| Temperatures | [HWMonitor](https://www.cpuid.com/softwares/hwmonitor.html) | CPUID.HWMonitor |         X         |       |
 
 ## WINDOWS
 
 | TASK                                   | APPLICATION                                                                                            | WINGET                                   |          DISABLE ANTIVIRUS           | NOTES                                                                           |
 | :------------------------------------- | :----------------------------------------------------------------------------------------------------- | :--------------------------------------- | :----------------------------------: | :------------------------------------------------------------------------------ |
-| Blue Screens (Check STOP-Codes/Errors) | [BlueScreenView](https://www.nirsoft.net/utils/blue_screen_view.html)                                  | NirSoft.BlueScreenView                   |                  ✕                   |                                                                                 |
-| Drivers (Verify)                       | [Verifier](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/driver-verifier)         | Win+R: verifier                          |                  ✕                   | _Built-in to Windows_                                                           |
-| Drivers (Update)                       | [Snappy Driver Installer Origin (SDIO)](https://www.glenn.delahoy.com/snappy-driver-installer-origin/) | GlennDelahoy.SnappyDriverInstallerOrigin |                  ✕                   |                                                                                 |
-| License Keys (Extract)                 | [Product Key Scanner](https://www.nirsoft.net/utils/product_key_scanner.html)                          | -                                        | <font style="color:red">**✓**</font- | _Extract license keys for Windows and/or Office_                                |
-| License Keys (Extract)                 | [ProduKey](https://www.nirsoft.net/utils/product_cd_key_viewer.html)                                   | -                                        | <font style="color:red">**✓**</font- | _May find licenses for some older products that Product Key Scanner could miss_ |
-| Software (Uninstall + Remnant Removal) | [RevoUninstaller](https://www.revouninstaller.com/)                                                    | RevoUninstaller.RevoUninstaller          |                  ✕                   |                                                                                 |
-| Remote Access                          | [TeamViewer](https://www.teamviewer.com/en-au/)                                                        | winget install TeamViewer.TeamViewer     |                  ✕                   | _May run into connection limit on free version_                                 |
-| Remote Access                          | [UltraViewer](https://www.ultraviewer.net/en/)                                                         | winget install DucFabulous.UltraViewer   |                  ✕                   | _Alternative to TeamViewer_                                                     |
-| User Profile (Backup/Migrate)          | [Transwiz](https://www.forensit.com/move-computer.html)                                                | -                                        |                  ✕                   |                                                                                 |
+| Blue Screens (Check STOP-Codes/Errors) | [BlueScreenView](https://www.nirsoft.net/utils/blue_screen_view.html)                                  | NirSoft.BlueScreenView                   |                  X                   |                                                                                 |
+| Drivers (Verify)                       | [Verifier](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/driver-verifier)         | Win+R: verifier                          |                  X                   | _Built-in to Windows_                                                           |
+| Drivers (Update)                       | [Snappy Driver Installer Origin (SDIO)](https://www.glenn.delahoy.com/snappy-driver-installer-origin/) | GlennDelahoy.SnappyDriverInstallerOrigin |                  X                   |                                                                                 |
+| License Keys (Extract)                 | [Product Key Scanner](https://www.nirsoft.net/utils/product_key_scanner.html)                          | -                                        | <font style="color:red">**Y**</font- | _Extract license keys for Windows and/or Office_                                |
+| License Keys (Extract)                 | [ProduKey](https://www.nirsoft.net/utils/product_cd_key_viewer.html)                                   | -                                        | <font style="color:red">**Y**</font- | _May find licenses for some older products that Product Key Scanner could miss_ |
+| Software (Uninstall + Remnant Removal) | [RevoUninstaller](https://www.revouninstaller.com/)                                                    | RevoUninstaller.RevoUninstaller          |                  X                   |                                                                                 |
+| Remote Access                          | [TeamViewer](https://www.teamviewer.com/en-au/)                                                        | winget install TeamViewer.TeamViewer     |                  X                   | _May run into connection limit on free version_                                 |
+| Remote Access                          | [UltraViewer](https://www.ultraviewer.net/en/)                                                         | winget install DucFabulous.UltraViewer   |                  X                   | _Alternative to TeamViewer_                                                     |
+| User Profile (Backup/Migrate)          | [Transwiz](https://www.forensit.com/move-computer.html)                                                | -                                        |                  X                   |                                                                                 |
 <!-- leave this comment here, it's stopping the above table from breaking the following category -->
 
 ## Android
@@ -400,7 +403,7 @@
     - make markdown doc work with a technician wiki? (Obsidian knowledgebase?)
 -->
 
-### Pre
+### Pre Scans
 
 - [<font style="color:RED">**IMPORTANT**</font>] **Air Gap Device**
   > _Ensure device is disconnected from all networks before RKill is run successfully and RATs ( Remote Access Tools ) removed, to ensure malicious actors do not re-connect to the device while it's still compromised_
@@ -437,7 +440,7 @@
   - Run `cleanmgr /sagerun:10`\
     _This will run the Disk Cleanup utility to using Profile 10's settings_
 
-### Main
+### Scans
 
 - Connect to Internet
 - [<font style="color:ORANGE">OPTIONAL</font>] [AdwCleaner](https://www.malwarebytes.com/adwcleaner)
@@ -461,8 +464,8 @@
       _n/a_</br>
     - **File System Related Actions**</br>&nbsp;&nbsp;&nbsp;&nbsp; 21. Rebuild icon cache</br>
     - **Essential Installes/Updates**</br>&nbsp;&nbsp;&nbsp;&nbsp;
-      [<font style="color:ORANGE">If Google Chrome is installed:</font>]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 22. Insall/Update Chrome</br>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;23. Install uBlock Origin for Chrome</br>&nbsp;&nbsp;&nbsp;&nbsp;
-      [<font style="color:ORANGE">If Mozilla Firefox is installed:</font>]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 24. Install/Update Firefox</br>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;25. Install uBlock Origin for Firefox</br>&nbsp;&nbsp;&nbsp;&nbsp; 26. Install uBlock Origin for Edge</br>&nbsp;&nbsp;&nbsp;&nbsp; 27. PatchMyPC - Update all apps</br>
+      [<font style="color:ORANGE">If Google Chrome is installed</font>]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 22. Insall/Update Chrome</br>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;23. Install uBlock Origin for Chrome</br>&nbsp;&nbsp;&nbsp;&nbsp;
+      [<font style="color:ORANGE">If Mozilla Firefox is installed</font>]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 24. Install/Update Firefox</br>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;25. Install uBlock Origin for Firefox</br>&nbsp;&nbsp;&nbsp;&nbsp; 26. Install uBlock Origin for Edge</br>&nbsp;&nbsp;&nbsp;&nbsp; 27. PatchMyPC - Update all apps</br>
     - **Privacy Cleanup**</br>&nbsp;&nbsp;&nbsp;&nbsp; 28. Clear all browsers history (all users)</br>&nbsp;&nbsp;&nbsp;&nbsp; 29. Delete browsers cookies (all users)</br>
     - **Maintenance Actions**</br>&nbsp;&nbsp;&nbsp;&nbsp; 30. Empty all users temp folders</br>&nbsp;&nbsp;&nbsp;&nbsp; 31. Empty browsers cache (all users)</br>&nbsp;&nbsp;&nbsp;&nbsp; 32. Unattended disk cleanup</br>
     - **System Repair and Optimization**</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -473,7 +476,7 @@
   - Select the following loadout settings: _(right menu)_</br>&nbsp;&nbsp;&nbsp;&nbsp; 1. Third party full scans</br>&nbsp;&nbsp;&nbsp;&nbsp; 2. Use unattended mode</br>&nbsp;&nbsp;&nbsp;&nbsp;
   - Click `Run selected fixes/apps`
 
-### Post
+### Post Scans
 
 - [<font style="color:ORANGE">OPTIONAL</font>] Create a new System Restore point "**COPS - Pre Windows Update**"
 - Update Windows (no preview updates)
@@ -525,7 +528,7 @@
 
 ---
 
-### Pre
+### Pre Scans
 
 - **Remove Intrusive Full-Screen Pop-Ups**\
   These relentless pop-ups make the device impossible to work with, so deal with these first _(if applicable)_\
@@ -536,69 +539,71 @@
   </details>
   - Open `Play Store`
     - Install [Ad Virus Cleaner - ROX Security](https://play.google.com/store/apps/details?id=com.tafayor.roxapp&pcampaignid=web_share "ROX Security app")
-  - Open `Ad Virus Cleaner - ROX Security`
-    - Tap `Scan` <!-- TODO: verify steps are correct and spelt correctly -->
+  - Open `ROX Security` <!-- TODO: verify steps are correct and spelt correctly -->
+    - Tap `Scan`
     - Wait for the scan to complete
     - Tap on `Pop-up Ad Detector`
       - Tap on `Give Permissions`\
         This will open a required permissions settings panel
         - Enable `ROX Security`
         - Tap `<` _(back button)_
-
-
+    - Wait for an intrusive full-screen pop-up
+    - Tap `|||` _(app switch button)_
+      - Switch back to `Rox Security`
+        `Rox Security` should have logged recent app activity under it's `Pop-up Ad Detector`
+    - Tap `:` _(kebab button)_ next to the offending app
+      - Tap `Show in Play Store`
+      - Verify the app is not important\
+        _If the app is published by Google or the device's manufacturer (i.e. Samsung) think twice before removing_
+      - Tap `Uninstall`
+  - Uninstall `ROX Security` when done
 - **Safe Mode**\
   Reboot the device in Safe-Mode _(if available)_
+- **Malicious or Suspicious Apps**\
+  - Remove any remote access apps _(i.e. AnyDesk, TeamViewer, etc..)_\
+    _These are used by scammers to access devices remotely_
+  - Remove any malicious or bloatware apps\
+    The following are common types of apps that are unnecessary often load their own malware:
+    - Any free 3rd-party "cleaner" apps
+    - Any free 3rd-party "QR Scanner" apps
+    - Any free 3rd-party "PDF Reader" apps _(excluding [Adobe Acrobat Reader](https://play.google.com/store/apps/details?id=com.adobe.reader&hl=en))_
+    - Any free 3rd-party "File Manager" apps
+  - Remove any "Crypto" apps _(after verifying the customer does not genuinely use them)_\
+    _Scammers often load on crypto apps to try and steal currencies the device has access to_
 - **Web Browsers**\
   Clear Cache + Data for all Web Browsers installed on the device.\
   _The following steps are for Google Chrome, but other apps are managed that same way_
   - Open `Settings`
-    - Tap `Apps`
+    - Tap `Apps` <!-- TODO: verify steps are correct and spelt correctly -->
       - Tap `Chrome`
         - Tap `Storage`
           - Tap `Clear cache`
           - Tap `Clear data`
-  
 
-Remove Full-Screen Pop Up Ads
-(use 'Ad Virus Cleaner - ROX Security' or 'Appwatch' apps) 
+### 1st Party Scans
 
-Remove any Suspicious or Malicious Apps
+- `Play Protect` Scan
+- [<font style="color:ORANGE">If Samsung Device</font>]
+  - Samsung `Device Care` Scan
 
+### 3rd Party Scans
 
+- Install and Run <u>at least 3</u> of the following free malware scanners:
+  - [Malwarebytes Mobile Security](https://play.google.com/store/apps/details?id=org.malwarebytes.antimalware&hl=en_AU)
+  - [AVG AntiVirus & Security](https://play.google.com/store/apps/details?id=com.antivirus&hl=en_AU)
+  - [Bitdefender Antivirus](https://play.google.com/store/apps/details?id=com.bitdefender.antivirus&hl=en_AU)
+  - [Sophos Intercept X for Mobile](https://play.google.com/store/apps/details?id=com.sophos.smsec&hl=en_AU)
+  - [Avira Security Antivirus & VPN](https://play.google.com/store/apps/details?id=com.avira.android&hl=en_AU)
+  - [Trend Micro Mobile Security & Antivirus](https://play.google.com/store/apps/details?id=com.trendmicro.tmmspersonal&hl=en_AU)
+  - [ESET Mobile Security Antivirus](https://play.google.com/store/apps/details?id=com.eset.ems2.gp&hl=en_AU)
+  - [TotalAV Mobile Security](https://play.google.com/store/apps/details?id=com.totalav.android&hl=en_AU) _untested if can be used without an account_
+  - [Panda Dome Antivirus and VPN](https://play.google.com/store/apps/details?id=com.pandasecurity.pandaav&hl=en_AU) _untested if can be used without an account_
+  - [Avast Antivirus & Security](https://play.google.com/store/apps/details?id=com.avast.android.mobilesecurity&hl=en_AU) _untested if can be used without an account_
 
-1ST PARTY SCANS
----------------------------------
+### Updates
 
-Play Protect Scan
-
-Samsung Device Care Scan (if Samsung Device)
-
-
-
-3RD PARTY SCANS (Pick at least 3)
----------------------------------
-
-Malwarebytes
-
-AVG Antivirus
-
-Bitdefender Antivirus
-
-Sophos Intercept X for Mobile
-
-Avira Security Antivirus & VPN
-
-Trend Micro Mobile Security & Antivirus
-
-ESET Mobile Security
-
-
-
-UPDATES
----------------------------------
-
-Update Apps - Play Store
-
-Update Apps - Galaxy Store (if Samsung Device)
-
-Update Android OS
+- Update Apps via `Play Store`
+- [<font style="color:ORANGE">If Samsung Device</font>]
+  - Update Apps via `Galaxy Store`
+- Update `Android OS`\
+  This may take multiple updates and reboots, as customers often neglect updating their devices

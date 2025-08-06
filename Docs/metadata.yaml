@@ -3,8 +3,8 @@ title: 'COPS Technican Manual'
 # title-mini: 'mini-title'
 # subtitle: 'subtitle'
 # degree: 'The Degree'
-author: 'Shaun Buckland'
-date: '2025-10-06'
+author: 'Maintained by [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au)'
+date: 'Updated 2025-10-06'
 maincolor: dc3545
 # phrase: 'This is a good phrase'
 # phrase-author: 'Phrase author'
@@ -14,10 +14,4 @@ abstract: This document provides step-by-step instructions on backing up a devic
 # cover: 'img/cover.png'
 # github-link: 'https://github.com/cops-sb/'
 geometry: a4paper,margin=2cm
-header-includes: |
-  \usepackage{graphicx}
-  \usepackage{float}
-  \usepackage{titling}
-  \pretitle{\begin{center}\includegraphics[width=0.3\linewidth]{Logo.pdf}\[\bigskipamount]}
-  \posttitle{\end{center}}
 ...
