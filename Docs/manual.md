@@ -57,6 +57,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | Trend Micro Maximum Security | `winget install "Trend Micro Maximum Security"` |||
 | HashCheck Shell Extension | `winget install idrassi.HashCheckShellExtension` |||
 | Git | `winget install Git.Git` |||
+<!-- TODO: finish this table -->
 
 ### Android
 
