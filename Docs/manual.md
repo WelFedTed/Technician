@@ -1,6 +1,8 @@
 <!-- COPS Technician Manual -->
 
-# Application Cheat Sheet (Windows)
+# App Cheat Sheet
+
+---
 
 ## CPU
 
@@ -48,12 +50,23 @@
 | Remote Access                          | [TeamViewer](https://www.teamviewer.com/en-au/)                                                        | winget install TeamViewer.TeamViewer     |                  ✕                   | _May run into connection limit on free version_                                 |
 | Remote Access                          | [UltraViewer](https://www.ultraviewer.net/en/)                                                         | winget install DucFabulous.UltraViewer   |                  ✕                   | _Alternative to TeamViewer_                                                     |
 | User Profile (Backup/Migrate)          | [Transwiz](https://www.forensit.com/move-computer.html)                                                | -                                        |                  ✕                   |                                                                                 |
-
 <!-- leave this comment here, it's stopping the above table from breaking the following category -->
 
-# System Service (Windows)
+## Android
 
-## Software
+| App   | Description   | Use Case  |
+| :---  | :---          | :---      |
+| [Appwatch](https://play.google.com/store/apps/details?id=com.tafayor.appwatch&hl=en_AU) | Snitch on app activity | <u>DEPRECATED</u></br>Use `Rox Security` instead<hr>_Identify apps that are responsible for instrusive full-screen pop-ups_ |
+| [Rox Security](https://play.google.com/store/apps/details?id=com.tafayor.roxapp&hl=en_AU&pli=1) | Multi-tool for identifying unusual/unwanted app behaviour, including snitching on app activity | Identify apps that are responsible for instrusive full-screen pop-ups |
+
+
+# System Service
+
+## Windows
+
+---
+
+### Software
 
 - **Restart Windows**\
   Force Restart Windows (`shutdown -r -f -t 00`) now to provide a clean environment befor proceeding
@@ -124,16 +137,20 @@
       `Event Viewer` - Windows Logs - System - Filter Current Log... - Event sources - Tick 'MemoryDiagnostics-Results' - Click OK
   - Create a new System Restore point</br>_Name it something like "COPS - Post System Service"_
 
-## Hardware
+### Hardware
 
 - Check all buttons and ports are free from debris and working functioning correctly
 - Air compress out system as required
 - Wipe down device and clean surfaces
 - Add a `Serviced by COPS` sticker or replace old worn stickers as required
 
-# Data Transfer (Windows)
+# Data Transfer
 
-## Backup
+## Windows
+
+---
+
+### Backup
 
 - **Restart Windows**\
   Force Restart Windows (`shutdown -r -f -t 00`) now to provide a clean environment befor proceeding
@@ -228,7 +245,7 @@
   _(update REPLACE-WITH-TARGET-FOLDER with the target drivers folder on the transfer drive)_
 - **Enable Antivirus**
 
-## Prepare New Device _(if required)_
+### Prepare New Device _(if required)_
 
 - **Create a Local Account during Windows 10/11 Out of Box Experience (OOBE)**
   - **Option 1: No Internet Connected**\
@@ -318,7 +335,7 @@
     - Click `Finish`
     - Restart Windows `shutdown -r -f -t 00`
 
-## Restore
+### Restore
 
 - **Install Programs**
   - you can use the winget install script for this if you made one \ - _install programs before restoring the user profile, as otherwise some required registry entries may not exist yet_
@@ -365,7 +382,14 @@
 - **Restart Windows**
 - **Create a new System Restore point** `COPS - Completed Data Transfer`
 
-# Virus/Malware Removal (Windows)
+
+
+# Virus/Malware Removal
+
+## Windows
+
+---
+
 <!--
     TO DO:
     - fill out large tasks sub-tasks (revo, cleanmgr, uvk, verifier, etc..)
@@ -376,7 +400,7 @@
     - make markdown doc work with a technician wiki? (Obsidian knowledgebase?)
 -->
 
-## Pre
+### Pre
 
 - [<font style="color:RED">**IMPORTANT**</font>] **Air Gap Device**
   > _Ensure device is disconnected from all networks before RKill is run successfully and RATs ( Remote Access Tools ) removed, to ensure malicious actors do not re-connect to the device while it's still compromised_
@@ -413,7 +437,7 @@
   - Run `cleanmgr /sagerun:10`\
     _This will run the Disk Cleanup utility to using Profile 10's settings_
 
-## Main
+### Main
 
 - Connect to Internet
 - [<font style="color:ORANGE">OPTIONAL</font>] [AdwCleaner](https://www.malwarebytes.com/adwcleaner)
@@ -449,7 +473,7 @@
   - Select the following loadout settings: _(right menu)_</br>&nbsp;&nbsp;&nbsp;&nbsp; 1. Third party full scans</br>&nbsp;&nbsp;&nbsp;&nbsp; 2. Use unattended mode</br>&nbsp;&nbsp;&nbsp;&nbsp;
   - Click `Run selected fixes/apps`
 
-## Post
+### Post
 
 - [<font style="color:ORANGE">OPTIONAL</font>] Create a new System Restore point "**COPS - Pre Windows Update**"
 - Update Windows (no preview updates)
@@ -496,3 +520,77 @@
       You can queue up multiple commands in PowerShell by pressing `Shift+Enter` to add a new line before pressing `Enter` to execute the all of the queued up commands one after another
     </details>
 - Create a new System Restore point "**COPS - Post Virus/Malware Removal**"
+
+## Android
+
+---
+
+### Pre
+
+- **Remove Intrusive Full-Screen Pop-Ups**\
+  These relentless pop-ups make the device impossible to work with, so deal with these first _(if applicable)_
+  - Open `Play Store`
+    - Install [Ad Virus Cleaner - ROX Security](https://play.google.com/store/apps/details?id=com.tafayor.roxapp&pcampaignid=web_share "ROX Security app")
+  - Open `Ad Virus Cleaner - ROX Security`
+    - Tap `Scan` <!-- TODO: verify steps are correct and spelt correctly -->
+    - Wait for the scan to complete
+    - Tap on `Pop-up Ad Detector`
+      - Tap on `Give Permissions`
+        - Enable `ROX Security
+
+- **Safe Mode**\
+  Reboot the device in Safe-Mode _(if available)_
+- **Web Browsers**\
+  Clear Cache + Data for all Web Browsers installed on the device.\
+  _The following steps are for Google Chrome, but other apps are managed that same way_
+  - Open `Settings`
+    - Tap `Apps`
+      - Tap `Chrome`
+        - Tap `Storage`
+          - Tap `Clear cache`
+          - Tap `Clear data`
+  
+
+Remove Full-Screen Pop Up Ads
+(use 'Ad Virus Cleaner - ROX Security' or 'Appwatch' apps) 
+
+Remove any Suspicious or Malicious Apps
+
+
+
+1ST PARTY SCANS
+---------------------------------
+
+Play Protect Scan
+
+Samsung Device Care Scan (if Samsung Device)
+
+
+
+3RD PARTY SCANS (Pick at least 3)
+---------------------------------
+
+Malwarebytes
+
+AVG Antivirus
+
+Bitdefender Antivirus
+
+Sophos Intercept X for Mobile
+
+Avira Security Antivirus & VPN
+
+Trend Micro Mobile Security & Antivirus
+
+ESET Mobile Security
+
+
+
+UPDATES
+---------------------------------
+
+Update Apps - Play Store
+
+Update Apps - Galaxy Store (if Samsung Device)
+
+Update Android OS
