@@ -94,6 +94,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | Audacity ||||
 | [Exact Audio Copy (EAC)](https://www.exactaudiocopy.de/) ||||
 | OpenOffice ||||
+| Inkscape | `winget install Inkscape.Inkscape` |||
 <!-- TODO: finish this table -->
 
 ### macOS

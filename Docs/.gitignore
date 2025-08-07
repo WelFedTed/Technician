@@ -5,3 +5,7 @@ z.docx
 # manual.pdf
 # manual.docx
 input.log
+input.out
+input.aux
+input.toc
+svg-inkscape

@@ -12,8 +12,8 @@ pdf-engine-opt:
   - '-shell-escape'
   - '-output-directory=.'
 template: template/yuki.html
-filters:
-  - template/filter.lua
+# filters:
+  # - template/filter.lua
 metadata-files:
   - metadata.yaml
 resource-path:
