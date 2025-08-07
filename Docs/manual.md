@@ -272,13 +272,18 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 ### Software
 
 - **Restart Windows**\
-  Force Restart Windows (`shutdown -r -f -t 00`) now to provide a clean environment befor proceeding
+  _Force Restart Windows now to provide a clean environment befor proceeding_\
+  `shutdown -r -f -t 00`
+
 - **System Restore**\
-  _Check System Restore configuration and try to set at least 7% allocation_
-- Create a new System Restore point\
-  _Name it something like `COPS - Pre System Service`_
+  - Check System Restore configuration\
+    _Make sure System Restore is Enabled on C: and set the allocation to 7%_ 
+  - Create a new System Restore point\
+    `COPS - Pre System Service`
+
 - **Task Manager**
   - Disable unwanted startup items
+
 - **Wintoys**
   - Install [Wintoys](https://apps.microsoft.com/detail/9p8ltpgcbzxd)\
     `winget install wintoys`\
@@ -307,23 +312,31 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
     - `Icons cache` | Click 'Rebuild'
   - Tweaks Tab
     - `Desktop` | Turn ON 'This PC' + 'Recycle Bin'
-- Update software
-  - Windows Update
-    - _old Windows 10 builds can use the Windows 10 Update Assistant to jump to the latest build_
-  - Update Apps via Winget
-  - Update Apps via Microsoft Store
-  - Update Office Apps
-- Update Drivers
+- **Updates**
+  - Update Windows\
+    _old Windows 10 builds can use the `Windows 10 Update Assistant` to jump to the latest build_
+  - Update Apps via `Winget`
+  - Update Apps via `Microsoft Store`
+  - Update Office Apps\
+    `"C:\Program Files\Common Files\microsoft shared\ClickToRun\OfficeC2RClient.exe" /update user forceappshutdown=true`
+
+- **Drivers**
   - Update Drivers using `SDIO`
   - Verify Drivers using `verifier`
-- Maintenance
-  - Run the following commands:
-    - sfc /scannow</br>
-    - dism /online /cleanup-image /startcomponentcleanup /resetbase</br>
-    - dism /online /cleanup-image /restorehealth</br>
-    - sfc /scannow</br>
-    - chkdsk c: /r /scan /perf</br>
-    - defrag c: /o
+
+- **System Maintenance/Repair**\
+  - Open a Terminal as Administrator\
+    Run `wt` or `powershell` or `cmd`
+  - Run the following commands:\
+    `winget source reset --force`\
+    `winget source update`\
+    `winget upgrade --all --silent`\
+    `sfc /scannow`\
+    `dism /online /cleanup-image /startcomponentcleanup /resetbase`\
+    `dism /online /cleanup-image /restorehealth`\
+    `sfc /scannow`\
+    `defrag /c /o`\
+    `chkdsk c: /r /scan /perf`\
   - Disk Cleanup
     - Run `cleanmgr /sageset:10`
     - Click `Clean up system files`
@@ -339,7 +352,8 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
     - Click 'Restart now and check for problems (recommended)'
     - After Windows boots back up, check results:</br>
       `Event Viewer` - Windows Logs - System - Filter Current Log... - Event sources - Tick 'MemoryDiagnostics-Results' - Click OK
-  - Create a new System Restore point</br>_Name it something like "COPS - Post System Service"_
+  - Create a new System Restore point\
+    `COPS - Post System Service`
 
 ### Hardware
 
@@ -357,18 +371,24 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 ### Backup
 
 - **Restart Windows**\
-  Force Restart Windows (`shutdown -r -f -t 00`) now to provide a clean environment befor proceeding
+  _Force Restart Windows now to provide a clean environment befor proceeding_\
+  `shutdown -r -f -t 00`
 - [ <font style="color:ORANGE">OPTIONAL</font> ] Create a new System Restore point
+
 - **Disable Antivirus**\
   - _Some of our extraction tools prompt false positives in the majority of security software_
+
 - **Create a Job folder on a Transfer Drive**\
   _naming convention:_\
   `Job#5000`
   - _Create a new folder with the current job number to save User Data to_
+
 - **Backup User Profiles**\
   - _Copy `C:\Users\` folder to the Job folder on the Transfer Drive_
+
 - **Backup Web Browsers**\
   _For each web browser installed complete the following:_
+
   - **Export Bookmarks**\
     _naming convention:_\
     `Web Browser - Google Chrome - Bookmarks - 2024-07-15.html`\
@@ -379,6 +399,7 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
     - _AVG Secure Browser URL:_ `secure://bookmarks`\
     - _Mozilla Firefox Hotkey:_ `Ctrl+Shift+O`\
     - _Microsoft Internet Explorer:_ `%USERPROFILE%\Favorites`
+
   - **Export Passwords**\
     _naming convention:_\
     `Web Browser - Google Chrome - Passwords - 2024-07-15.csv`\
@@ -389,6 +410,7 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
     - _AVG Secure Browser URL:_ `secure://password-manager` or `secure://settings/passwords` (older Secure Browser versions)\
     - _Mozilla Firefox URL:_ `about:logins`\
     - _Microsoft Internet Explorer:_ use [Nirsoft IE PassView](https://www.nirsoft.net/utils/internet_explorer_password.html)
+
   - **Sync Accounts**\
     _Try to sync each browser with their relevant accounts if available_\
     _Manual exports of Bookmarks + Passwords is good, but syncing the entire browser is better_
@@ -400,17 +422,24 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
       - Check Not Actively Syncing: `Sync Cycle Ongoing` = false\
       - Force Sync (if required): `chrome://extensions` - enable `Developer mode` - click `Update`\
     - _Microsoft Edge:_ `Microsoft Account`
-      - _TODO (but it's similar to Chrome)_\
+      - `edge://sync-internals`\
+      - Check Enabled: `Sync Feature Enabled`	= true\
+      - Check Account: `Username`\
+      - Checked Synced: `Last Synced` = Just now\
+      - Check Not Actively Syncing: `Sync Cycle Ongoing` = false\
+      - Force Sync (if required): `edge://extensions` - enable `Developer mode` - click `Update`\
     - _AVG Secure Browser:_ `AVG Account`
-      - _TODO (but it's similar to Chrome)_\
+      <!-- - _TODO (but it's similar to Chrome)_\ -->
     - Mozilla Firefox:_ `Mozilla Account`
-      - _TODO_
+      <!-- - _TODO_ -->
+
 - **Export Installed Programs List**\
   _naming convention:_\
   `Installed Programs - Nirsoft Uninstallview - 2024-07-15.html`\
   or\
   `installed-programs_nirsoft-uninstallview_2024-07-15.html`
-  - _use Nirsoft UninstallView, save all as Horizontal HTML_
+  - Use `Nirsoft UninstallView`, save all as `Horizontal HTML`
+
 - **Export Winget**\
   _naming convention:_\
   `Winget - Export - 2024-07-15.json`\
@@ -423,12 +452,14 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
   - Export Winget's list of installed programs `winget export -o "REPLACE-WITH-TARGET-FILE"`\
   _(update REPLACE-WITH-TARGET-FILE with the target winget export file on the transfer drive)_\
   - Optionally export a list of all programs that Winget does cannot re-install at the same time with this extended command `winget export -o "REPLACE-WITH-TARGET-FILE" >- "winget_unnavailable.txt"`
+
 - **Export License Keys**\
   _naming convention:_\
   `License Keys - Nirsoft Product Key Scanner - 2024-07-15.html`\
   or\
   `license-keys_nirsoft-product-key-scanner_2024-07-15.html`
   - _use Nirsoft Product Key Scanner or Nirsoft ProduKey, save all as Horizontal HTML_
+
 - **Export Emails**
   - Extract Passwords and Server Settings
     - Nirsoft Mail PassView
@@ -436,10 +467,12 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
     - Nirsoft PstPassword
   - Backup any accounts set up as POP
     - [_How to export emails to file in Outlook_](https://support.microsoft.com/en-au/office/back-up-your-email-e5845b0b-1aeb-424f-924c-aa1c33b18833)
+
 - **Check C: Drive for unusual files/folders**
   - _copy to Job folder copying the C: Drive file structure (TransferDrive:\\Job\#5000\\C\\FolderToSave)_
 - [ <font style="color:ORANGE">OPTIONAL</font> ] Create Winget Install Script
   - _https://winstall.app/ - Select Desired Programs - Generate Script - Download both Batch (.bat) and PowerShell (.ps1) scripts_
+
 - **Export Drivers**\
   `TRANSFERDRIVE:\\Job#5000\Drivers - 2024-07-15\`\
   or\
@@ -447,6 +480,7 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
   - _Open `PowerShell` as an Administrator and run the following script:_\
   `Export-WindowsDriver -Online -Destination "REPLACE-WITH-TARGET-FOLDER"`\
   _(update REPLACE-WITH-TARGET-FOLDER with the target drivers folder on the transfer drive)_
+  
 - **Enable Antivirus**
 
 ### Prepare New Device _(if required)_
@@ -562,7 +596,7 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 - **Update Office apps** (if installed)
 - **Restart Windows**
 - **Remove 'COPS' user account**
-  - Run: `netplwiz` - Select `COPS` - Click `Remove`
+  - Run `netplwiz` - Select `COPS` - Click `Remove`
   - Delete `C:\Users\COPS\` folder\
   _Windows may prevent you from removing this folder if it's currently accessing it in the background, if this happens just restart Windows and try to remove it again_
   - Empty Recycle Bin
@@ -606,13 +640,15 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 
 ### Pre Scans
 
-- [ <font style="color:RED">**IMPORTANT**</font> ] **Air Gap Device**
-  > _Ensure device is disconnected from all networks before RKill is run successfully and RATs ( Remote Access Tools ) removed, to ensure malicious actors do not re-connect to the device while it's still compromised_
+- [ <font style="color:RED">**IMPORTANT**</font> ] **Air Gap Device**\
+  _Ensure device is disconnected from all networks before RKill is run successfully and RATs ( Remote Access Tools ) removed, to ensure malicious actors do not re-connect to the device while it's still compromised_
 - Enable System Restore (set to 7% allocation if enough free disk space)
-- [ <font style="color:ORANGE">OPTIONAL</font> ] **Create a new [System Restore](https://support.microsoft.com/en-gb/windows/create-a-system-restore-point-77e02e2a-3298-c869-9974-ef5658ea3be9) point** `COPS - Pre Virus/Malware Removal`
-  > _This System Restore point will be wiped out in a later step (post-virus/malware removal), as malware can persist in old System Restore points_
+- [ <font style="color:ORANGE">OPTIONAL</font> ] **Create a new [System Restore](https://support.microsoft.com/en-gb/windows/create-a-system-restore-point-77e02e2a-3298-c869-9974-ef5658ea3be9) point**\
+  `COPS - Pre Virus/Malware Removal`\
+  _This System Restore point will be wiped out in a later step (post-virus/malware removal), as malware can persist in old System Restore points_
 - **Restart Windows**\
-  Force Restart Windows (`shutdown -r -f -t 00`) now to provide a clean environment befor proceeding
+  _Force Restart Windows now to provide a clean environment befor proceeding_\
+  `shutdown -r -f -t 00`
 - **COPS Folder**\
   Create `C:\COPS\` folder on the system
   - [ <font style="color:ORANGE">OPTIONAL</font> ] Add `C:\COPS\` to the installed antivirus's exclusion list\
@@ -624,7 +660,7 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 - **RKill**
   - Copy `RKill` folder from your USB Tool to the `COPS` folder\
     RKill can't run from a write-blocked drive, so you'll usually need to copy the executables out first
-  - [<font style="color:RED">**IMPORTANT**</font>] Run any RKill executable as Admininstrator
+  - [ <font style="color:RED">**IMPORTANT**</font> ] Run any RKill executable as Admininstrator
   - Wait for RKill to complete, it will then generate a report `RKill.txt` on the current user's desktop
   - Move `RKill.txt` from `%USERPROFILE%\Desktop` to `COPS` folder
 - **Revo Uninstaller**
@@ -636,7 +672,10 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
   - Select all checkboxes except for the following system error options:\
     `System error memory dump files`\
     `System error minidump files`\
-    _You can click on an option, and then use the UP + DOWN Arrows + Space Bar to quickly check or uncheck options_
+    <details>
+      <summary>Useful Tip</summary>
+    You can click on an option, and then use the `UP` + `DOWN` arrows + `Space Bar` to quickly check or uncheck options
+    </details>
   - Click `OK`
   - Run `cleanmgr /sagerun:10`\
     _This will run the Disk Cleanup utility to using Profile 10's settings_
@@ -644,10 +683,10 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 ### Scans
 
 - Connect to Internet
-- [ <font style="color:ORANGE">OPTIONAL</font> ] [AdwCleaner](https://www.malwarebytes.com/adwcleaner)
-  > _AdwCleaner crashes out of UVK's automation, so run it now instead if you want to use it_
-- [ <font style="color:ORANGE">OPTIONAL</font> ] [Spybot - Search & Destroy](https://www.safer-networking.org/free-download/)
-  > _Spybot is a thorough malware removal tool, but it can take a very long time to complete it's scans_
+- [ <font style="color:ORANGE">OPTIONAL</font> ] [AdwCleaner](https://www.malwarebytes.com/adwcleaner)\
+  _AdwCleaner crashes out of UVK's automation, so run it now instead if you want to use it_
+- [ <font style="color:ORANGE">OPTIONAL</font> ] [Spybot - Search & Destroy](https://www.safer-networking.org/free-download/)\
+  _Spybot is a thorough malware removal tool, but it can take a very long time to complete it's scans_
 - [ <font style="color:ORANGE">OPTIONAL</font> ] [Windows Defender Offline Scan](https://support.microsoft.com/en-au/windows/help-protect-my-pc-with-microsoft-defender-offline-9306d528-64bf-4668-5b80-ff533f183d6c "How to use Windows Defender Offline")
 - [ <font style="color:ORANGE">OPTIONAL</font> ] Create a new System Restore point `COPS - Pre Virus/Malware Removal`
 - [Ultra Virus Killer (UVK)](https://www.carifred.com/uvk/)
@@ -657,7 +696,10 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
     - Do Update UVK if asked when opening UVK
   - Click System Repair
   - Select the following repair actions: _(left menu)_
-    > _(you can click on an option, and then use the UP + DOWN Arrows + Space Bar to quickly check or uncheck options)_</br>
+    <details>
+      <summary>Useful Tip</summary>
+    You can click on an option, and then use the `UP` + `DOWN` arrows + `Space Bar` to quickly check or uncheck options
+    </details>
     - **Pre-Repair Actions**</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. Set technician power settings</br>&nbsp;&nbsp;&nbsp;&nbsp; 2. Kill all non system processes</br>&nbsp;&nbsp;&nbsp;&nbsp; 3. Delete all restore points</br>&nbsp;&nbsp;&nbsp;&nbsp; 4. Create a system restore point</br>&nbsp;&nbsp;&nbsp;&nbsp; 5. Free physical memory</br>&nbsp;&nbsp;&nbsp;&nbsp; 6. Backup the registry</br>&nbsp;&nbsp;&nbsp;&nbsp; 7. Un-immunize all areas</br>&nbsp;&nbsp;&nbsp;&nbsp; 8. Disable the User Account Control</br>&nbsp;&nbsp;&nbsp;&nbsp; 9. Enable the legacy (F8) boot menu</br>&nbsp;&nbsp;&nbsp;&nbsp; 10. Enable Windows Recovery Environment</br>&nbsp;&nbsp;&nbsp;&nbsp; 11. Prevent rebooting until all is done</br>
     - **Third-Party Built-in Apps**</br>&nbsp;&nbsp;&nbsp;&nbsp; 12. Ultra Adware Killer scan</br>&nbsp;&nbsp;&nbsp;&nbsp; 13. MalwareBytes AntiMalware scan</br>&nbsp;&nbsp;&nbsp;&nbsp; 14. Super AntiSpyware scan</br>&nbsp;&nbsp;&nbsp;&nbsp; 15. RogueKiller scan</br>&nbsp;&nbsp;&nbsp;&nbsp; 16. Kaspersky TDSSKiller scan</br>&nbsp;&nbsp;&nbsp;&nbsp; 17. Avast! Browser Cleanup</br>
     - **Reset Actions**</br>&nbsp;&nbsp;&nbsp;&nbsp; 18. Reset the DNS cache</br>&nbsp;&nbsp;&nbsp;&nbsp; 19. Reset the Windows Store</br>&nbsp;&nbsp;&nbsp;&nbsp; 20. Reset all print jobs</br>
@@ -679,21 +721,21 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 
 ### Post Scans
 
-- [ <font style="color:ORANGE">OPTIONAL</font> ] Create a new System Restore point "**COPS - Pre Windows Update**"
+- [ <font style="color:ORANGE">OPTIONAL</font> ] Create a new System Restore point `COPS - Pre Windows Update`
 - Update Windows (no preview updates)
 - Update Apps via Microsoft Store
-- Update Apps via Windows Package Manager (winget)
+- Update Apps via Windows Package Manager (winget)\
   `winget source update`\
   `winget upgrade --all --silent`\
   <details>
-    <summary>Tip</summary>
+    <summary>Useful Tip</summary>
     You can queue up multiple commands in PowerShell by pressing `Shift+Enter` to add a new line before pressing `Enter` to execute the all of the queued up commands one after another
   </details>
-- [ <font style="color:ORANGE">OPTIONAL</font> ] Create a new System Restore point "**COPS - Pre Driver Update**"
+- [ <font style="color:ORANGE">OPTIONAL</font> ] Create a new System Restore point `COPS - Pre Driver Update`
 - Update Drivers (SDIO)
 - Verify Drivers
   - **Turn On Windows Verifier:**
-    - Run `Win+R`: `verifier`
+    - Run `verifier`
     - Select `Create standard settings`
     - Click `Next`
     - Select `Automatically select all drivers on this computer`
@@ -702,10 +744,11 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
       _Windows Verifier works by stressing out drivers as they're loaded (it is expected that the computer's performance will be impacted while verifier is enabled)_\
       _If Windows loads into the desktop OK and does not crash with verifier enabled, then all is good and you can proceed to turn it off_
   - **Turn Off Windows Verifier:**
-    - Run `Win+R`: `verifier`
+    - Run `verifier`
     - Select `Delete existing settings`
     - Click `Finish`
-    - Restart Windows (`shutdown -r -f -t 00`)
+    - Restart Windows\
+      `shutdown -r -f -t 00`
 - **System Maintenance/Repair**\
   - Open a Terminal as Administrator\
     Run `wt` or `powershell` or `cmd`
@@ -764,8 +807,8 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
   - Remove any remote access apps _(i.e. AnyDesk, TeamViewer, etc..)_\
     _These are used by scammers to access devices remotely_
   - Remove any malicious or bloatware apps\
-    The following are common types of apps that are unnecessary often load their own malware:
-    - Any free 3rd-party "cleaner" apps
+    _The following are common types of apps that are unnecessary often load their own malware_
+    - Any free 3rd-party "Cleaner" apps
     - Any free 3rd-party "QR Scanner" apps
     - Any free 3rd-party "PDF Reader" apps _(excluding [Adobe Acrobat Reader](https://play.google.com/store/apps/details?id=com.adobe.reader&hl=en))_
     - Any free 3rd-party "File Manager" apps
@@ -881,29 +924,26 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 
 ### Inject Drivers
 
-#### Prep
+- **Prep**
+  - Have a folder with extracted drivers ready to go\
+    `C:\drivers\` for this example
+  - Create an empty directory ready to mount the Windows image to for editing\
+    `C:\mount\` for this example
+  - Have a Windows image ready to go\
+    `F:\sources\install.wim` for this example
 
-- Have a folder with extracted drivers ready to go\
-`C:\drivers\` for this example
-- Create an empty directory ready to mount the Windows image to for editing\
-`C:\mount\` for this example
-- Have a Windows image ready to go\
-`F:\sources\install.wim` for this example
+- **Mount**
+  - Open Powershell as admin
+  - Find index of the Windows image you want to mount\
+    `Get-WindowsImage -ImagePath F:\sources\install.wim`
+  - Mount the Windows image\
+    `Mount-WindowsImage -Path C:\mount\ -ImagePath F:\sources\install.wim -Index 1`
 
-#### Mount
+- **Add Drivers**
+  - `Add-WindowsDriver -Path C:\mount\ -Driver C:\drivers\ -Recurse -ForceUnsigned`
 
-- Open Powershell as admin
-- Find index of the Windows image you want to mount\
-`Get-WindowsImage -ImagePath F:\sources\install.wim`
-- `Mount-WindowsImage -Path C:\mount\ -ImagePath F:\sources\install.wim -Index 1`
-
-#### Add Drivers
-
-- `Add-WindowsDriver -Path C:\mount\ -Driver C:\drivers\ -Recurse -ForceUnsigned`
-
-#### Unmount
-
-- `Dismount-WindowsImage -Path C:\mount\ –Save`
+- **Unmount**
+  - `Dismount-WindowsImage -Path C:\mount\ –Save`
 
 # Sideloading <!-- TODO: flesh this out -->
 
@@ -945,7 +985,7 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 ### Install
 
 - Enable Sideloading\
-  Depending on the manufacturer of the device, you may need to enable Sideloading before you can install .APK files.\
+  _Depending on the manufacturer of the device, you may need to enable Sideloading before you can install .APK files_\
   [Samsung](https://www.samsung.com/ae/support/mobile-devices/how-to-enable-permission-to-install-apps-from-unknown-source-on-my-samsung-phone/ "How to enable sideloading on Samsung devices")
 - Open `Files` app
 - Navigate to `Downloads` folder
