@@ -480,7 +480,7 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
   - _Open `PowerShell` as an Administrator and run the following script:_\
   `Export-WindowsDriver -Online -Destination "REPLACE-WITH-TARGET-FOLDER"`\
   _(update REPLACE-WITH-TARGET-FOLDER with the target drivers folder on the transfer drive)_
-  
+
 - **Enable Antivirus**
 
 ### Prepare New Device _(if required)_
@@ -545,7 +545,8 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
   - Run the following commands:\
     `winget source update`\
     `winget upgrade --all --silent`\
-- **Update Windows**
+- **Update Windows**\
+  `control update`
 - **Update Office apps**\
   - Run `"C:\Program Files\Common Files\microsoft shared\ClickToRun\OfficeC2RClient.exe" /update user forceappshutdown=true`
 - **Check Drivers**\
