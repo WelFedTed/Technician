@@ -40,7 +40,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | [Nvidia App](https://www.nvidia.com/en-au/software/nvidia-app/) ||||
 | [RevoUninstaller](https://www.revouninstaller.com/) | `winget install RevoUninstaller.RevoUninstaller` |||
 | [Snappy Driver Installer Origin (SDIO)](https://www.glenn.delahoy.com/snappy-driver-installer-origin/) | `winget install GlennDelahoy.SnappyDriverInstallerOrigin` |||
-| [SublimeText](https://www.sublimetext.com/) | `winget install SublimeHQ.SublimeText.4` |||
+| [Sublime Text](https://www.sublimetext.com/) | `winget install SublimeHQ.SublimeText.4` |||
 | [TeamViewer](https://www.teamviewer.com/en-au/) | `winget install TeamViewer.TeamViewer` |||
 | [UltraViewer](https://www.ultraviewer.net/en/) | `winget install DucFabulous.UltraViewer` |||
 | [Ultra Virus Killer (UVK)](https://www.carifred.com/uvk/) ||||
@@ -57,7 +57,52 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | Trend Micro Maximum Security | `winget install "Trend Micro Maximum Security"` |||
 | HashCheck Shell Extension | `winget install idrassi.HashCheckShellExtension` |||
 | Git | `winget install Git.Git` |||
+| [MakeMKV](https://www.makemkv.com/) | `winget install GuinpinSoft.MakeMKV`<hr>[public beta key](https://forum.makemkv.com/forum/viewtopic.php?f=5&t=1053) |||
+| [HD Tune Pro](https://www.hdtune.com/index.html) | `winget install EFDSoftware.HDTunePro` | HDD / SSD Utility | Benchmark drive speed over time with graph |
+| 7-Zip ||||
+| AltSnap ||||
+| BandiZip ||||
+| BandiView ||||
+| Bitwarden ||||
+| Winget ||||
+| Chocolatey ||||
+| FFmpeg ||||
+| FileBot ||||
+| HandBrake ||||
+| iPerf ||||
+| JDownloader ||||
+| HexChat ||||
+| qBittorrent ||||
+| MediaInfo ||||
+| Microsoft OneDrive ||||
+| Google Drive ||||
+| DropBox ||||
+| NVIDIA GeForce Experience ||| <u>DEPRECATED</u></br>Use `NVIDIA App` instead |
+| Papa's Best STL Viewer ||||
+| PowerToys ||||
+| Proton VPN ||||
+| ReNamer ||||
+| Rufus ||||
+| BalenaEtcher ||||
+| SD Card Formatter ||||
+| [Raspberry Pi Imager](https://www.raspberrypi.com/software/) ||||
+| WinRAR ||||
+| [Win32 Disk Imager](https://sourceforge.net/projects/win32diskimager/) ||||
+| WizTree ||||
+| Everything ||||
+| [yt-dlp](https://github.com/yt-dlp/yt-dlp) | `winget install yt-dlp.yt-dlp` |||
+| Audacity ||||
+| [Exact Audio Copy (EAC)](https://www.exactaudiocopy.de/) ||||
+| OpenOffice ||||
 <!-- TODO: finish this table -->
+
+### macOS
+
+| App | Install | Description | Use Case |
+| :-- | :--     | :--         | :--      |
+| [Apple Image Capture](https://support.apple.com/en-au/guide/image-capture/welcome/mac) || Download photos/videos from digital cameras or iOS devices | Useful for backing up photos/videos from iOS devices, even if their iCloud account isn't working, as it treats the iOS device like a digital camera and simply imports the local copies on the device |
+
+### iOS
 
 ### Android
 
@@ -162,6 +207,61 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 <!-- populate hotkeys (i.e Win+R, Win+E, Win+D, Ctrl+Shift+ESC, Win+X > A, Win+X > M, Win+X > U > U, etc..) -->
 
+## Resources
+
+### Hardware
+
+[iFixIt Electronics Skills](https://www.ifixit.com/Device/Electronics_Skills)\
+[iFixIt Repair Guides](https://www.ifixit.com/Guide)\
+[Repair Wiki](https://repair.wiki/)\
+[Keyboard Checker](https://keyboardchecker.com/)
+
+### Networking
+
+[Port Forward](https://portforward.com/)\
+[SpeedTest](https://www.speedtest.net/)
+
+### Security
+
+[Bitwarden Password Generator](https://bitwarden.com/password-generator/#password-generator)\
+_(Type = Passphrase, Capitalize = Y, Include Number = Y, Word Separator = -, Length = 3)_\
+[Have I Been Pwned](https://haveibeenpwned.com/)\
+
+### Phonetic Alphabet
+
+The NATO Phonetic Alphabet can be very useful when trying to provide remote support over the phone
+
+<!-- reference: https://www.worldometers.info/languages/nato-phonetic-alphabet/ -->
+
+| Letter  | Word      |
+| :--:    | :--       |
+| A       | Aplha     |
+| B       | Bravo     |
+| C       | Charlie   |
+| D       | Delta     |
+| E       | Echo      |
+| F       | Foxtrot   |
+| G       | Golf      |
+| H       | Hotel     |
+| I       | India     |
+| J       | Juliett   |
+| K       | Kilo      |
+| L       | Lima      |
+| M       | Mike      |
+| N       | November  |
+| O       | Oscar     |
+| P       | Papa      |
+| Q       | Quebec    |
+| R       | Romeo     |
+| S       | Sierra    |
+| T       | Tango     |
+| U       | Uniform   |
+| V       | Victor    |
+| W       | Whiskey   |
+| X       | X-ray     |
+| Y       | Yankee    |
+| Z       | Zulu      |
+
 # System Service
 
 ## Windows
@@ -257,7 +357,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 - **Restart Windows**\
   Force Restart Windows (`shutdown -r -f -t 00`) now to provide a clean environment befor proceeding
-- [<font style="color:ORANGE">OPTIONAL</font>] Create a new System Restore point
+- [ <font style="color:ORANGE">OPTIONAL</font> ] Create a new System Restore point
 - **Disable Antivirus**\
   - _Some of our extraction tools prompt false positives in the majority of security software_
 - **Create a Job folder on a Transfer Drive**\
@@ -337,7 +437,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
     - [_How to export emails to file in Outlook_](https://support.microsoft.com/en-au/office/back-up-your-email-e5845b0b-1aeb-424f-924c-aa1c33b18833)
 - **Check C: Drive for unusual files/folders**
   - _copy to Job folder copying the C: Drive file structure (TransferDrive:\\Job\#5000\\C\\FolderToSave)_
-- [<font style="color:ORANGE">OPTIONAL</font>] Create Winget Install Script
+- [ <font style="color:ORANGE">OPTIONAL</font> ] Create Winget Install Script
   - _https://winstall.app/ - Select Desired Programs - Generate Script - Download both Batch (.bat) and PowerShell (.ps1) scripts_
 - **Export Drivers**\
   `TRANSFERDRIVE:\\Job#5000\Drivers - 2024-07-15\`\
@@ -371,7 +471,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
     In some cases you won't be able to open the Command Prompt, you may only see it's black box flash up on the screen and quickly dissapear. This is could be a indication of the Windows 10/11 install being in S Mode (Store Mode), which disables access to terminals (i.e. Command Prompt) and execution of non Microsoft Store apps.\
     If you encounter this, you will <u>not</u> be able create a Local Account during the OOBE, and you will need to complete the OOBE with the customer's Microsoft Account.
     After the OOBE is complete and you've reached the Windows Desktop environment, you may need to [Switch Out of S Mode](https://support.microsoft.com/en-au/windows/switching-out-of-s-mode-in-windows-4f56d9be-99ec-6983-119f-031bfb28a307) to proceed with the Data Transfer, as S Mode restricts us from running our tools if required.
-    - [<font style="color:ORANGE">OPTIONAL</font>] Switch Out of S Mode\
+    - [ <font style="color:ORANGE">OPTIONAL</font> ] Switch Out of S Mode\
     <font style="color:RED">WARNING: SWITCHING OUT OF S MODE IS A PERMANANT CHANGE AND <u>CANNOT</u> BE REVERTED</font>
       - _Connect to the internet_\
       - _Run_ `ms-windows-store://pdp/?productid=BF712690PMLF&OCID=windowssmodesupportpage`\
@@ -420,7 +520,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
   - Select `TODO: Create a new system restore point`
   - Select all missing/incorrect/corrupt drivers (as per bangs! in Device Manager)
   - Click `Install`
-- **[<font style="color:ORANGE">OPTIONAL</font>] Update Outdated Drivers**
+- **[ <font style="color:ORANGE">OPTIONAL</font> ] Update Outdated Drivers**
 - **Verify Drivers**
   - **Turn On Windows Verifier:**
     - Run `verifier`
@@ -505,16 +605,16 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 ### Pre Scans
 
-- [<font style="color:RED">**IMPORTANT**</font>] **Air Gap Device**
+- [ <font style="color:RED">**IMPORTANT**</font> ] **Air Gap Device**
   > _Ensure device is disconnected from all networks before RKill is run successfully and RATs ( Remote Access Tools ) removed, to ensure malicious actors do not re-connect to the device while it's still compromised_
 - Enable System Restore (set to 7% allocation if enough free disk space)
-- [<font style="color:ORANGE">OPTIONAL</font>] **Create a new [System Restore](https://support.microsoft.com/en-gb/windows/create-a-system-restore-point-77e02e2a-3298-c869-9974-ef5658ea3be9) point** `COPS - Pre Virus/Malware Removal`
+- [ <font style="color:ORANGE">OPTIONAL</font> ] **Create a new [System Restore](https://support.microsoft.com/en-gb/windows/create-a-system-restore-point-77e02e2a-3298-c869-9974-ef5658ea3be9) point** `COPS - Pre Virus/Malware Removal`
   > _This System Restore point will be wiped out in a later step (post-virus/malware removal), as malware can persist in old System Restore points_
 - **Restart Windows**\
   Force Restart Windows (`shutdown -r -f -t 00`) now to provide a clean environment befor proceeding
 - **COPS Folder**\
   Create `C:\COPS\` folder on the system
-  - [<font style="color:ORANGE">OPTIONAL</font>] Add `C:\COPS\` to the installed antivirus's exclusion list\
+  - [ <font style="color:ORANGE">OPTIONAL</font> ] Add `C:\COPS\` to the installed antivirus's exclusion list\
     [Trend Micro](https://helpcenter.trendmicro.com/en-us/article/tmka-14498 "How to add an exclusion to Trend Micro")\
     [Windows Security](https://support.microsoft.com/en-au/windows/add-an-exclusion-to-windows-security-811816c0-4dfd-af4a-47e4-c301afe13b26 "How to add an exclusion to Windows Security")\
 - **Disable Antivirus**\
@@ -543,12 +643,12 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 ### Scans
 
 - Connect to Internet
-- [<font style="color:ORANGE">OPTIONAL</font>] [AdwCleaner](https://www.malwarebytes.com/adwcleaner)
+- [ <font style="color:ORANGE">OPTIONAL</font> ] [AdwCleaner](https://www.malwarebytes.com/adwcleaner)
   > _AdwCleaner crashes out of UVK's automation, so run it now instead if you want to use it_
-- [<font style="color:ORANGE">OPTIONAL</font>] [Spybot - Search & Destroy](https://www.safer-networking.org/free-download/)
+- [ <font style="color:ORANGE">OPTIONAL</font> ] [Spybot - Search & Destroy](https://www.safer-networking.org/free-download/)
   > _Spybot is a thorough malware removal tool, but it can take a very long time to complete it's scans_
-- [<font style="color:ORANGE">OPTIONAL</font>] [Windows Defender Offline Scan](https://support.microsoft.com/en-au/windows/help-protect-my-pc-with-microsoft-defender-offline-9306d528-64bf-4668-5b80-ff533f183d6c "How to use Windows Defender Offline")
-- [<font style="color:ORANGE">OPTIONAL</font>] Create a new System Restore point "**COPS - Pre Virus/Malware Removal**"
+- [ <font style="color:ORANGE">OPTIONAL</font> ] [Windows Defender Offline Scan](https://support.microsoft.com/en-au/windows/help-protect-my-pc-with-microsoft-defender-offline-9306d528-64bf-4668-5b80-ff533f183d6c "How to use Windows Defender Offline")
+- [ <font style="color:ORANGE">OPTIONAL</font> ] Create a new System Restore point `COPS - Pre Virus/Malware Removal`
 - [Ultra Virus Killer (UVK)](https://www.carifred.com/uvk/)
   - Install UVK
   - Open UVK
@@ -564,8 +664,8 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
       _n/a_</br>
     - **File System Related Actions**</br>&nbsp;&nbsp;&nbsp;&nbsp; 21. Rebuild icon cache</br>
     - **Essential Installes/Updates**</br>&nbsp;&nbsp;&nbsp;&nbsp;
-      [<font style="color:ORANGE">If Google Chrome is installed</font>]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 22. Insall/Update Chrome</br>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;23. Install uBlock Origin for Chrome</br>&nbsp;&nbsp;&nbsp;&nbsp;
-      [<font style="color:ORANGE">If Mozilla Firefox is installed</font>]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 24. Install/Update Firefox</br>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;25. Install uBlock Origin for Firefox</br>&nbsp;&nbsp;&nbsp;&nbsp; 26. Install uBlock Origin for Edge</br>&nbsp;&nbsp;&nbsp;&nbsp; 27. PatchMyPC - Update all apps</br>
+      [ <font style="color:ORANGE">If Google Chrome is installed</font> ]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 22. Insall/Update Chrome</br>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;23. Install uBlock Origin for Chrome</br>&nbsp;&nbsp;&nbsp;&nbsp;
+      [ <font style="color:ORANGE">If Mozilla Firefox is installed</font> ]</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 24. Install/Update Firefox</br>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;25. Install uBlock Origin for Firefox</br>&nbsp;&nbsp;&nbsp;&nbsp; 26. Install uBlock Origin for Edge</br>&nbsp;&nbsp;&nbsp;&nbsp; 27. PatchMyPC - Update all apps</br>
     - **Privacy Cleanup**</br>&nbsp;&nbsp;&nbsp;&nbsp; 28. Clear all browsers history (all users)</br>&nbsp;&nbsp;&nbsp;&nbsp; 29. Delete browsers cookies (all users)</br>
     - **Maintenance Actions**</br>&nbsp;&nbsp;&nbsp;&nbsp; 30. Empty all users temp folders</br>&nbsp;&nbsp;&nbsp;&nbsp; 31. Empty browsers cache (all users)</br>&nbsp;&nbsp;&nbsp;&nbsp; 32. Unattended disk cleanup</br>
     - **System Repair and Optimization**</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -578,7 +678,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 ### Post Scans
 
-- [<font style="color:ORANGE">OPTIONAL</font>] Create a new System Restore point "**COPS - Pre Windows Update**"
+- [ <font style="color:ORANGE">OPTIONAL</font> ] Create a new System Restore point "**COPS - Pre Windows Update**"
 - Update Windows (no preview updates)
 - Update Apps via Microsoft Store
 - Update Apps via Windows Package Manager (winget)
@@ -588,7 +688,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
     <summary>Tip</summary>
     You can queue up multiple commands in PowerShell by pressing `Shift+Enter` to add a new line before pressing `Enter` to execute the all of the queued up commands one after another
   </details>
-- [<font style="color:ORANGE">OPTIONAL</font>] Create a new System Restore point "**COPS - Pre Driver Update**"
+- [ <font style="color:ORANGE">OPTIONAL</font> ] Create a new System Restore point "**COPS - Pre Driver Update**"
 - Update Drivers (SDIO)
 - Verify Drivers
   - **Turn On Windows Verifier:**
@@ -683,7 +783,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 ### 1st Party Scans
 
 - `Play Protect` Scan
-- [<font style="color:ORANGE">If Samsung Device</font>]
+- [ <font style="color:ORANGE">If Samsung Device</font> ]
   - Samsung `Device Care` Scan
 
 ### 3rd Party Scans
@@ -703,10 +803,60 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 ### Updates
 
 - Update Apps via `Play Store`
-- [<font style="color:ORANGE">If Samsung Device</font>]
+- [ <font style="color:ORANGE">If Samsung Device</font> ]
   - Update Apps via `Galaxy Store`
 - Update `Android OS`\
   This may take multiple updates and reboots, as customers often neglect updating their devices
+
+
+# Backup / Export
+
+---
+
+## Windows
+
+## macOS
+
+### Backup Device
+
+- Use Time Machine
+
+## iOS
+
+### Export Messages
+
+- [imessage-exporter](https://github.com/ReagentX/imessage-exporter)
+
+### Export Photos
+
+<!-- reference: https://support.apple.com/en-au/guide/image-capture/imgcp1003/mac -->
+- Connect the iOS device to a macOS device\
+  You may need to unlock the iOS device and tap `Trust` if prompted
+- Open `Image Capture` app
+- Click on the iOS device\
+  The connected iOS device should show up under `DEVICES` on the left
+- Change `Import To:` folder\
+  Make a Job# folder to import the photos/videos to
+- Click `Download All`
+
+### Backup iCloud Photos <!-- TODO: check this is accurate -->
+
+- Submit `Apple Privacy Data Request`
+  - Sign in [Apple's Data and Privacy page](https://privacy.apple.com/) with the customer's `Apple Account`
+  - Click `Request a copy of your data`
+  - Tick `iCloud Photos`
+  - Click `Continue`
+  - Choose the largest bundle/zip size _(this will make downloading the files easier, as you can only download 3 of the part files at a time)_
+- Check confirmation email\
+  Apple will send a confirmation email to the customer's Apple Account email address, if this does not come through now then you may have issues receiving the download link email later
+- Wait for the download link email\
+  Apple will have to compile and zip up all of the data you requested, this can take many days
+- Open download link
+- Download all .zip files Apple prepared for download
+- Unzip all .zip files
+- Combine the unzipped data in to one folder
+
+## Android
 
 
 # OS Install Media Creation
