@@ -115,24 +115,32 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 ### Backup
 
-- **Restart Windows**\
-  _Force Restart Windows now to provide a clean environment befor proceeding_\
-  `shutdown -r -f -t 00`
-- [ <font style="color:ORANGE">OPTIONAL</font> ] Create a new System Restore point
+#### Windows
 
-- **Disable Antivirus**\
-  - _Some of our extraction tools prompt false positives in the majority of security software_
+  - Restart Windows\
+    _Force Restart Windows now to provide a clean environment befor proceeding_\
+    `shutdown -r -f -t 00`
+  - [ <font style="color:ORANGE">OPTIONAL</font> ] Create a new System Restore point
 
-- **Create a Job folder on a Transfer Drive**\
-  _naming convention:_\
-  `Job#5000`
-  - _Create a new folder with the current job number to save User Data to_
+#### Antivirus
 
-- **Backup User Profiles**\
+  - Disable the Antivirus\
+    _Some of our extraction tools prompt false positives in the majority of security software_
+
+#### Transfer Drive
+
+  - Create a Job folder on the Transfer Drive
+    _naming convention:_\
+    `Job#5000`
+    - _Create a new folder with the current job number to save User Data to_
+
+#### User Profiles
+
   - _Copy `C:\Users\` folder to the Job folder on the Transfer Drive_
 
-- **Backup Web Browsers**\
-  _For each web browser installed complete the following:_
+#### Web Browsers
+
+  For each installed web browser complete the following:
 
   - **Export Bookmarks**\
     _naming convention:_\
@@ -178,47 +186,49 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
     - Mozilla Firefox:_ `Mozilla Account`
       <!-- - _TODO_ -->
 
-- **Export Installed Programs List**\
-  _naming convention:_\
-  `Installed Programs - Nirsoft Uninstallview - 2024-07-15.html`\
-  or\
-  `installed-programs_nirsoft-uninstallview_2024-07-15.html`
-  - Use `Nirsoft UninstallView`, save all as `Horizontal HTML`
+#### Programs
 
-- **Export Winget**\
-  _naming convention:_\
-  `Winget - Export - 2024-07-15.json`\
-  or\
-  `winget_export_2024-07-15.json`
-  - Open a Terminal as Administrator\
-    Run `wt` or `powershell` or `cmd`
-  - Check Winget is installed `winget -v` (this will throw an error if winget is unavailable)\
-  - Update Winget `winget source update`
-  - Export Winget's list of installed programs `winget export -o "REPLACE-WITH-TARGET-FILE"`\
-  _(update REPLACE-WITH-TARGET-FILE with the target winget export file on the transfer drive)_\
-  - Optionally export a list of all programs that Winget does cannot re-install at the same time with this extended command `winget export -o "REPLACE-WITH-TARGET-FILE" >- "winget_unnavailable.txt"`
+  - **Export Installed Programs List**\
+    _naming convention:_\
+    `Installed Programs - Nirsoft Uninstallview - 2024-07-15.html`\
+    or\
+    `installed-programs_nirsoft-uninstallview_2024-07-15.html`
+    - Use `Nirsoft UninstallView`, save all as `Horizontal HTML`
 
-- **Export License Keys**\
+  - **Export Winget**\
+    _naming convention:_\
+    `Winget - Export - 2024-07-15.json`\
+    or\
+    `winget_export_2024-07-15.json`
+    - Open a Terminal as Administrator\
+      Run `wt` or `powershell` or `cmd`
+    - Check Winget is installed `winget -v` (this will throw an error if winget is unavailable)\
+    - Update Winget `winget source update`
+    - Export Winget's list of installed programs `winget export -o "REPLACE-WITH-TARGET-FILE"`\
+    _(update REPLACE-WITH-TARGET-FILE with the target winget export file on the transfer drive)_\
+    - Optionally export a list of all programs that Winget does cannot re-install at the same time with this extended command `winget export -o "REPLACE-WITH-TARGET-FILE" >- "winget_unnavailable.txt"`
+
+#### Licenses
+
   _naming convention:_\
   `License Keys - Nirsoft Product Key Scanner - 2024-07-15.html`\
   or\
   `license-keys_nirsoft-product-key-scanner_2024-07-15.html`
   - _use Nirsoft Product Key Scanner or Nirsoft ProduKey, save all as Horizontal HTML_
 
-- **Export Emails**
+#### Emails / Calendars / Contacts
+
   - Extract Passwords and Server Settings
     - Nirsoft Mail PassView
     - Nirsoft WinMailPassRec
     - Nirsoft PstPassword
   - Backup any accounts set up as POP
     - [_How to export emails to file in Outlook_](https://support.microsoft.com/en-au/office/back-up-your-email-e5845b0b-1aeb-424f-924c-aa1c33b18833)
+  - Export Calendars
+  - Export Contacts
 
-- **Check C: Drive for unusual files/folders**
-  - _copy to Job folder copying the C: Drive file structure (TransferDrive:\\Job\#5000\\C\\FolderToSave)_
-- [ <font style="color:ORANGE">OPTIONAL</font> ] Create Winget Install Script
-  - _https://winstall.app/ - Select Desired Programs - Generate Script - Download both Batch (.bat) and PowerShell (.ps1) scripts_
+#### Drivers
 
-- **Export Drivers**\
   `TRANSFERDRIVE:\\Job#5000\Drivers - 2024-07-15\`\
   or\
   `TRANSFERDRIVER:\\Job#5000\drivers_2024-07-15\`
@@ -226,7 +236,12 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
   `Export-WindowsDriver -Online -Destination "REPLACE-WITH-TARGET-FOLDER"`\
   _(update REPLACE-WITH-TARGET-FOLDER with the target drivers folder on the transfer drive)_
 
-- **Enable Antivirus**
+#### Other
+
+  - **Check C: Drive for unusual files/folders**
+    - _copy to Job folder copying the C: Drive file structure (TransferDrive:\\Job\#5000\\C\\FolderToSave)_
+  - [ <font style="color:ORANGE">OPTIONAL</font> ] Create Winget Install Script
+    - _https://winstall.app/ - Select Desired Programs - Generate Script - Download both Batch (.bat) and PowerShell (.ps1) scripts_
 
 ### Prepare New Device _(if required)_
 
@@ -601,17 +616,21 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 # Backup / Export
 
----
-
 ## Windows
 
+---
+
 ## macOS
+
+---
 
 ### Backup Device
 
 - Use Time Machine
 
 ## iOS
+
+---
 
 ### Export Messages
 
@@ -647,6 +666,8 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 - Combine the unzipped data in to one folder
 
 ## Android
+
+---
 
 
 # OS Install Media Creation
@@ -739,8 +760,6 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 - Tap `Install`
 
 # USB Tool <!-- TODO: flesh this out -->
-
----
 
 ## Ventoy
 
@@ -964,29 +983,43 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 ### Hardware
 
-[iFixIt Electronics Skills](https://www.ifixit.com/Device/Electronics_Skills)\
-[iFixIt Repair Guides](https://www.ifixit.com/Guide)\
-[Keyboard Checker](https://keyboardchecker.com/)
-[Repair Wiki](https://repair.wiki/)\
+|    |     |
+|:-- | :-- |
+| [iFixIt - Electronics Skills](https://www.ifixit.com/Device/Electronics_Skills) | Learn general device repair and electronics skills |
+| [iFixIt - Repair Guides](https://www.ifixit.com/Guide) | Repository of repair guides for specific devices |
+| [Repair Wiki](https://repair.wiki/) | Guides for troubleshooting more specific or niche device issues |
+| [Keyboard Checker](https://keyboardchecker.com/) | Keyboard tester |
+| [HardwareTester - Midi Tester](https://hardwaretester.com/midi) | Test MIDI input devices |
+| [HardwareTester - Gamepad Tester](https://hardwaretester.com/gamepad) | Test Gamepads / Controllers |
+| [HardwareTester - Microphone Tester](https://hardwaretester.com/microphone) | Test Microphones |
+| [PassMark - CPU Benchmarks](https://www.cpubenchmark.net/) | Compare CPU's |
+| [PassMark - Videocard Benchmarks](https://www.videocardbenchmark.net/) | Compare Videocards |
+| [PassMark - Memory Benchmarks](https://www.memorybenchmark.net/) | Compare Memory Modules |
+| [PassMark - Hard Drive Benchmarks](https://www.harddrivebenchmark.net/) | Compare HDD's / SSD's |
 
 ### Networking
 
-[Port Forward](https://portforward.com/)\
-[SpeedTest](https://www.speedtest.net/)
+|    |     |
+|:-- | :-- |
+| [Port Forward](https://portforward.com/) ||
+| [SpeedTest](https://www.speedtest.net/) ||
 
 ### Security
 
-[Bitwarden Password Generator](https://bitwarden.com/password-generator/#password-generator)\
-_(Type = Passphrase, Capitalize = Y, Include Number = Y, Word Separator = -, Length = 3)_\
-[Have I Been Pwned](https://haveibeenpwned.com/)\
+|    |     |
+|:-- | :-- |
+| [Bitwarden Password Generator](https://bitwarden.com/password-generator/#password-generator) | Great password generator to create unique Passphrases<hr>_Type = Passphrase, Capitalize = Y, Include Number = Y, Word Separator = -, Length = 3_ |
+| [Have I Been Pwned](https://haveibeenpwned.com/) ||
 
 ### Software
 
-[Adobe PDF Tools](https://www.adobe.com/au/acrobat/online.html)
-[Photopea](https://www.photopea.com/)
-[PrintFriendly](https://www.printfriendly.com/)
-[Watermark Remover](https://www.watermarkremover.io/)
-[winstall](https://winstall.app/)
+|    |     |
+|:-- | :-- |
+| [Adobe PDF Tools](https://www.adobe.com/au/acrobat/online.html) ||
+| [Photopea](https://www.photopea.com/) ||
+| [PrintFriendly](https://www.printfriendly.com/) ||
+| [Watermark Remover](https://www.watermarkremover.io/) ||
+| [winstall](https://winstall.app/) ||
 
 ### Phonetic Alphabet
 
@@ -994,7 +1027,7 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 
 <!-- reference: https://www.worldometers.info/languages/nato-phonetic-alphabet/ -->
 
-| Letter  | Word      |
+|         |           |
 | :--:    | :--       |
 | A       | Aplha     |
 | B       | Bravo     |
