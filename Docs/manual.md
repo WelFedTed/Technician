@@ -844,6 +844,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | [Exact Audio Copy (EAC)](https://www.exactaudiocopy.de/) ||||
 | OpenOffice ||||
 | Inkscape | `winget install Inkscape.Inkscape` |||
+| Intel PresentMon ||||
 <!-- TODO: finish this table -->
 
 ### macOS
@@ -965,8 +966,8 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 [iFixIt Electronics Skills](https://www.ifixit.com/Device/Electronics_Skills)\
 [iFixIt Repair Guides](https://www.ifixit.com/Guide)\
-[Repair Wiki](https://repair.wiki/)\
 [Keyboard Checker](https://keyboardchecker.com/)
+[Repair Wiki](https://repair.wiki/)\
 
 ### Networking
 
@@ -978,6 +979,14 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 [Bitwarden Password Generator](https://bitwarden.com/password-generator/#password-generator)\
 _(Type = Passphrase, Capitalize = Y, Include Number = Y, Word Separator = -, Length = 3)_\
 [Have I Been Pwned](https://haveibeenpwned.com/)\
+
+### Software
+
+[Adobe PDF Tools](https://www.adobe.com/au/acrobat/online.html)
+[Photopea](https://www.photopea.com/)
+[PrintFriendly](https://www.printfriendly.com/)
+[Watermark Remover](https://www.watermarkremover.io/)
+[winstall](https://winstall.app/)
 
 ### Phonetic Alphabet
 
