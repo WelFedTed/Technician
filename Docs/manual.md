@@ -6,268 +6,6 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 <!-- <printfriendly-options style="display:none;" data-content-features="disableClickToDel=0;hideImages=0;imageDisplayStyle=block;disablePDF=0;disableEmail=0;disablePrint=0;encodeImages=0;showHiddenContent=0;"></printfriendly-options><script>var pfBtVersion='3';(function(){var js,pf;pf=document.createElement('script');pf.type='text/javascript';pf.src='//cdn.printfriendly.com/printfriendly.js';document.getElementsByTagName('head')[0].appendChild(pf);})();</script><a href="https://www.printfriendly.com" style="color:#6D9F00;text-decoration:none;" class="printfriendly" onclick="window.print();return false;" title="Printer Friendly and PDF"><img style="border:none;-webkit-box-shadow:none;box-shadow:none;" src="//cdn.printfriendly.com/buttons/new/print-light-blue.svg" alt="Print Friendly and PDF"/></a> -->
 
 
-# Cheat Sheet
-
-## Apps
-
----
-
-### Windows
-
-| App | Install | Description | Use Case |
-| :-- | :-- | :-- | :-- |
-| [AMD Adrenalin](https://www.amd.com/en/products/software/adrenalin.html) ||||
-| [Apple iTunes](https://www.apple.com/au/itunes/) | `winget install Apple.iTunes` || <u>DEPRECATED</U></br>Use `Apple Devices` instead |
-| [Apple Devices](https://support.apple.com/en-au/guide/devices-windows/mchl5ded2763/windows) | `winget install "Apple Devices"` |||
-| [Clear Disk Info](https://www.carifred.com/cleardiskinfo/) | `winget install Carifred.ClearDiskInfo` |||
-| [CPUID CPU-Z](https://www.cpuid.com/softwares/cpu-z.html) | `winget install CPUID.CPU-Z` |||
-| [CPUID HWMonitor](https://www.cpuid.com/softwares/hwmonitor.html) | `winget install CPUID.HWMonitor` |||
-| [CrystalDiskInfo](https://crystalmark.info/en/software/crystaldiskinfo/) | `winget install CrystalDewWorld.CrystalDiskInfo` || <u>DEPRACATED</u></br>Misreports SMART data on some drives, use `Clear Disk Info` instead |
-| [CrystalDiskMark](https://crystalmark.info/en/software/crystaldiskmark/) | `winget install CrystalDewWorld.CrystalDiskMark` |||
-| [Display Driver Uninstaller (DDU)](https://www.guru3d.com/download/display-driver-uninstaller-download/) | `winget install Wagnardsoft.DisplayDriverUninstaller` |||
-| [FileZilla](https://filezilla-project.org/) ||||
-| [ForensiT Transwiz](https://www.forensit.com/move-computer.html) | `winget install ForensiT.Transwiz` || <u>DEPRECATED</u></br>Breaks with newer OneDrive and Windows 11 releases, manually copy %USERPROFILE% instead |
-| [Furmark](https://www.geeks3d.com/furmark/) | `winget install Geeks3D.FurMark.2` |||
-| [GPU-Z](https://www.techpowerup.com/download/techpowerup-gpu-z/) | `winget install TechPowerUp.GPU-Z` |||
-| [Intel HD Graphics](https://www.intel.com/content/www/us/en/support/products/80939/graphics.html) ||||
-| [Libre Office](https://www.libreoffice.org/) | `winget install TheDocumentFoundation.LibreOffice` |||
-| [Microsoft Office](https://www.microsoft.com/en-au/microsoft-365/microsoft-office) | `winget install Microsoft.Office` |||
-| [Microsoft PC Health Check](https://support.microsoft.com/en-au/windows/how-to-use-the-pc-health-check-app-9c8abd9b-03ba-4e67-81ef-36f37caa7844) | `winget install Microsoft.WindowsPCHealthCheck` |||
-| [Microsoft Visual Studio Code](https://code.visualstudio.com/) | `winget install Microsoft.VisualStudioCode` ||
-| [Microsoft Windows Terminal](https://github.com/microsoft/terminal) | `winget install Microsoft.WindowsTerminal` |||
-| [Microsoft Verifier](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/driver-verifier) ||||
-| [MiniTool Partition Wizard](https://www.partitionwizard.com/) | `winget install MiniTool.PartitionWizard.Free` |||
-| [NirSoft BlueScreenView](https://www.nirsoft.net/utils/blue_screen_view.html) | `winget install NirSoft.BlueScreenView` |||
-| [NirSoft Product Key Scanner](https://www.nirsoft.net/utils/product_key_scanner.html) ||||
-| [NirSoft ProduKey](https://www.nirsoft.net/utils/product_cd_key_viewer.html) ||||
-| [Nvidia App](https://www.nvidia.com/en-au/software/nvidia-app/) ||||
-| [RevoUninstaller](https://www.revouninstaller.com/) | `winget install RevoUninstaller.RevoUninstaller` |||
-| [Snappy Driver Installer Origin (SDIO)](https://www.glenn.delahoy.com/snappy-driver-installer-origin/) | `winget install GlennDelahoy.SnappyDriverInstallerOrigin` |||
-| [Sublime Text](https://www.sublimetext.com/) | `winget install SublimeHQ.SublimeText.4` |||
-| [TeamViewer](https://www.teamviewer.com/en-au/) | `winget install TeamViewer.TeamViewer` |||
-| [UltraViewer](https://www.ultraviewer.net/en/) | `winget install DucFabulous.UltraViewer` |||
-| [Ultra Virus Killer (UVK)](https://www.carifred.com/uvk/) ||||
-| Google Chrome | `winget install Google.Chrome` |||
-| Mozilla Firefox | `winget install Mozilla.Firefox` |||
-| Mozilla Thunderbird | `winget install Mozilla.Thunderbird` |||
-| eM Client | `winget install eMClient.eMClient` |||
-| Disk Drill | `winget install CleverFiles.DiskDrill` |||
-| HWiNFO | `winget install REALiX.HWiNFO` |||
-| Cinebench | `winget install Maxon.CinebenchR23` |||
-| VLC | `winget install VideoLAN.VLC` |||
-| GitHub Desktop | `winget install GitHub.GitHubDesktop` |||
-| Trend Micro Internet Security | `winget install "Trend Micro Internet Security"` |||
-| Trend Micro Maximum Security | `winget install "Trend Micro Maximum Security"` |||
-| HashCheck Shell Extension | `winget install idrassi.HashCheckShellExtension` |||
-| Git | `winget install Git.Git` |||
-| [MakeMKV](https://www.makemkv.com/) | `winget install GuinpinSoft.MakeMKV`<hr>[public beta key](https://forum.makemkv.com/forum/viewtopic.php?f=5&t=1053) |||
-| [HD Tune Pro](https://www.hdtune.com/index.html) | `winget install EFDSoftware.HDTunePro` | HDD / SSD Utility | Benchmark drive speed over time with graph |
-| 7-Zip ||||
-| AltSnap ||||
-| BandiZip ||||
-| BandiView ||||
-| Bitwarden ||||
-| Winget ||||
-| Chocolatey ||||
-| FFmpeg ||||
-| FileBot ||||
-| HandBrake ||||
-| iPerf ||||
-| JDownloader ||||
-| HexChat ||||
-| qBittorrent ||||
-| MediaInfo ||||
-| Microsoft OneDrive ||||
-| Google Drive ||||
-| DropBox ||||
-| NVIDIA GeForce Experience ||| <u>DEPRECATED</u></br>Use `NVIDIA App` instead |
-| Papa's Best STL Viewer ||||
-| PowerToys ||||
-| Proton VPN ||||
-| ReNamer ||||
-| Rufus ||||
-| BalenaEtcher ||||
-| SD Card Formatter ||||
-| [Raspberry Pi Imager](https://www.raspberrypi.com/software/) ||||
-| WinRAR ||||
-| [Win32 Disk Imager](https://sourceforge.net/projects/win32diskimager/) ||||
-| WizTree ||||
-| Everything ||||
-| [yt-dlp](https://github.com/yt-dlp/yt-dlp) | `winget install yt-dlp.yt-dlp` |||
-| Audacity ||||
-| [Exact Audio Copy (EAC)](https://www.exactaudiocopy.de/) ||||
-| OpenOffice ||||
-| Inkscape | `winget install Inkscape.Inkscape` |||
-<!-- TODO: finish this table -->
-
-### macOS
-
-| App | Install | Description | Use Case |
-| :-- | :--     | :--         | :--      |
-| [Apple Image Capture](https://support.apple.com/en-au/guide/image-capture/welcome/mac) || Download photos/videos from digital cameras or iOS devices | Useful for backing up photos/videos from iOS devices, even if their iCloud account isn't working, as it treats the iOS device like a digital camera and simply imports the local copies on the device |
-| Microsoft Remote Desktop ||| <u>DEPRECATED</u></br>Use `Microsoft Windows App` instead |
-| Microsoft Windows App ||||
-
-### iOS
-
-### Android
-
-| App   | Description   | Use Case  |
-| :---  | :---          | :---      |
-| [Appwatch](https://play.google.com/store/apps/details?id=com.tafayor.appwatch&hl=en_AU) | Snitch on app activity | <u>DEPRECATED</u></br>Use `Rox Security` instead<hr>_Identify apps that are responsible for instrusive full-screen pop-ups_ |
-| [Aurora Store](https://auroraoss.com/aurora-store) | Alternative `Google Play Store` app | Install apps from the Play Store repository without needing to log in with a Google Account, and can download .APKs from the Play Store for later sideloading |
-| [Rox Security](https://play.google.com/store/apps/details?id=com.tafayor.roxapp&hl=en_AU&pli=1) | Multi-tool for identifying unusual/unwanted app behaviour, including snitching on app activity | Identify apps that are responsible for instrusive full-screen pop-ups |
-
-## Commands
-
----
-
-### Windows
-
-| Command                   | Description                                         | Use Case  |
-| :---                      | :---                                                | :---      |
-| `\`                       | Opens `%SYSTEMDRIVE%` folder                        | Quick access to `C:\` |
-| `appwiz.cpl`              | Opens `Programs and Features` control panel window  ||
-| `calc`                    | Opens `Calculator` app ||
-| `charmap`                 | Opens `Character Map` app ||
-| `chrome`                  | Opens `Google Chrome` app _(if installed)_ ||
-| `cmd`                     | Opens `Command Prompt` app _(if installed)_ ||
-| `code`                    | Opens `Visual Studio Code` app ||
-| `compmgmt.msc`            | Opens `Computer Management` snap in ||
-| `control`                 | Opens `Control Panel` ||
-| `control folders`         | Opens `File Explorer Options` window ||
-| `control keyboard`        | Opens `Keyboard Properties` window ||
-| `control printers`        | Opens `Bluetooth & devices` settings window         | Quick access to `Printers & scanners` |
-| `control update`          | Opens `Windows Update` settings window              ||
-| `desk.cpl`                | Opens `Display` settings window ||
-| `devmgmt.msc`             | Opens `Device Manager` snap in                      ||
-| `diskmgmt.msc`            | Opens `Disk Management` snap in ||
-| `diskpart`                | Opens `Microsoft DiskPart` command line interface ||
-| `documents`               | Opens current user's `Documents` folder ||
-| `downloads`               | Opens current user's `Downloads` folder ||
-| `dxdiag`                  | Opens `DirectX Diagnostic Tool` app ||
-| `eventvwr.msc`            | Opens `Event Viewer` snap in ||
-| `explorer`                | Opens `Windows Explorer` ||
-| `firefox`                 | Opens `Mozilla Firefox` app _(if installed)_ ||
-| `firewall.cpl`            | Opens `Windows Defender Firewall` control panel window ||
-| `fonts`                   | Opens `Fonts` folder ||
-| `gpedit.msc`              | Opens `Local Group Policy Editor` snap in ||
-| `iexplore`                | Opens `Internet Explorer` app ||
-| `inetcpl.cpl`             | Opens `Internet Properties` window                  | Quick access to `Proxy server` settings |
-| `joy.cpl`                 | Opens `Game Controllers` window                     | Use to test game controller inputs |
-| `lusrmgr.msc`             | Opens `Local Users and Groups` snap in              | Powerful control over User Accounts and Groups, but does <u>not</u> work on Windows Home editions |
-| `main.cpl`                | Opens `Mouse Properties` window ||
-| `manage-bde c: -off`      | Run in a terminal to decrypt and disable `BitLocker` on C: drive ||
-| `manage-bde -status`      | Run in a terminal to show `BitLocker` status of all drives ||
-| `mdsched`                 | Opens `Windows Memory Diagnostic` app ||
-| `mmc`                     | Opens empty `Microsoft Management Console` snap in  ||
-| `mmsys.cpl`               | Opens `Sound` window ||
-| `mrt`                     | Opens `Microsoft Windows Malicious Software Removal Tool` app ||
-| `msconfig`                | Opens `System Configuration` window                 | Quick access to `Safe boot` or Windows boot entries |
-| `msedge`                  | Opens `Microsoft Edge` app ||
-| `msinfo32`                | Opens `System Information` ||
-| `mstsc`                   | Opens `Remote Desktop Connection` app ||
-| `ms-windows-store:`       | Opens `Microsoft Store` app                         ||
-| `ncpa.cpl`                | Opens `Network Connections` control panel window    ||
-| `netplwiz`                | Opens `User Accounts` window                        | Less powerful control over User Accounts, but does work on Windows Home editions |
-| `notepad`                 | Opens `Notepad` app                                 ||
-| `onedrive`                | Opens current user's `OneDrive` folder ||
-| `osk`                     | Opens `On-Screen Keyboard` ||
-| `pictures`                | Opens current user's `Pictures` folder ||
-| `powercfg.cpl`            | Opens `Power Options` control panel window          ||
-| `powershell`              | Opens `Powershell` app ||
-| `regedit`                 | Opens `Registry Editor` app ||
-| `resmon`                  | Opens `Resource Monitor app` ||
-| `services.msc`            | Opens `Services` snap in ||
-| `shell:appsfolder`        | Opens `Applications` folder | Useful for creating shortcuts to `Microsoft Store` apps |
-| `shell:mycomputerfolder`  | Opens `This PC` folder ||
-| `shell:recyclebinfolder`  | Opens `Recycle Bin` folder                          ||
-| `shell:startup`           | Opens `Startup` folder                              ||
-| `shutdown -h`             | Hibernate computer ||
-| `shutdown -l`             | Log off                                             ||
-| `shutdown -r -fw`         | Restart Windows and boot in to `BIOS` / `UEFI` ||
-| `shutdown -r -o`          | Restart Windows and boot in to `Recovery Environment` ||
-| `shutdown -r -f -t 00`    | Force Restarts Windows immediately ||
-| `shutdown -s -f -t 00`    | Force Shuts down Windows immediately ||
-| `snippingtool`            | Opens `Snipping Tool` app ||
-| `sysdm.cpl`               | Opens `System Properties` window                    | Quick access to `System Restore` |
-| `taskmgr`                 | Opens `Task Manager` app ||
-| `taskschd.msc`            | Opens `Task Scheduler` snap in ||
-| `timedate.cpl`            | Opens `Date and Time` window ||
-| `verifier`                | Opens `Driver Verifier Manager` app ||
-| `videos`                  | Opens current user's `Videos` folder ||
-| `vlc`                     | Opens `VLC Media Player` app _(if installed)_ ||
-| `winver`                  | Opens `About Windows` window                        | Quick way to check installed Windows edition _(Home/Pro/Enterprise)_, version, and build |
-| `wt`                      | Opens `Windows Terminal` app                        ||
-| `%APPDATA%`               | Opens current user's `AppData\Roaming` folder ||
-| `%LOCALAPPDATA%`          | Opens current user's `AppData\Local` folder ||
-| `%SYSTEMDRIVE%`           | Opens the root folder of the system drive ||
-| `%TEMP%`                  | Opens current user's `Temp` folder ||
-| `%USERPROFILE%`           | Opens current user's profile folder ||
-| `%WINDIR%`                | Opens `Windows` folder ||
-<!-- add sfc, dism, chkdsk, defrag, cleanmgr -->
-
-## Hotkeys
-
-### Windows
-
-<!-- populate hotkeys (i.e Win+R, Win+E, Win+D, Ctrl+Shift+ESC, Win+X > A, Win+X > M, Win+X > U > U, etc..) -->
-
-## Resources
-
-### Hardware
-
-[iFixIt Electronics Skills](https://www.ifixit.com/Device/Electronics_Skills)\
-[iFixIt Repair Guides](https://www.ifixit.com/Guide)\
-[Repair Wiki](https://repair.wiki/)\
-[Keyboard Checker](https://keyboardchecker.com/)
-
-### Networking
-
-[Port Forward](https://portforward.com/)\
-[SpeedTest](https://www.speedtest.net/)
-
-### Security
-
-[Bitwarden Password Generator](https://bitwarden.com/password-generator/#password-generator)\
-_(Type = Passphrase, Capitalize = Y, Include Number = Y, Word Separator = -, Length = 3)_\
-[Have I Been Pwned](https://haveibeenpwned.com/)\
-
-### Phonetic Alphabet
-
-The NATO Phonetic Alphabet can be very useful when trying to provide remote support over the phone
-
-<!-- reference: https://www.worldometers.info/languages/nato-phonetic-alphabet/ -->
-
-| Letter  | Word      |
-| :--:    | :--       |
-| A       | Aplha     |
-| B       | Bravo     |
-| C       | Charlie   |
-| D       | Delta     |
-| E       | Echo      |
-| F       | Foxtrot   |
-| G       | Golf      |
-| H       | Hotel     |
-| I       | India     |
-| J       | Juliett   |
-| K       | Kilo      |
-| L       | Lima      |
-| M       | Mike      |
-| N       | November  |
-| O       | Oscar     |
-| P       | Papa      |
-| Q       | Quebec    |
-| R       | Romeo     |
-| S       | Sierra    |
-| T       | Tango     |
-| U       | Uniform   |
-| V       | Victor    |
-| W       | Whiskey   |
-| X       | X-ray     |
-| Y       | Yankee    |
-| Z       | Zulu      |
-
 # System Service 
 
 <!-- TODO: Download Checklists-->
@@ -1013,3 +751,265 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 ## Windows Tools
 
 ## COPS Extras (scripts, etc..)
+
+# Reference
+
+## Apps
+
+---
+
+### Windows
+
+| App | Install | Description | Use Case |
+| :-- | :-- | :-- | :-- |
+| [AMD Adrenalin](https://www.amd.com/en/products/software/adrenalin.html) ||||
+| [Apple iTunes](https://www.apple.com/au/itunes/) | `winget install Apple.iTunes` || <u>DEPRECATED</U></br>Use `Apple Devices` instead |
+| [Apple Devices](https://support.apple.com/en-au/guide/devices-windows/mchl5ded2763/windows) | `winget install "Apple Devices"` |||
+| [Clear Disk Info](https://www.carifred.com/cleardiskinfo/) | `winget install Carifred.ClearDiskInfo` |||
+| [CPUID CPU-Z](https://www.cpuid.com/softwares/cpu-z.html) | `winget install CPUID.CPU-Z` |||
+| [CPUID HWMonitor](https://www.cpuid.com/softwares/hwmonitor.html) | `winget install CPUID.HWMonitor` |||
+| [CrystalDiskInfo](https://crystalmark.info/en/software/crystaldiskinfo/) | `winget install CrystalDewWorld.CrystalDiskInfo` || <u>DEPRACATED</u></br>Misreports SMART data on some drives, use `Clear Disk Info` instead |
+| [CrystalDiskMark](https://crystalmark.info/en/software/crystaldiskmark/) | `winget install CrystalDewWorld.CrystalDiskMark` |||
+| [Display Driver Uninstaller (DDU)](https://www.guru3d.com/download/display-driver-uninstaller-download/) | `winget install Wagnardsoft.DisplayDriverUninstaller` |||
+| [FileZilla](https://filezilla-project.org/) ||||
+| [ForensiT Transwiz](https://www.forensit.com/move-computer.html) | `winget install ForensiT.Transwiz` || <u>DEPRECATED</u></br>Breaks with newer OneDrive and Windows 11 releases, manually copy %USERPROFILE% instead |
+| [Furmark](https://www.geeks3d.com/furmark/) | `winget install Geeks3D.FurMark.2` |||
+| [GPU-Z](https://www.techpowerup.com/download/techpowerup-gpu-z/) | `winget install TechPowerUp.GPU-Z` |||
+| [Intel HD Graphics](https://www.intel.com/content/www/us/en/support/products/80939/graphics.html) ||||
+| [Libre Office](https://www.libreoffice.org/) | `winget install TheDocumentFoundation.LibreOffice` |||
+| [Microsoft Office](https://www.microsoft.com/en-au/microsoft-365/microsoft-office) | `winget install Microsoft.Office` |||
+| [Microsoft PC Health Check](https://support.microsoft.com/en-au/windows/how-to-use-the-pc-health-check-app-9c8abd9b-03ba-4e67-81ef-36f37caa7844) | `winget install Microsoft.WindowsPCHealthCheck` |||
+| [Microsoft Visual Studio Code](https://code.visualstudio.com/) | `winget install Microsoft.VisualStudioCode` ||
+| [Microsoft Windows Terminal](https://github.com/microsoft/terminal) | `winget install Microsoft.WindowsTerminal` |||
+| [Microsoft Verifier](https://learn.microsoft.com/en-us/windows-hardware/drivers/devtest/driver-verifier) ||||
+| [MiniTool Partition Wizard](https://www.partitionwizard.com/) | `winget install MiniTool.PartitionWizard.Free` |||
+| [NirSoft BlueScreenView](https://www.nirsoft.net/utils/blue_screen_view.html) | `winget install NirSoft.BlueScreenView` |||
+| [NirSoft Product Key Scanner](https://www.nirsoft.net/utils/product_key_scanner.html) ||||
+| [NirSoft ProduKey](https://www.nirsoft.net/utils/product_cd_key_viewer.html) ||||
+| [Nvidia App](https://www.nvidia.com/en-au/software/nvidia-app/) ||||
+| [RevoUninstaller](https://www.revouninstaller.com/) | `winget install RevoUninstaller.RevoUninstaller` |||
+| [Snappy Driver Installer Origin (SDIO)](https://www.glenn.delahoy.com/snappy-driver-installer-origin/) | `winget install GlennDelahoy.SnappyDriverInstallerOrigin` |||
+| [Sublime Text](https://www.sublimetext.com/) | `winget install SublimeHQ.SublimeText.4` |||
+| [TeamViewer](https://www.teamviewer.com/en-au/) | `winget install TeamViewer.TeamViewer` |||
+| [UltraViewer](https://www.ultraviewer.net/en/) | `winget install DucFabulous.UltraViewer` |||
+| [Ultra Virus Killer (UVK)](https://www.carifred.com/uvk/) ||||
+| Google Chrome | `winget install Google.Chrome` |||
+| Mozilla Firefox | `winget install Mozilla.Firefox` |||
+| Mozilla Thunderbird | `winget install Mozilla.Thunderbird` |||
+| eM Client | `winget install eMClient.eMClient` |||
+| Disk Drill | `winget install CleverFiles.DiskDrill` |||
+| HWiNFO | `winget install REALiX.HWiNFO` |||
+| Cinebench | `winget install Maxon.CinebenchR23` |||
+| VLC | `winget install VideoLAN.VLC` |||
+| GitHub Desktop | `winget install GitHub.GitHubDesktop` |||
+| Trend Micro Internet Security | `winget install "Trend Micro Internet Security"` |||
+| Trend Micro Maximum Security | `winget install "Trend Micro Maximum Security"` |||
+| HashCheck Shell Extension | `winget install idrassi.HashCheckShellExtension` |||
+| Git | `winget install Git.Git` |||
+| [MakeMKV](https://www.makemkv.com/) | `winget install GuinpinSoft.MakeMKV`<hr>[public beta key](https://forum.makemkv.com/forum/viewtopic.php?f=5&t=1053) |||
+| [HD Tune Pro](https://www.hdtune.com/index.html) | `winget install EFDSoftware.HDTunePro` | HDD / SSD Utility | Benchmark drive speed over time with graph |
+| 7-Zip ||||
+| AltSnap ||||
+| BandiZip ||||
+| BandiView ||||
+| Bitwarden ||||
+| Winget ||||
+| Chocolatey ||||
+| FFmpeg ||||
+| FileBot ||||
+| HandBrake ||||
+| iPerf ||||
+| JDownloader ||||
+| HexChat ||||
+| qBittorrent ||||
+| MediaInfo ||||
+| Microsoft OneDrive ||||
+| Google Drive ||||
+| DropBox ||||
+| NVIDIA GeForce Experience ||| <u>DEPRECATED</u></br>Use `NVIDIA App` instead |
+| Papa's Best STL Viewer ||||
+| PowerToys ||||
+| Proton VPN ||||
+| ReNamer ||||
+| Rufus ||||
+| BalenaEtcher ||||
+| SD Card Formatter ||||
+| [Raspberry Pi Imager](https://www.raspberrypi.com/software/) ||||
+| WinRAR ||||
+| [Win32 Disk Imager](https://sourceforge.net/projects/win32diskimager/) ||||
+| WizTree ||||
+| Everything ||||
+| [yt-dlp](https://github.com/yt-dlp/yt-dlp) | `winget install yt-dlp.yt-dlp` |||
+| Audacity ||||
+| [Exact Audio Copy (EAC)](https://www.exactaudiocopy.de/) ||||
+| OpenOffice ||||
+| Inkscape | `winget install Inkscape.Inkscape` |||
+<!-- TODO: finish this table -->
+
+### macOS
+
+| App | Install | Description | Use Case |
+| :-- | :--     | :--         | :--      |
+| [Apple Image Capture](https://support.apple.com/en-au/guide/image-capture/welcome/mac) || Download photos/videos from digital cameras or iOS devices | Useful for backing up photos/videos from iOS devices, even if their iCloud account isn't working, as it treats the iOS device like a digital camera and simply imports the local copies on the device |
+| Microsoft Remote Desktop ||| <u>DEPRECATED</u></br>Use `Microsoft Windows App` instead |
+| Microsoft Windows App ||||
+
+### iOS
+
+### Android
+
+| App   | Description   | Use Case  |
+| :---  | :---          | :---      |
+| [Appwatch](https://play.google.com/store/apps/details?id=com.tafayor.appwatch&hl=en_AU) | Snitch on app activity | <u>DEPRECATED</u></br>Use `Rox Security` instead<hr>_Identify apps that are responsible for instrusive full-screen pop-ups_ |
+| [Aurora Store](https://auroraoss.com/aurora-store) | Alternative `Google Play Store` app | Install apps from the Play Store repository without needing to log in with a Google Account, and can download .APKs from the Play Store for later sideloading |
+| [Rox Security](https://play.google.com/store/apps/details?id=com.tafayor.roxapp&hl=en_AU&pli=1) | Multi-tool for identifying unusual/unwanted app behaviour, including snitching on app activity | Identify apps that are responsible for instrusive full-screen pop-ups |
+
+## Commands
+
+---
+
+### Windows
+
+| Command                   | Description                                         | Use Case  |
+| :---                      | :---                                                | :---      |
+| `\`                       | Opens `%SYSTEMDRIVE%` folder                        | Quick access to `C:\` |
+| `appwiz.cpl`              | Opens `Programs and Features` control panel window  ||
+| `calc`                    | Opens `Calculator` app ||
+| `charmap`                 | Opens `Character Map` app ||
+| `chrome`                  | Opens `Google Chrome` app _(if installed)_ ||
+| `cmd`                     | Opens `Command Prompt` app _(if installed)_ ||
+| `code`                    | Opens `Visual Studio Code` app ||
+| `compmgmt.msc`            | Opens `Computer Management` snap in ||
+| `control`                 | Opens `Control Panel` ||
+| `control folders`         | Opens `File Explorer Options` window ||
+| `control keyboard`        | Opens `Keyboard Properties` window ||
+| `control printers`        | Opens `Bluetooth & devices` settings window         | Quick access to `Printers & scanners` |
+| `control update`          | Opens `Windows Update` settings window              ||
+| `desk.cpl`                | Opens `Display` settings window ||
+| `devmgmt.msc`             | Opens `Device Manager` snap in                      ||
+| `diskmgmt.msc`            | Opens `Disk Management` snap in ||
+| `diskpart`                | Opens `Microsoft DiskPart` command line interface ||
+| `documents`               | Opens current user's `Documents` folder ||
+| `downloads`               | Opens current user's `Downloads` folder ||
+| `dxdiag`                  | Opens `DirectX Diagnostic Tool` app ||
+| `eventvwr.msc`            | Opens `Event Viewer` snap in ||
+| `explorer`                | Opens `Windows Explorer` ||
+| `firefox`                 | Opens `Mozilla Firefox` app _(if installed)_ ||
+| `firewall.cpl`            | Opens `Windows Defender Firewall` control panel window ||
+| `fonts`                   | Opens `Fonts` folder ||
+| `gpedit.msc`              | Opens `Local Group Policy Editor` snap in ||
+| `iexplore`                | Opens `Internet Explorer` app ||
+| `inetcpl.cpl`             | Opens `Internet Properties` window                  | Quick access to `Proxy server` settings |
+| `joy.cpl`                 | Opens `Game Controllers` window                     | Use to test game controller inputs |
+| `lusrmgr.msc`             | Opens `Local Users and Groups` snap in              | Powerful control over User Accounts and Groups, but does <u>not</u> work on Windows Home editions |
+| `main.cpl`                | Opens `Mouse Properties` window ||
+| `manage-bde c: -off`      | Run in a terminal to decrypt and disable `BitLocker` on C: drive ||
+| `manage-bde -status`      | Run in a terminal to show `BitLocker` status of all drives ||
+| `mdsched`                 | Opens `Windows Memory Diagnostic` app ||
+| `mmc`                     | Opens empty `Microsoft Management Console` snap in  ||
+| `mmsys.cpl`               | Opens `Sound` window ||
+| `mrt`                     | Opens `Microsoft Windows Malicious Software Removal Tool` app ||
+| `msconfig`                | Opens `System Configuration` window                 | Quick access to `Safe boot` or Windows boot entries |
+| `msedge`                  | Opens `Microsoft Edge` app ||
+| `msinfo32`                | Opens `System Information` ||
+| `mstsc`                   | Opens `Remote Desktop Connection` app ||
+| `ms-windows-store:`       | Opens `Microsoft Store` app                         ||
+| `ncpa.cpl`                | Opens `Network Connections` control panel window    ||
+| `netplwiz`                | Opens `User Accounts` window                        | Less powerful control over User Accounts, but does work on Windows Home editions |
+| `notepad`                 | Opens `Notepad` app                                 ||
+| `onedrive`                | Opens current user's `OneDrive` folder ||
+| `osk`                     | Opens `On-Screen Keyboard` ||
+| `pictures`                | Opens current user's `Pictures` folder ||
+| `powercfg.cpl`            | Opens `Power Options` control panel window          ||
+| `powershell`              | Opens `Powershell` app ||
+| `regedit`                 | Opens `Registry Editor` app ||
+| `resmon`                  | Opens `Resource Monitor app` ||
+| `services.msc`            | Opens `Services` snap in ||
+| `shell:appsfolder`        | Opens `Applications` folder | Useful for creating shortcuts to `Microsoft Store` apps |
+| `shell:mycomputerfolder`  | Opens `This PC` folder ||
+| `shell:recyclebinfolder`  | Opens `Recycle Bin` folder                          ||
+| `shell:startup`           | Opens `Startup` folder                              ||
+| `shutdown -h`             | Hibernate computer ||
+| `shutdown -l`             | Log off                                             ||
+| `shutdown -r -fw`         | Restart Windows and boot in to `BIOS` / `UEFI` ||
+| `shutdown -r -o`          | Restart Windows and boot in to `Recovery Environment` ||
+| `shutdown -r -f -t 00`    | Force Restarts Windows immediately ||
+| `shutdown -s -f -t 00`    | Force Shuts down Windows immediately ||
+| `snippingtool`            | Opens `Snipping Tool` app ||
+| `sysdm.cpl`               | Opens `System Properties` window                    | Quick access to `System Restore` |
+| `taskmgr`                 | Opens `Task Manager` app ||
+| `taskschd.msc`            | Opens `Task Scheduler` snap in ||
+| `timedate.cpl`            | Opens `Date and Time` window ||
+| `verifier`                | Opens `Driver Verifier Manager` app ||
+| `videos`                  | Opens current user's `Videos` folder ||
+| `vlc`                     | Opens `VLC Media Player` app _(if installed)_ ||
+| `winver`                  | Opens `About Windows` window                        | Quick way to check installed Windows edition _(Home/Pro/Enterprise)_, version, and build |
+| `wt`                      | Opens `Windows Terminal` app                        ||
+| `%APPDATA%`               | Opens current user's `AppData\Roaming` folder ||
+| `%LOCALAPPDATA%`          | Opens current user's `AppData\Local` folder ||
+| `%SYSTEMDRIVE%`           | Opens the root folder of the system drive ||
+| `%TEMP%`                  | Opens current user's `Temp` folder ||
+| `%USERPROFILE%`           | Opens current user's profile folder ||
+| `%WINDIR%`                | Opens `Windows` folder ||
+<!-- add sfc, dism, chkdsk, defrag, cleanmgr -->
+
+## Hotkeys
+
+### Windows
+
+<!-- populate hotkeys (i.e Win+R, Win+E, Win+D, Ctrl+Shift+ESC, Win+X > A, Win+X > M, Win+X > U > U, etc..) -->
+
+## Resources
+
+### Hardware
+
+[iFixIt Electronics Skills](https://www.ifixit.com/Device/Electronics_Skills)\
+[iFixIt Repair Guides](https://www.ifixit.com/Guide)\
+[Repair Wiki](https://repair.wiki/)\
+[Keyboard Checker](https://keyboardchecker.com/)
+
+### Networking
+
+[Port Forward](https://portforward.com/)\
+[SpeedTest](https://www.speedtest.net/)
+
+### Security
+
+[Bitwarden Password Generator](https://bitwarden.com/password-generator/#password-generator)\
+_(Type = Passphrase, Capitalize = Y, Include Number = Y, Word Separator = -, Length = 3)_\
+[Have I Been Pwned](https://haveibeenpwned.com/)\
+
+### Phonetic Alphabet
+
+The NATO Phonetic Alphabet can be very useful when trying to provide remote support over the phone
+
+<!-- reference: https://www.worldometers.info/languages/nato-phonetic-alphabet/ -->
+
+| Letter  | Word      |
+| :--:    | :--       |
+| A       | Aplha     |
+| B       | Bravo     |
+| C       | Charlie   |
+| D       | Delta     |
+| E       | Echo      |
+| F       | Foxtrot   |
+| G       | Golf      |
+| H       | Hotel     |
+| I       | India     |
+| J       | Juliett   |
+| K       | Kilo      |
+| L       | Lima      |
+| M       | Mike      |
+| N       | November  |
+| O       | Oscar     |
+| P       | Papa      |
+| Q       | Quebec    |
+| R       | Romeo     |
+| S       | Sierra    |
+| T       | Tango     |
+| U       | Uniform   |
+| V       | Victor    |
+| W       | Whiskey   |
+| X       | X-ray     |
+| Y       | Yankee    |
+| Z       | Zulu      |

@@ -10,7 +10,7 @@ maincolor: dc3545
 # phrase-author: 'Phrase author'
 # lang: english
 keywords: [backup, restore, user data, data transfer, sideloading, ventoy, medicat]
-abstract: This document provides step-by-step instructions on backing up a device's user data and restoring it to a new device.
+# abstract: This document provides step-by-step instructions on backing up a device's user data and restoring it to a new device.
 cover: 'images/computer-repair.png'
 # github-link: 'https://github.com/cops-sb/'
 geometry: a4paper,margin=2cm
