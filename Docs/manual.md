@@ -864,6 +864,10 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | OpenOffice ||||
 | Inkscape | `winget install Inkscape.Inkscape` |||
 | Intel PresentMon ||||
+| [Chocolatey](https://chocolatey.org/) || Alternative Windows package manager ||
+| [Scoop](https://scoop.sh/) || Alternative Windows package manager ||
+| [iMazing Converter](https://imazing.com/converter) | `winget install DigiDNA.iMazingHEICConverter`|||
+| [iMazing](https://imazing.com/) | `winget install DigiDNA.iMazing` |||
 <!-- TODO: finish this table -->
 
 ### macOS
@@ -1001,9 +1005,10 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 |    |     |
 |:-- | :-- |
-| [Port Forward](https://portforward.com/) ||
-| [SpeedTest](https://www.speedtest.net/) ||
-
+| [Port Forward](https://portforward.com/) | Repository of router port forwarding guides and ports for common software |
+| [Router Passwords](https://www.routerpasswords.com/) | Repository of default router usernames/passwords and IP addresses |
+| [SpeedTest](https://www.speedtest.net/) | Test internet connection download, upload, ping speeds |
+chr
 ### Security
 
 |    |     |
@@ -1015,11 +1020,12 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 |    |     |
 |:-- | :-- |
-| [Adobe PDF Tools](https://www.adobe.com/au/acrobat/online.html) ||
-| [Photopea](https://www.photopea.com/) ||
-| [PrintFriendly](https://www.printfriendly.com/) ||
-| [Watermark Remover](https://www.watermarkremover.io/) ||
-| [winstall](https://winstall.app/) ||
+| [winstall](https://winstall.app/) | Make winget install scripts to batch install software |
+| [Ninite](https://ninite.com/) | Make standalone batch software installers |
+| [Adobe PDF Tools](https://www.adobe.com/au/acrobat/online.html) | Free to use PDF tools, use Incognito/Private mode to exceed free 'try' limits |
+| [Photopea](https://www.photopea.com/) | Free Photoshop alternative that runs in the web browser |
+| [PrintFriendly](https://www.printfriendly.com/) | Convert various file formats to PDF |
+| [Watermark Remover](https://www.watermarkremover.io/) | AI watermark removing tool, use Incognito/Private mode to exceed free 'try' limits |
 
 ### Phonetic Alphabet
 
