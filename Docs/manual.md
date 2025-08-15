@@ -35,7 +35,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 - Click `Command Prompt`
 - Navigate to the System32 directory\
   `cd c:\windows\system32`\
-  _Depending on the number logical volumes the computer has connected at the time, the volume that contains the Windows directory may be mounted to a different drive letter, but it's usually mounted as C:._\
+  _Depending on the number logical volumes the computer has connected at the time, the volume that contains the Windows directory may be mounted to a different drive letter, but it's usually mounted as C:_\
   <details>
     <summary>How to find the correct drive letter that contains the Windows directory</summary>
     If `C:` does not contain the `Windows` directory, then you can repeat the following steps with different letters to locate which drive does:\
@@ -82,17 +82,24 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 #### Restore Utilman.exe
 
-- Hold `Shift` + `Restart`\
-  _(hold shift until the screen goes black)_\
+- Hold `Shift` key + click `Restart`\
+  _Continue to hold shift until the screen goes black_\
   Windows should reboot in to the `Recovery Environment`
 - Click `Troubleshoot`
 - Click `Advanced`
 - Click `Command Prompt`
-- Check where windows drive is mounted (usually C:)
 - Navigate to the System32 directory\
-  `cd c:\windows\system32`
-- Restore Utility Manager\
-  `copy utilman.exe.bak utilman.exe`
+  `cd c:\windows\system32`\
+  _Depending on the number logical volumes the computer has connected at the time, the volume that contains the Windows directory may be mounted to a different drive letter, but it's usually mounted as C:_\
+  <details>
+    <summary>How to find the correct drive letter that contains the Windows directory</summary>
+    If `C:` does not contain the `Windows` directory, then you can repeat the following steps with different letters to locate which drive does:\
+    - Run `D:`
+    - Run `dir`
+    - Check the output of `dir` for both the `Users` and `Windows` directories
+  </details>
+  - Restore Utility Manager\
+    `copy utilman.exe.bak utilman.exe`
 
 
 # System Service 
