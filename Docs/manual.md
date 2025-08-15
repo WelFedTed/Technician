@@ -56,7 +56,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
   _Command Prompt should now open instead of the Utility Manager_
 - Enter the following commands:\
   `net user temp /add`\
-  `net localground administrators temp /add`\
+  `net localgroup administrators temp /add`\
   `exit`
 
 #### Reset User Password
@@ -181,17 +181,17 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
   - Disk Cleanup
     - Run `cleanmgr /sageset:10`
     - Click `Clean up system files`
-    - Tick all checkboxes EXCEPT:</br>
-    `System error memory dump files`</br>
-    `System error minidump files`</br>
-    `Windows error reports and feedback diagnostics`</br>
+    - Tick all checkboxes EXCEPT:\
+    `System error memory dump files`\
+    `System error minidump files`\
+    `Windows error reports and feedback diagnostics`\
     `User file history`
     - Click `OK`
     - Run `cleanmgr /sagerun:10`
   - Memory Diagnostics
     - Run `Windows Memory Diagnostics`
     - Click 'Restart now and check for problems (recommended)'
-    - After Windows boots back up, check results:</br>
+    - After Windows boots back up, check results:\
       `Event Viewer` - Windows Logs - System - Filter Current Log... - Event sources - Tick 'MemoryDiagnostics-Results' - Click OK
   - Create a new System Restore point\
     `COPS - Post System Service`
@@ -243,43 +243,43 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
     `Web Browser - Google Chrome - Bookmarks - 2024-07-15.html`\
     or\
     `web-browser_google-chrome_bookmarks_2024-07-15.html`
-    - _Google Chrome URL:_ `chrome://bookmarks`\
-    - _Microsoft Edge URL:_ `edge://favorites`\
-    - _AVG Secure Browser URL:_ `secure://bookmarks`\
-    - _Mozilla Firefox Hotkey:_ `Ctrl+Shift+O`\
-    - _Microsoft Internet Explorer:_ `%USERPROFILE%\Favorites`
+    - Google Chrome URL: `chrome://bookmarks`\
+    - Microsoft Edge URL: `edge://favorites`\
+    - AVG Secure Browser URL: `secure://bookmarks`\
+    - Mozilla Firefox Hotkey: `Ctrl+Shift+O`\
+    - Microsoft Internet Explorer: `%USERPROFILE%\Favorites`
 
   - **Export Passwords**\
     _naming convention:_\
     `Web Browser - Google Chrome - Passwords - 2024-07-15.csv`\
     or\
     `web-browser_google-chrome_passwords-2024-07-15.csv`
-    - _Google Chrome URL:_ `chrome://password-manager` or `chrome://settings/passwords` (older Chrome versions)\
-    - _Microsoft Edge URL:_ `edge://wallet/passwords` or `edge://settings/passwords` (older Edge versions)\
-    - _AVG Secure Browser URL:_ `secure://password-manager` or `secure://settings/passwords` (older Secure Browser versions)\
-    - _Mozilla Firefox URL:_ `about:logins`\
-    - _Microsoft Internet Explorer:_ use [Nirsoft IE PassView](https://www.nirsoft.net/utils/internet_explorer_password.html)
+    - Google Chrome URL: `chrome://password-manager` or `chrome://settings/passwords` (older Chrome versions)\
+    - Microsoft Edge URL: `edge://wallet/passwords` or `edge://settings/passwords` (older Edge versions)\
+    - AVG Secure Browser URL: `secure://password-manager` or `secure://settings/passwords` (older Secure Browser versions)\
+    - Mozilla Firefox URL: `about:logins`\
+    - Microsoft Internet Explorer: use [Nirsoft IE PassView](https://www.nirsoft.net/utils/internet_explorer_password.html)
 
   - **Sync Accounts**\
     _Try to sync each browser with their relevant accounts if available_\
     _Manual exports of Bookmarks + Passwords is good, but syncing the entire browser is better_
-    - _Google Chrome:_ `Google Account`
+    - Google Chrome: `Google Account`
       - `chrome://sync-internals`\
       - Check Enabled: `Sync Feature Enabled`	= true\
       - Check Account: `Username`\
       - Checked Synced: `Last Synced` = Just now\
       - Check Not Actively Syncing: `Sync Cycle Ongoing` = false\
       - Force Sync (if required): `chrome://extensions` - enable `Developer mode` - click `Update`\
-    - _Microsoft Edge:_ `Microsoft Account`
+    - Microsoft Edge: `Microsoft Account`
       - `edge://sync-internals`\
       - Check Enabled: `Sync Feature Enabled`	= true\
       - Check Account: `Username`\
       - Checked Synced: `Last Synced` = Just now\
       - Check Not Actively Syncing: `Sync Cycle Ongoing` = false\
       - Force Sync (if required): `edge://extensions` - enable `Developer mode` - click `Update`\
-    - _AVG Secure Browser:_ `AVG Account`
+    - AVG Secure Browser: `AVG Account`
       <!-- - _TODO (but it's similar to Chrome)_\ -->
-    - Mozilla Firefox:_ `Mozilla Account`
+    - Mozilla Firefox: `Mozilla Account`
       <!-- - _TODO_ -->
 
 #### Programs
@@ -304,6 +304,10 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
     _(update REPLACE-WITH-TARGET-FILE with the target winget export file on the transfer drive)_\
     - Optionally export a list of all programs that Winget does cannot re-install at the same time with this extended command `winget export -o "REPLACE-WITH-TARGET-FILE" >- "winget_unnavailable.txt"`
 
+  - [ <font style="color:ORANGE">ALTERNATIVE</font> ] Create Winget Install Script using 3rd party site\
+    [winstall.app](https://winstall.app/)\
+    [winget.run](https://winget.run/)
+
 #### Licenses
 
   _naming convention:_\
@@ -325,19 +329,19 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 #### Drivers
 
+- Export Drivers\
+  _naming convention:_\
   `TRANSFERDRIVE:\\Job#5000\Drivers - 2024-07-15\`\
   or\
   `TRANSFERDRIVER:\\Job#5000\drivers_2024-07-15\`
-  - _Open `PowerShell` as an Administrator and run the following script:_\
+- Open `PowerShell` as an Administrator and run the following script:\
   `Export-WindowsDriver -Online -Destination "REPLACE-WITH-TARGET-FOLDER"`\
-  _(update REPLACE-WITH-TARGET-FOLDER with the target drivers folder on the transfer drive)_
+  _update REPLACE-WITH-TARGET-FOLDER with the target drivers folder on the transfer drive_
 
 #### Other
 
-  - **Check C: Drive for unusual files/folders**
-    - _copy to Job folder copying the C: Drive file structure (TransferDrive:\\Job\#5000\\C\\FolderToSave)_
-  - [ <font style="color:ORANGE">OPTIONAL</font> ] Create Winget Install Script
-    - _https://winstall.app/ - Select Desired Programs - Generate Script - Download both Batch (.bat) and PowerShell (.ps1) scripts_
+- Check C: Drive for unusual files/folders to transfer\
+  _copy to Job folder copying the C: Drive file structure (TransferDrive:\\Job\#5000\\C\\FolderToSave)_
 
 ### Prepare New Device _(if required)_
 
@@ -887,7 +891,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | [BandiView](https://en.bandisoft.com/bandiview/) ||||
 | [BandiZip](https://en.bandisoft.com/bandizip/) ||||
 | [Bitwarden](https://bitwarden.com/) ||||
-| [Chocolatey](https://chocolatey.org/) ||| <u>DEPRECATED</u></br>Use `Winget` instead |
+| [Chocolatey](https://chocolatey.org/) | `winget install Chocolatey.Chocolatey` || <u>DEPRECATED</u></br>Use `Winget` instead |
 | [Cinebench](https://www.maxon.net/en/cinebench) | `winget install Maxon.CinebenchR23` |||
 | [Clear Disk Info](https://www.carifred.com/cleardiskinfo/) | `winget install Carifred.ClearDiskInfo` |||
 | [CPUID CPU-Z](https://www.cpuid.com/softwares/cpu-z.html) | `winget install CPUID.CPU-Z` |||
@@ -906,27 +910,28 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | [FileZilla](https://filezilla-project.org/) ||||
 | [ForensiT Transwiz](https://www.forensit.com/move-computer.html) | `winget install ForensiT.Transwiz` || <u>DEPRECATED</u></br>Copy `%USERPROFILE%` instead<hr>_Issue: Creates broken user profiles with newer OneDrive and Windows 11 releases_ |
 | [Furmark](https://www.geeks3d.com/furmark/) | `winget install Geeks3D.FurMark.2` |||
-| [Gimp](https://www.gimp.org/) ||||
+| [Gimp](https://www.gimp.org/) | `winget install GIMP.GIMP.3` |||
 | [Git](https://git-scm.com/) | `winget install Git.Git` |||
 | [GitHub Desktop](https://github.com/desktop/desktop) | `winget install GitHub.GitHubDesktop` |||
 | [Google Chrome](https://www.google.com/intl/en_au/chrome/) | `winget install Google.Chrome` |||
-| [Google Drive](https://drive.google.com/) ||||
+| [Google Drive](https://drive.google.com/) | `winget install Google.GoogleDrive` |||
 | [GPU-Z](https://www.techpowerup.com/download/techpowerup-gpu-z/) | `winget install TechPowerUp.GPU-Z` |||
-| [HandBrake](https://handbrake.fr/) ||||
+| [HandBrake](https://handbrake.fr/) | `winget install HandBrake.HandBrake` |||
 | [HashCheck Shell Extension](https://github.com/idrassi/HashCheck) | `winget install idrassi.HashCheckShellExtension` |||
 | [HD Tune Pro](https://www.hdtune.com/index.html) | `winget install EFDSoftware.HDTunePro` | HDD / SSD Utility | Benchmark drive speed over time with graph |
-| [HexChat](https://hexchat.github.io/) ||||
+| [HexChat](https://hexchat.github.io/) | `winget install HexChat.HexChat` |||
 | [HWiNFO](https://www.hwinfo.com/) | `winget install REALiX.HWiNFO` |||
 | [iMazing](https://imazing.com/) | `winget install DigiDNA.iMazing` |||
 | [iMazing Converter](https://imazing.com/converter) | `winget install DigiDNA.iMazingHEICConverter`|||
-| [ImgBurn](https://www.imgburn.com/) ||||
+| [ImgBurn](https://www.imgburn.com/) | `winget install LIGHTNINGUK.ImgBurn` |||
 | [Inkscape](https://inkscape.org/) | `winget install Inkscape.Inkscape` |||
 | [Intel HD Graphics](https://www.intel.com/content/www/us/en/support/products/80939/graphics.html) ||||
-| [Intel PresentMon](https://game.intel.com/us/intel-presentmon/) ||||
-| [iPerf](https://iperf.fr/) ||||
-| [JDownloader](https://jdownloader.org/) ||||
+| [Intel PresentMon](https://game.intel.com/us/intel-presentmon/) | `winget install Intel.PresentMon.beta` |||
+| [iPerf](https://iperf.fr/) | `winget install ar51an.iPerf3`| Measuring TCP, UDP and SCTP bandwidth performance | Test network throughput |
+| [JDownloader](https://jdownloader.org/) | `winget install AppWork.JDownloader` |||
 | [Libre Office](https://www.libreoffice.org/) | `winget install TheDocumentFoundation.LibreOffice` |||
-| [MediaInfo](https://mediaarea.net/en/MediaInfo) ||||
+| [MAS](https://massgrave.dev/)</br>Microsoft Activation Scripts | `irm https://get.activated.win | iex` | Open-source Windows and Office activator | Change Windows Editions<hr>Change Office Editions<hr>Activate/Crack Windows/Office |
+| [MediaInfo](https://mediaarea.net/en/MediaInfo) | `winget install MediaArea.MediaInfo.GUI` |||
 | [MakeMKV](https://www.makemkv.com/) | `winget install GuinpinSoft.MakeMKV`<hr>[public beta key](https://forum.makemkv.com/forum/viewtopic.php?f=5&t=1053) |||
 | [Microsoft Office](https://www.microsoft.com/en-au/microsoft-365/microsoft-office) | `winget install Microsoft.Office` |||
 | [Microsoft OneDrive](https://www.microsoft.com/en-au/microsoft-365/onedrive/online-cloud-storage) ||||
@@ -950,7 +955,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | [Raspberry Pi Imager](https://www.raspberrypi.com/software/) ||||
 | [ReNamer](https://www.den4b.com/products/renamer) ||||
 | [RevoUninstaller](https://www.revouninstaller.com/) | `winget install RevoUninstaller.RevoUninstaller` |||
-| [Rufus](https://rufus.ie/en/) ||||
+| [Rufus](https://rufus.ie/en/) | `winget install Rufus.Rufus` |||
 | [SD Card Formatter](https://www.sdcard.org/downloads/formatter/) ||||
 | [Scoop](https://scoop.sh/) ||| <u>DEPRECATED</u></br>Use `Winget` instead |
 | [Snappy Driver Installer Origin (SDIO)](https://www.glenn.delahoy.com/snappy-driver-installer-origin/) | `winget install GlennDelahoy.SnappyDriverInstallerOrigin` |||
@@ -960,13 +965,14 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | [Trend Micro Maximum Security](https://www.trendmicro.com/en_au/forHome/products/maximum-security.html) | `winget install "Trend Micro Maximum Security"` |||
 | [UltraViewer](https://www.ultraviewer.net/en/) | `winget install DucFabulous.UltraViewer` |||
 | [Ultra Virus Killer (UVK)](https://www.carifred.com/uvk/) ||||
+| [UniGetUI](https://github.com/marticliment/UniGetUI)</br>_formerly WingetUI_ | `winget install MartiCliment.UniGetUI` | A GUI for the most common CLI package managers for Windows ||
 | [uTorrent](https://www.utorrent.com/) ||| <u>DEPRECATED</u></br>Use `qBittorrent` instead |
 | [VLC Media Player](https://www.videolan.org/) | `winget install VideoLAN.VLC` |||
-| [Win32 Disk Imager](https://sourceforge.net/projects/win32diskimager/) ||||
-| [WinDirStat](https://windirstat.net/) ||| <u>DEPRECATED</u></br>Use `WizTree` instead |
-| [Winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/) ||||
-| [WinRAR](https://www.win-rar.com/start.html?&L=0) ||||
-| [WizTree](https://diskanalyzer.com/) ||||
+| [Win32 Disk Imager](https://sourceforge.net/projects/win32diskimager/) | `winget install Win32diskimager.win32diskimager` |||
+| [WinDirStat](https://windirstat.net/) | `winget install WinDirStat.WinDirStat` || <u>DEPRECATED</u></br>Use `WizTree` instead |
+| [Winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/) | `irm asheroto.com/winget | iex` |||
+| [WinRAR](https://www.win-rar.com/start.html?&L=0) | `winget install RARLab.WinRAR` |||
+| [WizTree](https://diskanalyzer.com/) | `winget install AntibodySoftware.WizTree` |||
 | [yt-dlp](https://github.com/yt-dlp/yt-dlp) | `winget install yt-dlp.yt-dlp` |||
 <!-- TODO: finish this table -->
 
