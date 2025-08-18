@@ -23,7 +23,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 ### Method 2: Manual
 
 <!-- TODO: Verify + flesh out steps -->
-<!-- Reference: https://4sysops.com/archives/reset-a-windows-10-password/ -->
+<!-- REFERENCE: https://4sysops.com/archives/reset-a-windows-10-password/ -->
 
 #### Exploit Utilman.exe
 
@@ -738,7 +738,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 ### Export Photos
 
-<!-- reference: https://support.apple.com/en-au/guide/image-capture/imgcp1003/mac -->
+<!-- REFERENCE: https://support.apple.com/en-au/guide/image-capture/imgcp1003/mac -->
 - Connect the iOS device to a macOS device\
   You may need to unlock the iOS device and tap `Trust` if prompted
 - Open `Image Capture` app
@@ -1138,7 +1138,7 @@ chr
 
 The NATO Phonetic Alphabet can be very useful when trying to provide remote support over the phone
 
-<!-- reference: https://www.worldometers.info/languages/nato-phonetic-alphabet/ -->
+<!-- REFERENCE: https://www.worldometers.info/languages/nato-phonetic-alphabet/ -->
 
 |         |           |       |           |
 | :--:    | :--:      | :--:  | :--:      |
