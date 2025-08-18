@@ -958,6 +958,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | [Rufus](https://rufus.ie/en/) | `winget install Rufus.Rufus` |||
 | [SD Card Formatter](https://www.sdcard.org/downloads/formatter/) ||||
 | [Scoop](https://scoop.sh/) ||| <u>DEPRECATED</u></br>Use `Winget` instead |
+| [Snappy Driver Installer (SDI)](https://sdi-tool.org/) | `winget install samlab-ws.SnappyDriverInstaller` || <u>DEPRECATED</u></br>Use `Snappy Driver Installer Origin (SDIO)` instead<hr>Reason:</br>Known to bundle malware since development changed hands</br>[reference](https://alternativeto.net/software/snappy-driver/about/) |
 | [Snappy Driver Installer Origin (SDIO)](https://www.glenn.delahoy.com/snappy-driver-installer-origin/) | `winget install GlennDelahoy.SnappyDriverInstallerOrigin` |||
 | [Sublime Text](https://www.sublimetext.com/) | `winget install SublimeHQ.SublimeText.4` |||
 | [TeamViewer](https://www.teamviewer.com/en-au/) | `winget install TeamViewer.TeamViewer` |||
