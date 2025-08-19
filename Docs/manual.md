@@ -1155,3 +1155,29 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 | K       | Kilo      | X     | X-ray     |
 | L       | Lima      | Y     | Yankee    |
 | M       | Mike      | Z     | Zulu      |
+
+# Misc Notes
+
+<!-- TODO: incorporate these entries into main doc -->
+
+---
+
+## How to do a hard refresh in any browser
+
+<!-- Reference: https://help.gavel.io/articles/how-to-do-a-hard-refresh-in-any-browser -->
+
+A hard refresh clears your browser cache for a specific page, which forces it to load the most recent version of that page. This could include new scripts, styles or features.
+
+Important: Clicking the "Refresh" arrow on your browser address bar is not a hard refresh. Here's how you can clear your cache through a hard refresh on any browser:
+
+- Google Chrome\
+  Windows: `Ctrl and then press F5`\
+  macOS: `Cmd + Shift + R`
+- Firefox\
+  Windows: `Ctrl + F5`\
+  macOS: `Cmd + Shift + R`
+- Safari (Mac)\
+  Empty Cache: Go to Safari > Empty Cache, or hit `Opt + Cmd + E`\
+  Refresh: Click the refresh button on the address bar or press `Cmd + R`
+- Internet Explorer/Microsoft Edge (Windows)\
+  `Ctrl + F5`
