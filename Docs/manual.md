@@ -896,7 +896,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | [Clear Disk Info](https://www.carifred.com/cleardiskinfo/) | `winget install Carifred.ClearDiskInfo` |||
 | [CPUID CPU-Z](https://www.cpuid.com/softwares/cpu-z.html) | `winget install CPUID.CPU-Z` |||
 | [CPUID HWMonitor](https://www.cpuid.com/softwares/hwmonitor.html) | `winget install CPUID.HWMonitor` |||
-| [CrystalDiskInfo](https://crystalmark.info/en/software/crystaldiskinfo/) | `winget install CrystalDewWorld.CrystalDiskInfo` || <u>DEPRECATED</u></br>Use `Clear Disk Info` instead<hr>_Issue: Misreports SMART data on some drives_ |
+| [CrystalDiskInfo](https://crystalmark.info/en/software/crystaldiskinfo/) | `winget install CrystalDewWorld.CrystalDiskInfo` || <u>DEPRECATED</u></br>Use `Clear Disk Info` instead<hr>_Reason:</br>Misreports SMART data on some drives_ |
 | [CrystalDiskMark](https://crystalmark.info/en/software/crystaldiskmark/) | `winget install CrystalDewWorld.CrystalDiskMark` |||
 | [DaVinci Resolve](https://www.blackmagicdesign.com/au/products/davinciresolve) |||
 | [Disk Drill](https://www.cleverfiles.com/) | `winget install CleverFiles.DiskDrill` |||
@@ -908,7 +908,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | [FFmpeg](https://ffmpeg.org/) ||||
 | [FileBot](https://www.filebot.net/) ||||
 | [FileZilla](https://filezilla-project.org/) ||||
-| [ForensiT Transwiz](https://www.forensit.com/move-computer.html) | `winget install ForensiT.Transwiz` || <u>DEPRECATED</u></br>Copy `%USERPROFILE%` instead<hr>_Issue: Creates broken user profiles with newer OneDrive and Windows 11 releases_ |
+| [ForensiT Transwiz](https://www.forensit.com/move-computer.html) | `winget install ForensiT.Transwiz` || <u>DEPRECATED</u></br>Copy `%USERPROFILE%` instead<hr>_Reason:</br>Creates broken user profiles with newer OneDrive and Windows 11 releases_ |
 | [Furmark](https://www.geeks3d.com/furmark/) | `winget install Geeks3D.FurMark.2` |||
 | [Gimp](https://www.gimp.org/) | `winget install GIMP.GIMP.3` |||
 | [Git](https://git-scm.com/) | `winget install Git.Git` |||
@@ -958,7 +958,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | [Rufus](https://rufus.ie/en/) | `winget install Rufus.Rufus` |||
 | [SD Card Formatter](https://www.sdcard.org/downloads/formatter/) ||||
 | [Scoop](https://scoop.sh/) ||| <u>DEPRECATED</u></br>Use `Winget` instead |
-| [Snappy Driver Installer (SDI)](https://sdi-tool.org/) | `winget install samlab-ws.SnappyDriverInstaller` || <u>DEPRECATED</u></br>Use `Snappy Driver Installer Origin (SDIO)` instead<hr>Reason:</br>Known to bundle malware since development changed hands</br>[reference](https://alternativeto.net/software/snappy-driver/about/) |
+| [Snappy Driver Installer (SDI)](https://sdi-tool.org/) | `winget install samlab-ws.SnappyDriverInstaller` || <u>DEPRECATED</u></br>Use `Snappy Driver Installer Origin (SDIO)` instead<hr>_Reason:</br>[Known to bundle malware since development changed hands](https://alternativeto.net/software/snappy-driver/about/)_ |
 | [Snappy Driver Installer Origin (SDIO)](https://www.glenn.delahoy.com/snappy-driver-installer-origin/) | `winget install GlennDelahoy.SnappyDriverInstallerOrigin` |||
 | [Sublime Text](https://www.sublimetext.com/) | `winget install SublimeHQ.SublimeText.4` |||
 | [TeamViewer](https://www.teamviewer.com/en-au/) | `winget install TeamViewer.TeamViewer` |||
@@ -991,7 +991,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 | App   | Description   | Use Case  |
 | :---  | :---          | :---      |
-| [Appwatch](https://play.google.com/store/apps/details?id=com.tafayor.appwatch&hl=en_AU) | Snitch on app activity | <u>DEPRECATED</u></br>Use `Rox Security` instead<hr>_Issue: Misses some guilty pop-up apps_ |
+| [Appwatch](https://play.google.com/store/apps/details?id=com.tafayor.appwatch&hl=en_AU) | Snitch on app activity | <u>DEPRECATED</u></br>Use `Rox Security` instead<hr>_Reason:</br>Misses some guilty pop-up apps_ |
 | [Aurora Store](https://auroraoss.com/aurora-store) | Alternative `Google Play Store` app | Install apps from the Play Store repository without needing to log in with a Google Account, and can download .APKs from the Play Store for later sideloading |
 | [Rox Security](https://play.google.com/store/apps/details?id=com.tafayor.roxapp&hl=en_AU&pli=1) | Multi-tool for identifying unusual/unwanted app behaviour, including snitching on app activity | Identify apps that are responsible for instrusive full-screen pop-ups |
 
