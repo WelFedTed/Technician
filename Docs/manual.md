@@ -1134,6 +1134,12 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 | [PrintFriendly](https://www.printfriendly.com/) | Convert various file formats to PDF |
 | [Watermark Remover](https://www.watermarkremover.io/) | AI watermark removing tool, use Incognito/Private mode to exceed free 'try' limits |
 
+### Scripting / Coding
+
+|    |     |
+|:-- | :-- |
+| [SS64.com](https://ss64.com/) | Quick reference from terminal shell commands, particularly helpful for CMD / Batch commands |
+
 ### Phonetic Alphabet
 
 The NATO Phonetic Alphabet can be very useful when trying to provide remote support over the phone
