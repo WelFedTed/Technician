@@ -1158,11 +1158,11 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 
 # Misc Notes
 
-<!-- TODO: incorporate these entries into main doc -->
+<!-- TODO: verify steps and incorporate these entries into main doc -->
 
 ---
 
-## How to do a hard refresh in any browser
+## How to Hard Refresh Web Browsers
 
 <!-- Reference: https://help.gavel.io/articles/how-to-do-a-hard-refresh-in-any-browser -->
 
@@ -1181,3 +1181,13 @@ Important: Clicking the "Refresh" arrow on your browser address bar is not a har
   Refresh: Click the refresh button on the address bar or press `Cmd + R`
 - Internet Explorer/Microsoft Edge (Windows)\
   `Ctrl + F5`
+
+## How to Manually Clear the Print Queue (Windows)
+
+<!-- TODO: also make this a script on USB tool 'Clear-Print-Queue.bat' -->
+
+- Open a terminal as Administrator
+- Run the following commands:\
+  `net stop spooler`\
+  `del %SYSTEMROOT%\System32\spool\PRINTERS\* /Q`\
+  `net start spooler`
