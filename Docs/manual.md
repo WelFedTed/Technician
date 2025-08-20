@@ -1197,3 +1197,11 @@ Important: Clicking the "Refresh" arrow on your browser address bar is not a har
   `net stop spooler`\
   `del %SYSTEMROOT%\System32\spool\PRINTERS\* /Q`\
   `net start spooler`
+
+## How to Generate Battery Report (Windows)
+
+- Open a terminal as Administrator
+- Export Battery Report\
+  `powercfg /batteryreport /output c:\batt.html`
+- Open Battery Report\
+  `start c:\batt.html`
