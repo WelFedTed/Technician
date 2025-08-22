@@ -1073,12 +1073,12 @@ Need to preserve 2x empty lines before any H1 # tags, to avoid breaking printing
 | `shell:mycomputerfolder`  | Opens `This PC` folder                              | |
 | `shell:recyclebinfolder`  | Opens `Recycle Bin` folder                          | |
 | `shell:startup`           | Opens `Startup` folder                              | |
-| `shutdown -h`             | Hibernate computer                                  | |
-| `shutdown -l`             | Log off                                             | |
-| `shutdown -r -fw`         | Restart Windows and boot in to `BIOS` / `UEFI`      | |
-| `shutdown -r -o`          | Restart Windows and boot in to `Recovery Environment` | |
-| `shutdown -r -f -t 00`    | Force Restarts Windows immediately                  | |
-| `shutdown -s -f -t 00`    | Force Shuts down Windows immediately                | |
+| `shutdown /h`             | Hibernate computer                                  | |
+| `shutdown /l`             | Log off                                             | |
+| `shutdown /r /fw /t 00`</br>Run as Administrator | Restart Windows and boot in to `BIOS` / `UEFI`      | |
+| `shutdown /r /o /t 00`    | Restart Windows and boot in to `Recovery Environment` | |
+| `shutdown /r /f /t 00`    | Force Restarts Windows immediately                  | |
+| `shutdown /s /f /t 00`    | Force Shuts down Windows immediately                | |
 | `snippingtool`            | Opens `Snipping Tool` app                           | |
 | `sysdm.cpl`               | Opens `System Properties` window                    | Quick access to `System Restore` |
 | `taskmgr`                 | Opens `Task Manager` app                            | |
