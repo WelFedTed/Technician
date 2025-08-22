@@ -5,6 +5,11 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 
 <!-- <printfriendly-options style="display:none;" data-content-features="disableClickToDel=0;hideImages=0;imageDisplayStyle=block;disablePDF=0;disableEmail=0;disablePrint=0;encodeImages=0;showHiddenContent=0;"></printfriendly-options><script>var pfBtVersion='3';(function(){var js,pf;pf=document.createElement('script');pf.type='text/javascript';pf.src='//cdn.printfriendly.com/printfriendly.js';document.getElementsByTagName('head')[0].appendChild(pf);})();</script><a href="https://www.printfriendly.com" style="color:#6D9F00;text-decoration:none;" class="printfriendly" onclick="window.print();return false;" title="Printer Friendly and PDF"><img style="border:none;-webkit-box-shadow:none;box-shadow:none;" src="//cdn.printfriendly.com/buttons/new/print-light-blue.svg" alt="Print Friendly and PDF"/></a> -->
 
+<!-- 
+NOTES:
+Need to preserve 2x empty lines before any H1 # tags, to avoid breaking printing
+ -->
+
 
 # Reset Passwords
 
@@ -203,6 +208,7 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
 - Wipe down device and clean surfaces
 - Add a `Serviced by COPS` sticker or replace old worn stickers as required
 
+
 # Data Transfer
 
 ## Windows
@@ -302,7 +308,8 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
     - Update Winget `winget source update`
     - Export Winget's list of installed programs `winget export -o "REPLACE-WITH-TARGET-FILE"`\
     _(update REPLACE-WITH-TARGET-FILE with the target winget export file on the transfer drive)_\
-    - Optionally export a list of all programs that Winget does cannot re-install at the same time with this extended command `winget export -o "REPLACE-WITH-TARGET-FILE" >- "winget_unnavailable.txt"`
+    - Optionally export a list of all programs that Winget does cannot re-install at the same time with this extended command\
+      `winget export -o "REPLACE-WITH-TARGET-FILE" > "winget_unnavailable.txt"`
 
   - [ <font style="color:ORANGE">ALTERNATIVE</font> ] Create Winget Install Script using 3rd party site\
     [winstall.app](https://winstall.app/)\
@@ -480,7 +487,6 @@ Please email [shaun@copscorp.com.au](mailto:shaun@copscorp.com.au) with any corr
   </details>
 - **Restart Windows**
 - **Create a new System Restore point** `COPS - Completed Data Transfer`
-
 
 
 # Virus/Malware Removal
