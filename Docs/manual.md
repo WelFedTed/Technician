@@ -1175,7 +1175,7 @@ The NATO Phonetic Alphabet can be very useful when trying to provide remote supp
 | L       | Lima      | Y     | Yankee    |
 | M       | Mike      | Z     | Zulu      |
 
-# Misc Notes
+# Miscellaneous
 
 <!-- TODO: verify steps and incorporate these entries into main doc -->
 
