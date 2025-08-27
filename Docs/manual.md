@@ -1218,3 +1218,103 @@ Important: Clicking the "Refresh" arrow on your browser address bar is not a har
   `powercfg /batteryreport /output c:\batt.html`
 - Open Battery Report\
   `start c:\batt.html`
+
+## How to Reset Page File (pagefile.sys) (Windows)
+
+<!-- Reference: https://www.thewindowsclub.com/how-to-reset-virtual-memory-or-page-file-in-windows -->
+
+A page file (also known as a "paging file") is an optional, hidden system file on a hard disk.
+Page files enable the system to remove infrequently accessed modified data from physical memory to let the system use physical memory more efficiently for more frequently accessed data.
+
+<details>
+  <summary>More Info</summary>
+  Page files extend how much `Committed Memory` (also known as "virtual memory") is used to store modified data.</br>
+  This can be checked in `Task Manager` > `Performance` > `Memory` > `Committed`</br>
+  <em>This comitted memory value should represent Total Physical Memory + Page File size</em>
+</details>
+
+
+### Method 1: Registry
+
+- Run `regedit` as Administrator (Shift + Enter)
+- Navigate to `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management`
+- Open `ClearPageFileAtShutdown` (Double-Click)
+  - Change `Value data` to `1`
+  - Click `OK`
+- Close `Registry Editor`
+- Restart Windows\
+  `shutdown /r /f /t 00`
+
+### Method 2: Group Policy
+
+- Run `gpedit.msc` as Administrator (Shift + Enter)
+- Navigate to `Local Computer Policy > Computer Configuration > Windows Settings > Security Settings > Local Policies > Security Options`
+- Open `Shutdown: Clear virtual memory pagefile` (Double-Click)
+  - Select `Enabled`
+  - Click `OK`
+- Close `Local Group Policy Editor`
+- Run a terminal as Administrator\
+  `wt` or `powershell` or `cmd`
+- Run the following command:\
+  `gpupdate /force`
+- Restart Windows\
+  `shutdown /r /f /t 00`
+
+### Method 3: Manual
+
+#### Disable Page File
+
+- Open `System Properties`\
+  `sysdm.cpl`
+- Click `Advanced` tab
+- `Performance`
+  - Click `Settings...` button
+  - Click `Advanced` tab
+  - `Virtual Memory`
+    - Click `Change...` button
+    - Take not of the current settings (we'll need to re-apply these later)
+    - Uncheck `Automatically manage paging file size for all drives`
+    - Select `C:` drive
+    - Select `No paging file`
+    - Click `Set`
+    - Click `Yes`
+    - Click `OK`
+- Restart Windows\
+  `shutdown /r /f /t 00`
+
+#### Re-Enable Page File
+
+- Open `System Properties`\
+  `sysdm.cpl`
+- Click `Advanced` tab
+- `Performance`
+  - Click `Settings...` button
+  - Click `Advanced` tab
+  - `Virtual Memory`
+    - Click `Change...` button
+    - Re-Apply Settings as they were before disabling
+    - Click `OK`
+- Restart Windows\
+  `shutdown /r /f /t 00`
+
+## How to Reset Hibernation File (hiberfil.sys) (Windows)
+
+<!-- Reference: https://learn.microsoft.com/en-us/troubleshoot/windows-client/setup-upgrade-and-drivers/disable-and-re-enable-hibernation -->
+
+Windows uses the hiberfil.sys file to store a copy of the system memory on the hard disk when the hybrid sleep setting is turned on. If this file is not present, the computer cannot hibernate.
+<details>
+  <summary>More Info</summary>
+  The hiberfil.sys hidden system file is located in the root folder of the drive where the operating system is installed. The Windows Kernel Power Manager reserves this file when you install Windows. The size of this file is approximately equal to how much random access memory (RAM) is installed on the computer.
+</details>
+
+### Disable Hibernation
+
+`powercfg -h off`\
+or\
+`powercfg.exe /hibernate off`
+
+### Re-Enable Hibernation
+
+`powercfg -h on`\
+or\
+`powercfg.exe /hibernate on`
