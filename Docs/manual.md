@@ -1146,6 +1146,8 @@ Need to preserve 2x empty lines before any H1 # tags, to avoid breaking printing
 | [Photopea](https://www.photopea.com/) | Free Photoshop alternative that runs in the web browser |
 | [PrintFriendly](https://www.printfriendly.com/) | Convert various file formats to PDF |
 | [Watermark Remover](https://www.watermarkremover.io/) | AI watermark removing tool, use Incognito/Private mode to exceed free 'try' limits |
+| [Monkeytype](https://monkeytype.com/) | Typing test website |
+| [keybr](https://www.keybr.com/) | Typing practice website |
 
 ### Scripting / Coding
 
