@@ -1120,6 +1120,7 @@ Need to preserve 2x empty lines before any H1 # tags, to avoid breaking printing
 | [PassMark - Videocard Benchmarks](https://www.videocardbenchmark.net/) | Compare Videocards |
 | [PassMark - Memory Benchmarks](https://www.memorybenchmark.net/) | Compare Memory Modules |
 | [PassMark - Hard Drive Benchmarks](https://www.harddrivebenchmark.net/) | Compare HDD's / SSD's |
+| [AirPrint](https://support.apple.com/en-us/HT201311) | List of Printers that support AirPrint |
 
 ### Networking
 
@@ -1320,3 +1321,15 @@ or\
 `powercfg -h on`\
 or\
 `powercfg.exe /hibernate on`
+
+## How to Install / Repair Winget
+
+<!-- Reference: https://github.com/asheroto/winget-install -->
+
+- Connect to the internet
+- Open a terminal as Administrator
+- Run `irm asheroto.com/winget | iex`
+- Wait for script to complete
+- Close + Re-open the terminal\
+  _winget should now be working again_
+- Run `winget -v` to test
