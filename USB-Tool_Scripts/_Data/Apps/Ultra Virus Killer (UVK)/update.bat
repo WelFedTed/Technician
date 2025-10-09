@@ -10,6 +10,10 @@ set "update=update.tmp"
 set "app=UVKPortable.exe"
 
 echo:
+echo Installing WGet if required...
+winget install wget
+
+echo:
 echo Downloading 7zip (required for update)...
 wget https://www.7-zip.org/a/7zr.exe -P %TEMP%
 set "zip=%TEMP%\7zr.exe"
