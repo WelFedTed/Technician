@@ -214,11 +214,6 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
-
-# replace this with a pause to keep the window open
-Start-Sleep -Seconds 10000
-
-
 Write-Output "Backing up User Profiles..."
 Log "Backing up User Profiles..."
 .\bin\rclone.exe copy "C:\Users" "users" --progress
@@ -254,6 +249,10 @@ write-Output "Done"
 Log "Done"
 Write-Output ""
 
+Write-Output "Backup Complete"
+Log "----------------------------------------"
+Log "Backup Complete"
+Log "----------------------------------------"
 
 # replace this with a pause to keep the window open
 Start-Sleep -Seconds 15
