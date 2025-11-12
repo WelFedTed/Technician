@@ -60,6 +60,7 @@ $dependencies = @(
     @("Nirsoft Mail PassView", "https://www.nirsoft.net/toolsdownload/mailpv.zip", $null, $null),
     @("Nirsoft NetworkInterfacesView", "https://www.nirsoft.net/utils/networkinterfacesview.zip", "https://www.nirsoft.net/utils/networkinterfacesview-x64.zip", $null),
     @("Nirsoft Network Password Recovery", "https://www.nirsoft.net/toolsdownload/netpass.zip", "https://www.nirsoft.net/toolsdownload/netpass-x64.zip", "ntps5291#"),
+    @("Nirsoft NTFSLinksView", "https://www.nirsoft.net/utils/ntfslinksview.zip", "https://www.nirsoft.net/utils/ntfslinksview-x64.zip", $null),
     @("Nirsoft OutlookAccountsView", "https://www.nirsoft.net/utils/outlookaccountsview.zip", "https://www.nirsoft.net/utils/outlookaccountsview-x64.zip", $null),
     @("Nirsoft OutlookAddressBookView", "https://www.nirsoft.net/utils/outlookaddressbookview.zip", $null, $null),
     @("Nirsoft Password Security Scanner", "https://www.nirsoft.net/utils/passwordscan.zip", "https://www.nirsoft.net/utils/passwordscan-x64.zip", $null),
@@ -71,6 +72,8 @@ $dependencies = @(
     @("Nirsoft SecuritySoftView", "https://www.nirsoft.net/utils/securitysoftview.zip", $null, $null),
     @("Nirsoft ShellExView", "https://www.nirsoft.net/utils/shexview.zip", "https://www.nirsoft.net/utils/shexview-x64.zip", $null),
     @("Nirsoft ShortcutsMan", "https://www.nirsoft.net/utils/shman.zip", "https://www.nirsoft.net/utils/shman-x64.zip", $null),
+    @("Nirsoft TaskSchedulerView", "https://www.nirsoft.net/utils/taskschedulerview.zip", "https://www.nirsoft.net/utils/taskschedulerview-x64.zip", $null),
+    @("Nirsoft UserProfilesView", "https://www.nirsoft.net/utils/userprofilesview.zip", $null, $null),
     @("Nirsoft UninstallView", "https://www.nirsoft.net/utils/uninstallview.zip", "https://www.nirsoft.net/utils/uninstallview-x64.zip", $null),
     @("Nirsoft VaultPasswordView", "https://www.nirsoft.net/toolsdownload/vaultpasswordview.zip", "https://www.nirsoft.net/toolsdownload/vaultpasswordview-x64.zip", $null),
     @("Nirsoft VNCPassView", "https://www.nirsoft.net/toolsdownload/vncpassview.zip", $null, $null),
@@ -79,7 +82,8 @@ $dependencies = @(
     @("Nirsoft WhatInStartup", "https://www.nirsoft.net/utils/whatinstartup.zip", "https://www.nirsoft.net/utils/whatinstartup-x64.zip", $null),
     @("Nirsoft WinMailPassRec", "https://www.nirsoft.net/utils/winmailpassrec.zip", "https://www.nirsoft.net/utils/winmailpassrec-x64.zip", $null),
     @("Nirsoft WirelessKeyView", "https://www.nirsoft.net/toolsdownload/wirelesskeyview.zip", "https://www.nirsoft.net/toolsdownload/wirelesskeyview-x64.zip", "WKey4567#"),
-    @("Rclone", "https://downloads.rclone.org/rclone-current-windows-386.zip", "https://downloads.rclone.org/rclone-current-windows-amd64.zip", $null)
+    @("Rclone", "https://downloads.rclone.org/rclone-current-windows-386.zip", "https://downloads.rclone.org/rclone-current-windows-amd64.zip", $null),
+    @("UVK", "https://www.carifred.com/uvk/UVK.zip", $null, $null)
 )
 
 foreach ($dep in $dependencies) {
@@ -120,11 +124,21 @@ if (Test-Path $wallpaperPath) {
 } else {
     New-Item -Path ".\wallpaper.txt" -ItemType File -Value "No wallpaper found." -Force | Out-Null
 }
-.\bin\shexview.exe /shtml "desktop_shellexview.html"
-.\bin\shman.exe /shtml "desktop_shortcuts_nirsoft-shortcutsman.html"
-.\bin\WhatInStartup.exe /shtml "desktop_startup-programs_nirsoft-whatinstartup.html"
+.\bin\NTFSLinksView.exe /shtml "symlinks_nirsoft-ntfslinksview.html"
+.\bin\shexview.exe /shtml "shell-extensions_nirsoft-shellexview.html"
+.\bin\shman.exe /shtml "shortcuts_nirsoft-shortcutsman.html"
+.\bin\TaskSchedulerView.exe /shtml "scheduled-tasks_nirsoft-taskschedulerview.html"
+.\bin\UserProfilesView.exe /shtml "user-profiles_nirsoft-userprofilesview.html"
+.\bin\WhatInStartup.exe /shtml "startup-items_nirsoft-whatinstartup.html"
+if ([Environment]::Is64BitOperatingSystem) {
+    .\bin\UVK_en64.exe -WriteSysInfo "$directory\system-info.html"
+} else {
+    .\bin\UVK_en.exe -WriteSysInfo "$directory\system-info.html"
+}
+net users > users.txt
 Write-Output "Done"
 Log "Done"
+write-Output ""
 
 Write-Output "Extracting Passwords..."
 Log "Extracting Passwords..."
@@ -178,6 +192,7 @@ Write-Output "Backing up Devices..."
 Log "Backing up Devices..."
 .\bin\DriveLetterView.exe /shtml "devices_nirsoft-driveletterview.html"
 hostname > hostname.txt
+net use > mapped-drives.txt
 Get-Printer > printers.txt
 Write-Output "Done"
 Log "Done"
