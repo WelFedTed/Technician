@@ -47,12 +47,6 @@ Write-Output ""
 Write-Output "Closing non-essential applications..."
 Log "Closing non-essential applications..."
 Get-Process | Where-Object {$_.MainWindowTitle -ne "" -and $_.Id -ne $PID -and $_.ProcessName -ne "explorer"} | Stop-Process -Force
-# if ([Environment]::Is64BitOperatingSystem) {
-#     .\bin\UVK_en64.exe -Nuke -ExitAfter
-# } else {
-#     .\bin\UVK_en.exe -Nuke -ExitAfter
-# }
-# Start-Sleep -Seconds 10 # wait for apps to close
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -66,55 +60,61 @@ $headers = @{
 }
 
 $dependencies = @(
-    # Name, URL (x86), URL (x64), Password
-    @("7zip", "https://www.7-zip.org/a/7za920.zip", $null, $null),
-    @("Nirsoft AdapterWatch", "https://www.nirsoft.net/utils/awatch.zip", $null, $null),
-    @("Nirsoft BrowserAddonsView", "https://www.nirsoft.net/utils/browseraddonsview.zip", "https://www.nirsoft.net/utils/browseraddonsview-x64.zip", $null),
-    @("Nirsoft BulletsPassView", "https://www.nirsoft.net/utils/bulletspassview.zip", "https://www.nirsoft.net/utils/bulletspassview-x64.zip", $null),
-    @("Nirsoft CredentialsFileView", "https://www.nirsoft.net/toolsdownload/credentialsfileview.zip", "https://www.nirsoft.net/toolsdownload/credentialsfileview-x64.zip", $null),
-    @("Nirsoft Dialupass", "https://www.nirsoft.net/toolsdownload/dialupass.zip", $null, "nsdlps3861@"),
-    @("Nirsoft DriveLetterView", "https://www.nirsoft.net/utils/driveletterview.zip", "https://www.nirsoft.net/utils/driveletterview-x64.zip", $null),
-    @("Nirsoft DriverView", "https://www.nirsoft.net/utils/driverview.zip", "https://www.nirsoft.net/utils/driverview-x64.zip", $null),
-    @("Nirsoft InstalledAppView", "https://www.nirsoft.net/utils/installedappview.zip", "https://www.nirsoft.net/utils/installedappview-x64.zip", $null),
-    @("Nirsoft InstalledPackagesView", "https://www.nirsoft.net/utils/installedpackagesview.zip", "https://www.nirsoft.net/utils/installedpackagesview-x64.zip", $null),
-    @("Nirsoft LostMyPassword", "https://www.nirsoft.net/utils/lostmypassword.zip", "https://www.nirsoft.net/utils/lostmypassword-x64.zip", $null),
-    @("Nirsoft Mail PassView", "https://www.nirsoft.net/toolsdownload/mailpv.zip", $null, $null),
-    @("Nirsoft NetworkInterfacesView", "https://www.nirsoft.net/utils/networkinterfacesview.zip", "https://www.nirsoft.net/utils/networkinterfacesview-x64.zip", $null),
-    @("Nirsoft Network Password Recovery", "https://www.nirsoft.net/toolsdownload/netpass.zip", "https://www.nirsoft.net/toolsdownload/netpass-x64.zip", "ntps5291#"),
-    @("Nirsoft NTFSLinksView", "https://www.nirsoft.net/utils/ntfslinksview.zip", "https://www.nirsoft.net/utils/ntfslinksview-x64.zip", $null),
-    @("Nirsoft OutlookAccountsView", "https://www.nirsoft.net/utils/outlookaccountsview.zip", "https://www.nirsoft.net/utils/outlookaccountsview-x64.zip", $null),
-    @("Nirsoft OutlookAddressBookView", "https://www.nirsoft.net/utils/outlookaddressbookview.zip", $null, $null),
-    @("Nirsoft Password Security Scanner", "https://www.nirsoft.net/utils/passwordscan.zip", "https://www.nirsoft.net/utils/passwordscan-x64.zip", $null),
-    # @("Nirsoft PCAnywhere PassView", "https://www.nirsoft.net/utils/pcanypass.zip", $null, $null),
-    @("Nirsoft Product Key Scanner", "https://www.nirsoft.net/utils/productkeyscanner.zip", "https://www.nirsoft.net/utils/productkeyscanner-x64.zip", $null),
-    @("Nirsoft ProduKey", "https://www.nirsoft.net/utils/produkey.zip", "https://www.nirsoft.net/utils/produkey-x64.zip", $null),
-    @("Nirsoft PstPassword", "https://www.nirsoft.net/toolsdownload/pstpassword.zip", $null, $null),
-    @("Nirsoft Remote Desktop PassView", "https://www.nirsoft.net/toolsdownload/rdpv.zip", $null, $null),
-    @("Nirsoft SecuritySoftView", "https://www.nirsoft.net/utils/securitysoftview.zip", $null, $null),
-    @("Nirsoft ShellExView", "https://www.nirsoft.net/utils/shexview.zip", "https://www.nirsoft.net/utils/shexview-x64.zip", $null),
-    @("Nirsoft ShortcutsMan", "https://www.nirsoft.net/utils/shman.zip", "https://www.nirsoft.net/utils/shman-x64.zip", $null),
-    @("Nirsoft TaskSchedulerView", "https://www.nirsoft.net/utils/taskschedulerview.zip", "https://www.nirsoft.net/utils/taskschedulerview-x64.zip", $null),
-    @("Nirsoft UserProfilesView", "https://www.nirsoft.net/utils/userprofilesview.zip", $null, $null),
-    @("Nirsoft UninstallView", "https://www.nirsoft.net/utils/uninstallview.zip", "https://www.nirsoft.net/utils/uninstallview-x64.zip", $null),
-    @("Nirsoft VaultPasswordView", "https://www.nirsoft.net/toolsdownload/vaultpasswordview.zip", "https://www.nirsoft.net/toolsdownload/vaultpasswordview-x64.zip", $null),
-    @("Nirsoft VNCPassView", "https://www.nirsoft.net/toolsdownload/vncpassview.zip", $null, $null),
-    @("Nirsoft WebBrowserBookmarksView", "https://www.nirsoft.net/utils/webbrowserbookmarksview.zip", $null, $null),
-    @("Nirsoft WebBrowserPassView", "https://www.nirsoft.net/toolsdownload/webbrowserpassview.zip", $null, "wbpv28821@"),
-    @("Nirsoft WhatInStartup", "https://www.nirsoft.net/utils/whatinstartup.zip", "https://www.nirsoft.net/utils/whatinstartup-x64.zip", $null),
-    @("Nirsoft WinMailPassRec", "https://www.nirsoft.net/utils/winmailpassrec.zip", "https://www.nirsoft.net/utils/winmailpassrec-x64.zip", $null),
-    @("Nirsoft WirelessKeyView", "https://www.nirsoft.net/toolsdownload/wirelesskeyview.zip", "https://www.nirsoft.net/toolsdownload/wirelesskeyview-x64.zip", "WKey4567#"),
-    @("Rclone", "https://downloads.rclone.org/rclone-current-windows-386.zip", "https://downloads.rclone.org/rclone-current-windows-amd64.zip", $null),
-    @("UVK", "https://www.carifred.com/uvk/UVK.zip", $null, $null)
+    # Name, URL (x86), URL (x64), Password, Executable
+    @("7zip", "https://www.7-zip.org/a/7za920.zip", $null, $null, "7za.exe"),
+    @("Nirsoft AdapterWatch", "https://www.nirsoft.net/utils/awatch.zip", $null, $null, "awatch.exe"),
+    @("Nirsoft BrowserAddonsView", "https://www.nirsoft.net/utils/browseraddonsview.zip", "https://www.nirsoft.net/utils/browseraddonsview-x64.zip", $null, "BrowserAddonsView.exe"),
+    @("Nirsoft BulletsPassView", "https://www.nirsoft.net/utils/bulletspassview.zip", "https://www.nirsoft.net/utils/bulletspassview-x64.zip", $null, "BulletsPassView.exe"),
+    @("Nirsoft CredentialsFileView", "https://www.nirsoft.net/toolsdownload/credentialsfileview.zip", "https://www.nirsoft.net/toolsdownload/credentialsfileview-x64.zip", $null, "CredentialsFileView.exe"),
+    @("Nirsoft Dialupass", "https://www.nirsoft.net/toolsdownload/dialupass.zip", $null, "nsdlps3861@", "Dialupass.exe"),
+    @("Nirsoft DriveLetterView", "https://www.nirsoft.net/utils/driveletterview.zip", "https://www.nirsoft.net/utils/driveletterview-x64.zip", $null, "DriveLetterView.exe"),
+    @("Nirsoft DriverView", "https://www.nirsoft.net/utils/driverview.zip", "https://www.nirsoft.net/utils/driverview-x64.zip", $null, "DriverView.exe"),
+    @("Nirsoft InstalledAppView", "https://www.nirsoft.net/utils/installedappview.zip", "https://www.nirsoft.net/utils/installedappview-x64.zip", $null, "InstalledAppView.exe"),
+    @("Nirsoft InstalledPackagesView", "https://www.nirsoft.net/utils/installedpackagesview.zip", "https://www.nirsoft.net/utils/installedpackagesview-x64.zip", $null, "InstalledPackagesView.exe"),
+    @("Nirsoft LostMyPassword", "https://www.nirsoft.net/utils/lostmypassword.zip", "https://www.nirsoft.net/utils/lostmypassword-x64.zip", $null, "LostMyPassword.exe"),
+    @("Nirsoft Mail PassView", "https://www.nirsoft.net/toolsdownload/mailpv.zip", $null, $null, "mailpv.exe"),
+    @("Nirsoft NetworkInterfacesView", "https://www.nirsoft.net/utils/networkinterfacesview.zip", "https://www.nirsoft.net/utils/networkinterfacesview-x64.zip", $null, "NetworkInterfacesView.exe"),
+    @("Nirsoft Network Password Recovery", "https://www.nirsoft.net/toolsdownload/netpass.zip", "https://www.nirsoft.net/toolsdownload/netpass-x64.zip", "ntps5291#", "netpass.exe"),
+    @("Nirsoft NTFSLinksView", "https://www.nirsoft.net/utils/ntfslinksview.zip", "https://www.nirsoft.net/utils/ntfslinksview-x64.zip", $null, "NTFSLinksView.exe"),
+    @("Nirsoft OutlookAccountsView", "https://www.nirsoft.net/utils/outlookaccountsview.zip", "https://www.nirsoft.net/utils/outlookaccountsview-x64.zip", $null, "OutlookAccountsView.exe"),
+    @("Nirsoft OutlookAddressBookView", "https://www.nirsoft.net/utils/outlookaddressbookview.zip", $null, $null, "OutlookAddressBookView.exe"),
+    @("Nirsoft Password Security Scanner", "https://www.nirsoft.net/utils/passwordscan.zip", "https://www.nirsoft.net/utils/passwordscan-x64.zip", $null, "PasswordScan.exe"),
+    # @("Nirsoft PCAnywhere PassView", "https://www.nirsoft.net/utils/pcanypass.zip", $null, $null, "PCAnyPass.exe"),
+    @("Nirsoft Product Key Scanner", "https://www.nirsoft.net/utils/productkeyscanner.zip", "https://www.nirsoft.net/utils/productkeyscanner-x64.zip", $null, "ProductKeyScanner.exe"),
+    @("Nirsoft ProduKey", "https://www.nirsoft.net/utils/produkey.zip", "https://www.nirsoft.net/utils/produkey-x64.zip", $null, "ProduKey.exe"),
+    @("Nirsoft PstPassword", "https://www.nirsoft.net/toolsdownload/pstpassword.zip", $null, $null, "PstPassword.exe"),
+    @("Nirsoft Remote Desktop PassView", "https://www.nirsoft.net/toolsdownload/rdpv.zip", $null, $null, "rdpv.exe"),
+    @("Nirsoft SecuritySoftView", "https://www.nirsoft.net/utils/securitysoftview.zip", $null, $null, "SecuritySoftView.exe"),
+    @("Nirsoft ShellExView", "https://www.nirsoft.net/utils/shexview.zip", "https://www.nirsoft.net/utils/shexview-x64.zip", $null, "shexview.exe"),
+    @("Nirsoft ShortcutsMan", "https://www.nirsoft.net/utils/shman.zip", "https://www.nirsoft.net/utils/shman-x64.zip", $null, "shman.exe"),
+    @("Nirsoft TaskSchedulerView", "https://www.nirsoft.net/utils/taskschedulerview.zip", "https://www.nirsoft.net/utils/taskschedulerview-x64.zip", $null, "TaskSchedulerView.exe"),
+    @("Nirsoft UserProfilesView", "https://www.nirsoft.net/utils/userprofilesview.zip", $null, $null, "UserProfilesView.exe"),
+    @("Nirsoft UninstallView", "https://www.nirsoft.net/utils/uninstallview.zip", "https://www.nirsoft.net/utils/uninstallview-x64.zip", $null, "UninstallView.exe"),
+    @("Nirsoft VaultPasswordView", "https://www.nirsoft.net/toolsdownload/vaultpasswordview.zip", "https://www.nirsoft.net/toolsdownload/vaultpasswordview-x64.zip", $null, "VaultPasswordView.exe"),
+    @("Nirsoft VNCPassView", "https://www.nirsoft.net/toolsdownload/vncpassview.zip", $null, $null, "VNCPassView.exe"),
+    @("Nirsoft WebBrowserBookmarksView", "https://www.nirsoft.net/utils/webbrowserbookmarksview.zip", $null, $null, "WebBrowserBookmarksView.exe"),
+    @("Nirsoft WebBrowserPassView", "https://www.nirsoft.net/toolsdownload/webbrowserpassview.zip", $null, "wbpv28821@", "WebBrowserPassView.exe"),
+    @("Nirsoft WhatInStartup", "https://www.nirsoft.net/utils/whatinstartup.zip", "https://www.nirsoft.net/utils/whatinstartup-x64.zip", $null, "WhatInStartup.exe"),
+    @("Nirsoft WinMailPassRec", "https://www.nirsoft.net/utils/winmailpassrec.zip", "https://www.nirsoft.net/utils/winmailpassrec-x64.zip", $null, "WinMailPassRec.exe"),
+    @("Nirsoft WirelessKeyView", "https://www.nirsoft.net/toolsdownload/wirelesskeyview.zip", "https://www.nirsoft.net/toolsdownload/wirelesskeyview-x64.zip", "WKey4567#", "WirelessKeyView.exe"),
+    @("Rclone", "https://downloads.rclone.org/rclone-current-windows-386.zip", "https://downloads.rclone.org/rclone-current-windows-amd64.zip", $null, "rclone.exe"),
+    @("UVK", "https://www.carifred.com/uvk/UVK.zip", $null, $null, "UVK_en64.exe")
 )
 
 foreach ($dep in $dependencies) {
     $name = $dep[0]
     $url = if ([Environment]::Is64BitOperatingSystem -and $dep[2]) { $dep[2] } else { $dep[1] }
     $password = $dep[3]
+    $exe = $dep[4]
 
-    $ProgressPreference = "SilentlyContinue"    # Hides progress bar, but speeds up downloads
-    # $ProgressPreference = "Continue"            # Shows progress bar
-
+    if (Test-Path -Path ".\bin\$exe") {
+        Write-Output "$name already exists, skipping download."
+        Log "$name already exists, skipping download."
+        Write-Output ""
+        continue
+    }
+    
+    # $ProgressPreference = "SilentlyContinue"    # Hides progress bar, but speeds up downloads
     Write-Output "Downloading $name..."
     Log "Downloading $name..."
     $outputPath = "$env:TEMP\$($name -replace ' ', '')-download.zip"
@@ -136,6 +136,8 @@ foreach ($dep in $dependencies) {
     Log "Done"
     Write-Output ""
 }
+
+# cmd /k pause
 
 Write-Output "Backing up Desktop..."
 Log "Backing up Desktop..."
@@ -297,5 +299,4 @@ Log "----------------------------------------"
 Log "Backup Complete"
 Log "----------------------------------------"
 
-# replace this with a pause to keep the window open
-Start-Sleep -Seconds 15
+cmd /k pause
