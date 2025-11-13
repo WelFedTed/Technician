@@ -44,6 +44,19 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+Write-Output "Closing non-essential applications..."
+Log "Closing non-essential applications..."
+Get-Process | Where-Object {$_.MainWindowTitle -ne "" -and $_.Id -ne $PID -and $_.ProcessName -ne "explorer"} | Stop-Process -Force
+# if ([Environment]::Is64BitOperatingSystem) {
+#     .\bin\UVK_en64.exe -Nuke -ExitAfter
+# } else {
+#     .\bin\UVK_en.exe -Nuke -ExitAfter
+# }
+# Start-Sleep -Seconds 10 # wait for apps to close
+Write-Output "Done"
+Log "Done"
+Write-Output ""
+
 Write-Output "Checking dependencies..."
 Log "Checking dependencies..."
 Write-Output ""
@@ -123,18 +136,6 @@ foreach ($dep in $dependencies) {
     Log "Done"
     Write-Output ""
 }
-
-Write-Output "Closing non-essential applications..."
-Log "Closing non-essential applications..."
-if ([Environment]::Is64BitOperatingSystem) {
-    .\bin\UVK_en64.exe -Nuke -ExitAfter
-} else {
-    .\bin\UVK_en.exe -Nuke -ExitAfter
-}
-Start-Sleep -Seconds 10 # wait for apps to close
-Write-Output "Done"
-Log "Done"
-Write-Output ""
 
 Write-Output "Backing up Desktop..."
 Log "Backing up Desktop..."
