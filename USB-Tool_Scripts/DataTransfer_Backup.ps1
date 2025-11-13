@@ -36,8 +36,16 @@ Write-Output "Logging to file: $logFile"
 Log "Logging to file: $logFile"
 Write-Output ""
 
-Write-Output "Downloading dependencies..."
-Log "Downloading dependencies..."
+Write-Output "Setting power settings to prevent sleep on AC power..."
+Log "Setting power settings to prevent sleep on AC power..."
+powercfg /change standby-timeout-ac 0 | Out-Null
+powercfg /change monitor-timeout-ac 0 | Out-Null
+Write-Output "Done"
+Log "Done"
+Write-Output ""
+
+Write-Output "Checking dependencies..."
+Log "Checking dependencies..."
 Write-Output ""
 New-Item -Path "bin" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 $headers = @{
@@ -64,7 +72,7 @@ $dependencies = @(
     @("Nirsoft OutlookAccountsView", "https://www.nirsoft.net/utils/outlookaccountsview.zip", "https://www.nirsoft.net/utils/outlookaccountsview-x64.zip", $null),
     @("Nirsoft OutlookAddressBookView", "https://www.nirsoft.net/utils/outlookaddressbookview.zip", $null, $null),
     @("Nirsoft Password Security Scanner", "https://www.nirsoft.net/utils/passwordscan.zip", "https://www.nirsoft.net/utils/passwordscan-x64.zip", $null),
-    @("Nirsoft PCAnywhere PassView", "https://www.nirsoft.net/utils/pcanypass.zip", $null, $null),
+    # @("Nirsoft PCAnywhere PassView", "https://www.nirsoft.net/utils/pcanypass.zip", $null, $null),
     @("Nirsoft Product Key Scanner", "https://www.nirsoft.net/utils/productkeyscanner.zip", "https://www.nirsoft.net/utils/productkeyscanner-x64.zip", $null),
     @("Nirsoft ProduKey", "https://www.nirsoft.net/utils/produkey.zip", "https://www.nirsoft.net/utils/produkey-x64.zip", $null),
     @("Nirsoft PstPassword", "https://www.nirsoft.net/toolsdownload/pstpassword.zip", $null, $null),
@@ -273,6 +281,13 @@ reg export "HKEY_LOCAL_MACHINE" ".\registry\HKEY_LOCAL_MACHINE.reg" /y | Out-Nul
 reg export "HKEY_USERS" ".\registry\HKEY_USERS.reg" /y | Out-Null
 reg export "HKEY_CURRENT_CONFIG" ".\registry\HKEY_CURRENT_CONFIG.reg" /y | Out-Null
 write-Output "Done"
+Log "Done"
+Write-Output ""
+
+Write-Output "Resetting power settings..."
+Log "Resetting power settings..."
+powercfg /restoredefaultschemes | Out-Null
+Write-Output "Done"
 Log "Done"
 Write-Output ""
 
