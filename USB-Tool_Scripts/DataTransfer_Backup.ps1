@@ -13,7 +13,7 @@ function Log {
     param (
         [string]$message
         )
-        New-Item -ItemType File -Path $logFile -ErrorAction SilentlyContinue >> $logFile
+        New-Item -ItemType File -Path $logFile -ErrorAction SilentlyContinue | Out-Null
         $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         $logEntry = "$timestamp - $message"
         Write-Output $logEntry | Out-File -FilePath $logFile -Append
@@ -273,14 +273,14 @@ Write-Output ""
 
 Write-Output "Backing up User Profiles..."
 Log "Backing up User Profiles..."
-.\bin\rclone.exe copy "C:\Users" "users" --progress
+.\bin\rclone.exe copy "C:\Users" "users" --progress --log-file=_rclone.log
 write-Output "Done"
 Log "Done"
 Write-Output ""
 
 Write-Output "Backing up Fonts..."
 Log "Backing up Fonts..."
-.\bin\rclone.exe copy "C:\Windows\Fonts" "fonts" --progress
+.\bin\rclone.exe copy "C:\Windows\Fonts" "fonts" --progress --log-file=_rclone.log
 write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -317,5 +317,7 @@ Write-Output "Backup Complete"
 Log "----------------------------------------"
 Log "Backup Complete"
 Log "----------------------------------------"
+Write-Output ""
 
 cmd /k pause
+exit
