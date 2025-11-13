@@ -98,7 +98,8 @@ $dependencies = @(
     @("Nirsoft WinMailPassRec", "https://www.nirsoft.net/utils/winmailpassrec.zip", "https://www.nirsoft.net/utils/winmailpassrec-x64.zip", $null, "WinMailPassRec.exe"),
     @("Nirsoft WirelessKeyView", "https://www.nirsoft.net/toolsdownload/wirelesskeyview.zip", "https://www.nirsoft.net/toolsdownload/wirelesskeyview-x64.zip", "WKey4567#", "WirelessKeyView.exe"),
     @("Rclone", "https://downloads.rclone.org/rclone-current-windows-386.zip", "https://downloads.rclone.org/rclone-current-windows-amd64.zip", $null, "rclone.exe"),
-    @("UVK", "https://www.carifred.com/uvk/UVK.zip", $null, $null, "UVK_en64.exe")
+    @("UVK", "https://www.carifred.com/uvk/UVK.zip", $null, $null, "UVK_en64.exe"),
+    @("WizTree", "https://diskanalyzer.com/files/wiztree_4_27_portable.zip", $null, $null, "WizTree64.exe")
 )
 
 foreach ($dep in $dependencies) {
@@ -217,6 +218,11 @@ Log "Backing up Devices..."
 hostname > hostname.txt
 net use > mapped-drives.txt
 Get-Printer > printers.txt
+if ([Environment]::Is64BitOperatingSystem) {
+    .\bin\WizTree64.exe "$directory" /export="wiztree.csv"
+} else {
+    .\bin\WizTree.exe "$directory" /export="wiztree.csv"
+}
 Write-Output "Done"
 Log "Done"
 Write-Output ""
