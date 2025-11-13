@@ -13,7 +13,7 @@ function Log {
     param (
         [string]$message
         )
-        New-Item -ItemType File -Path $logFile -ErrorAction SilentlyContinue | Out-Null
+        New-Item -ItemType File -Path $logFile -ErrorAction SilentlyContinue >> $logFile
         $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         $logEntry = "$timestamp - $message"
         Write-Output $logEntry | Out-File -FilePath $logFile -Append
@@ -38,8 +38,8 @@ Write-Output ""
 
 Write-Output "Setting power settings to prevent sleep on AC power..."
 Log "Setting power settings to prevent sleep on AC power..."
-powercfg /change standby-timeout-ac 0 | Out-Null
-powercfg /change monitor-timeout-ac 0 | Out-Null
+powercfg /change standby-timeout-ac 0
+powercfg /change monitor-timeout-ac 0
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -54,7 +54,7 @@ Write-Output ""
 Write-Output "Checking dependencies..."
 Log "Checking dependencies..."
 Write-Output ""
-New-Item -Path "bin" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+New-Item -Path "bin" -ItemType Directory -ErrorAction SilentlyContinue >> $logFile
 $headers = @{
     "Referer" = "http://www.example.com/previous-page.html"
 }
@@ -124,9 +124,9 @@ foreach ($dep in $dependencies) {
         Expand-Archive -Path $outputPath -DestinationPath "bin" -Force
     } else {
         if ($password) {
-            .\bin\7za.exe e $outputPath -o"bin" -p"$password" -y | Out-Null
+            .\bin\7za.exe e $outputPath -o"bin" -p"$password" -y >> $logFile
         } else {
-            .\bin\7za.exe e $outputPath -o"bin" -y | Out-Null
+            .\bin\7za.exe e $outputPath -o"bin" -y >> $logFile
         }
     }
 
@@ -143,9 +143,9 @@ Write-Output "Backing up Desktop..."
 Log "Backing up Desktop..."
 $wallpaperPath = $env:APPDATA + "\Microsoft\Windows\Themes\TranscodedWallpaper"
 if (Test-Path $wallpaperPath) {
-    Copy-Item -Path $wallpaperPath -Destination ".\desktop_wallpaper.jpg" -Force | Out-Null
+    Copy-Item -Path $wallpaperPath -Destination ".\desktop_wallpaper.jpg" -Force >> $logFile
 } else {
-    New-Item -Path ".\wallpaper.txt" -ItemType File -Value "No wallpaper found." -Force | Out-Null
+    New-Item -Path ".\wallpaper.txt" -ItemType File -Value "No wallpaper found." -Force >> $logFile
 }
 .\bin\NTFSLinksView.exe /shtml "symlinks_nirsoft-ntfslinksview.html"
 .\bin\shexview.exe /shtml "shell-extensions_nirsoft-shellexview.html"
@@ -166,15 +166,15 @@ write-Output ""
 Write-Output "Extracting Passwords..."
 Log "Extracting Passwords..."
 .\bin\BulletsPassView.exe /shtml "passwords_nirsoft-bulletspassview.html"
-.\bin\CredentialsFileView.exe /shtml "passwords_nirsoft-credentialsfileview.html"
-.\bin\Dialupass.exe /shtml "passwords_nirsoft-dialupass.html"
-.\bin\LostMyPassword.exe /shtml "passwords_nirsoft-lostmypassword.html"
-.\bin\netpass.exe /shtml "passwords_nirsoft-network-password-recovery.html"
-.\bin\PasswordScan.exe /shtml "passwords_nirsoft-password-security-scanner.html"
-# .\bin\PCAnyPass.exe /shtml "passwords_nirsoft-pcanywhere-passview.html"     # PCAnywhere is deprecated but may still be in use
-.\bin\rdpv.exe /shtml "passwords_nirsoft-remote-desktop-passview.html"
-.\bin\WebBrowserPassView.exe /shtml "passwords_nirsoft-webbrowserpassview.html"
-.\bin\VaultPasswordView.exe /shtml "passwords_nirsoft-vaultpasswordview.html"
+.\bin\CredentialsFileView.exe /shtml "passwords_nirsoft-credentialsfileview.html"   # no cli export
+.\bin\Dialupass.exe /shtml "passwords_nirsoft-dialupass.html"                       # no cli export
+.\bin\LostMyPassword.exe /shtml "passwords_nirsoft-lostmypassword.html"             # no cli export
+.\bin\netpass.exe /shtml "passwords_nirsoft-network-password-recovery.html"         # no cli export
+.\bin\PasswordScan.exe /shtml "passwords_nirsoft-password-security-scanner.html"    # no cli export
+# .\bin\PCAnyPass.exe /shtml "passwords_nirsoft-pcanywhere-passview.html"           # PCAnywhere is deprecated but may still be in use
+.\bin\rdpv.exe /shtml "passwords_nirsoft-remote-desktop-passview.html"              # no cli export
+.\bin\WebBrowserPassView.exe /shtml "passwords_nirsoft-webbrowserpassview.html"     # no cli export
+.\bin\VaultPasswordView.exe /shtml "passwords_nirsoft-vaultpasswordview.html"       # no cli export
 .\bin\VNCPassView.exe /shtml "passwords_nirsoft-vncpassview.html"
 Write-Output "Done"
 Log "Done"
@@ -182,7 +182,7 @@ Write-Output ""
 
 Write-Output "Exporting Licenses..."
 Log "Exporting Licenses..."
-.\bin\ProductKeyScanner.exe /shtml "licenses_nirsoft-productkeyscanner.html"
+.\bin\ProductKeyScanner.exe /shtml "licenses_nirsoft-productkeyscanner.html"        # no cli export
 .\bin\ProduKey.exe /shtml "licenses_nirsoft-produkey.html"
 Write-Output "Done"
 Log "Done"
@@ -190,14 +190,14 @@ Write-Output ""
 
 Write-Output "Backing up Mail Clients..."
 Log "Backing up Mail Clients..."
-.\bin\mailpv.exe /shtml "mail-clients_nirsoft-mail-passview.html"
-.\bin\OutlookAccountsView.exe /shtml "mail-clients_nirsoft-outlookaccountsview.html"
+.\bin\mailpv.exe /shtml "mail-clients_nirsoft-mail-passview.html"                       # no cli export
+.\bin\OutlookAccountsView.exe /shtml "mail-clients_nirsoft-outlookaccountsview.html"    # no cli export
 .\bin\OutlookAddressBookView.exe /shtml "mail-clients_nirsoft-outlookaddressbookview.html"
-.\bin\PstPassword.exe /shtml "mail-clients_nirsoft-pstpassword.html"
-.\bin\WinMailPassRec.exe /shtml "mail-clients_nirsoft-winmailpassrec.html"
-reg export "HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook" "outlook_profile_2007-2010.reg" /y | Out-Null
-reg export "HKEY_CURRENT_USER\Software\Microsoft\Office\15.0\Outlook" "outlook_profile_2013.reg" /y | Out-Null
-reg export "HKEY_CURRENT_USER\Software\Microsoft\Office\16.0\Outlook" "outlook_profile_2016-onwards.reg" /y | Out-Null
+.\bin\PstPassword.exe /shtml "mail-clients_nirsoft-pstpassword.html"                    # no cli export
+.\bin\WinMailPassRec.exe /shtml "mail-clients_nirsoft-winmailpassrec.html"              # no cli export
+reg export "HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook" "outlook_profile_2007-2010.reg" /y >> $logFile
+reg export "HKEY_CURRENT_USER\Software\Microsoft\Office\15.0\Outlook" "outlook_profile_2013.reg" /y >> $logFile
+reg export "HKEY_CURRENT_USER\Software\Microsoft\Office\16.0\Outlook" "outlook_profile_2016-onwards.reg" /y >> $logFile
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -232,8 +232,8 @@ Write-Output ""
 write-Output "Exporting Installed Programs..."
 Log "Exporting Installed Programs..."
 if (Get-Command winget -ErrorAction SilentlyContinue) {
-    winget export -o "winget.json" | Out-Null
-    winget export -o "winget.json" > winget_unavailable.txt
+    winget export -o "winget.json" --accept-source-agreements >> $logFile
+    winget export -o "winget.json" --accept-source-agreements > winget_unavailable.txt
 } else {
     Write-Output "Winget not found, skipping winget export."
     Log "Winget not found, skipping winget export."
@@ -268,7 +268,7 @@ Write-Output ""
 
 Write-Output "Exporting Drivers..."
 Log "Exporting Drivers..."
-New-Item -Path "drivers" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
+New-Item -Path "drivers" -ItemType Directory -ErrorAction SilentlyContinue >> $logFile
 Export-WindowsDriver -Online -Destination ".\drivers"
 .\bin\DriverView.exe /shtml "drivers_nirsoft-driverview.html"
 write-Output "Done"
@@ -277,19 +277,19 @@ Write-Output ""
 
 Write-Output "Backuping up Registry..."
 Log "Backing up Registry..."
-New-Item -Path "registry" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
-reg export "HKEY_CLASSES_ROOT" ".\registry\HKEY_CLASSES_ROOT.reg" /y | Out-Null
-reg export "HKEY_CURRENT_USER" ".\registry\HKEY_CURRENT_USER.reg" /y | Out-Null
-reg export "HKEY_LOCAL_MACHINE" ".\registry\HKEY_LOCAL_MACHINE.reg" /y | Out-Null
-reg export "HKEY_USERS" ".\registry\HKEY_USERS.reg" /y | Out-Null
-reg export "HKEY_CURRENT_CONFIG" ".\registry\HKEY_CURRENT_CONFIG.reg" /y | Out-Null
+New-Item -Path "registry" -ItemType Directory -ErrorAction SilentlyContinue >> $logFile
+reg export "HKEY_CLASSES_ROOT" ".\registry\HKEY_CLASSES_ROOT.reg" /y >> $logFile
+reg export "HKEY_CURRENT_USER" ".\registry\HKEY_CURRENT_USER.reg" /y >> $logFile
+reg export "HKEY_LOCAL_MACHINE" ".\registry\HKEY_LOCAL_MACHINE.reg" /y >> $logFile
+reg export "HKEY_USERS" ".\registry\HKEY_USERS.reg" /y >> $logFile
+reg export "HKEY_CURRENT_CONFIG" ".\registry\HKEY_CURRENT_CONFIG.reg" /y >> $logFile
 write-Output "Done"
 Log "Done"
 Write-Output ""
 
 Write-Output "Resetting power settings..."
 Log "Resetting power settings..."
-powercfg /restoredefaultschemes | Out-Null
+powercfg /restoredefaultschemes >> $logFile
 Write-Output "Done"
 Log "Done"
 Write-Output ""
