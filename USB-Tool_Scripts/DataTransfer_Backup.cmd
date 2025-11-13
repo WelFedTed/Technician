@@ -27,6 +27,25 @@ if "%~1" == "" (
 )
 rem is elevated, continue script
 echo Running as Administrator, proceeding...
+echo:
+echo You are about to run the Data Transfer Backup script.
+echo Backup data will be saved to the following directory:
+echo:
+echo %currentDir%
+echo:
+choice /c YN /n /m "Are you sure you want to continue? (Y/N): "
+
+IF ERRORLEVEL 2 GOTO NO_CONTINUE
+IF ERRORLEVEL 1 GOTO CONTINUE
+
+:CONTINUE
 pushd "%~dp0"
 PowerShell.exe -Command "& {Start-Process PowerShell.exe -ArgumentList '-NonInteractive -NoProfile -ExecutionPolicy Bypass -File "%~dp0\%~n0.ps1 %currentDir%"' -Verb RunAs}"
+goto END
+
+:NO_CONTINUE
+echo Exiting...
+goto END
+
+:END
 exit /b
