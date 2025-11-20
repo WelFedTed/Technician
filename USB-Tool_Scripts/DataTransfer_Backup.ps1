@@ -6,17 +6,17 @@
 # This export / backup can then be used to restore
 # on to aother device.
 
-$directory=$args[0]
+$directory = $args[0]
 $logFile = "_backup.log"
 
 function Log {
     param (
         [string]$message
-        )
-        New-Item -ItemType File -Path $logFile -ErrorAction SilentlyContinue | Out-Null
-        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-        $logEntry = "$timestamp - $message"
-        Write-Output $logEntry | Out-File -FilePath $logFile -Append
+    )
+    New-Item -ItemType File -Path $logFile -ErrorAction SilentlyContinue | Out-Null
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logEntry = "$timestamp - $message"
+    Write-Output $logEntry | Out-File -FilePath $logFile -Append
 }
 
 Set-Location -Path $directory
@@ -46,7 +46,7 @@ Write-Output ""
 
 Write-Output "Closing non-essential applications..."
 Log "Closing non-essential applications..."
-Get-Process | Where-Object {$_.MainWindowTitle -ne "" -and $_.Id -ne $PID -and $_.ProcessName -ne "explorer"} | Stop-Process -Force
+Get-Process | Where-Object { $_.MainWindowTitle -ne "" -and $_.Id -ne $PID -and $_.ProcessName -ne "explorer" } | Stop-Process -Force
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -136,10 +136,12 @@ foreach ($dep in $dependencies) {
 
     if ($name -eq "7zip") {
         Expand-Archive -Path $outputPath -DestinationPath "bin" -Force
-    } else {
+    }
+    else {
         if ($password) {
             .\bin\7za.exe e $outputPath -o"bin" -p"$password" -y >> $logFile
-        } else {
+        }
+        else {
             .\bin\7za.exe e $outputPath -o"bin" -y >> $logFile
         }
     }
@@ -158,8 +160,9 @@ Log "Backing up Desktop..."
 $wallpaperPath = $env:APPDATA + "\Microsoft\Windows\Themes\TranscodedWallpaper"
 if (Test-Path $wallpaperPath) {
     Copy-Item -Path $wallpaperPath -Destination ".\desktop_wallpaper.jpg" -Force >> $logFile
-} else {
-    New-Item -Path ".\wallpaper.txt" -ItemType File -Value "No wallpaper found." -Force >> $logFile
+}
+else {
+    New-Item -Path ".\desktop_wallpaper.txt" -ItemType File -Value "No wallpaper found." -Force >> $logFile
 }
 .\bin\NTFSLinksView.exe /shtml "symlinks_nirsoft-ntfslinksview.html"
 .\bin\shexview.exe /shtml "shell-extensions_nirsoft-shellexview.html"
@@ -169,7 +172,8 @@ if (Test-Path $wallpaperPath) {
 .\bin\WhatInStartup.exe /shtml "startup-items_nirsoft-whatinstartup.html"
 if ([Environment]::Is64BitOperatingSystem) {
     .\bin\UVK_en64.exe -WriteSysInfo "$directory\system-info.html"
-} else {
+}
+else {
     .\bin\UVK_en.exe -WriteSysInfo "$directory\system-info.html"
 }
 net users > users.txt
@@ -230,10 +234,11 @@ Log "Backing up Devices..."
 .\bin\DriveLetterView.exe /shtml "devices_nirsoft-driveletterview.html"
 hostname > hostname.txt
 net use > mapped-drives.txt
-Get-Printer > printers.txt
+Get-Printer > printers.txt # TODO: replace with better export than shell redirects, it misses some info if the window is too narrow
 if ([Environment]::Is64BitOperatingSystem) {
     .\bin\WizTree64.exe "$directory" /export="wiztree.csv"
-} else {
+}
+else {
     .\bin\WizTree.exe "$directory" /export="wiztree.csv"
 }
 Write-Output "Done"
@@ -253,7 +258,8 @@ Log "Exporting Installed Programs..."
 if (Get-Command winget -ErrorAction SilentlyContinue) {
     winget export -o "winget.json" --accept-source-agreements >> $logFile
     winget export -o "winget.json" --accept-source-agreements > winget_unavailable.txt
-} else {
+}
+else {
     Write-Output "Winget not found, skipping winget export."
     Log "Winget not found, skipping winget export."
 }
