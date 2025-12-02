@@ -21,6 +21,7 @@ if errorlevel 1 (
     echo Proceeding...
     del "%temp%\DataTransfer_Backup_latest.cmd"
 )
+echo:
 
 @REM update DataTransfer_Backup.ps1
 echo Checking for latest version of DataTransfer_Backup.ps1...
@@ -35,6 +36,7 @@ if errorlevel 1 (
     echo Proceeding...
     del "%temp%\DataTransfer_Backup_latest.ps1"
 )
+echo:
 
 echo Checking if you have Administrator permissions...
 echo:
