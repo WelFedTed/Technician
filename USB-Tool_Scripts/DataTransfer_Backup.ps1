@@ -156,16 +156,18 @@ foreach ($dep in $dependencies) {
 Write-Output "Backing up Relevant App Data..."
 Log "Backing up Relevant App Data..."
 $appDataPaths = @(
-    "$env:APPDATA\Mozilla\Firefox",
-    "$env:APPDATA\eM Client",
-    "$env:APPDATA\Opera Software\Opera Stable"
-    "$env:APPDATA\Thunderbird",
-    "$env:LOCALAPPDATA\AVG Software\Browser",
-    "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser",
-    "$env:LOCALAPPDATA\Google\Chrome",
-    "$env:LOCALAPPDATA\Microsoft\Edge",
-    "$env:LOCALAPPDATA\Microsoft\Outlook",
-    "$env:USERPROFILE\AppData\LocalLow\Sun\Java"
+    "$env:USERPROFILE\AppData\Local\AVG Software\Browser",
+    "$env:USERPROFILE\AppData\Local\BraveSoftware\Brave-Browser",
+    "$env:USERPROFILE\AppData\Local\Chromium",
+    "$env:USERPROFILE\AppData\Local\Google\Chrome",
+    "$env:USERPROFILE\AppData\Local\Microsoft\Edge",
+    "$env:USERPROFILE\AppData\Local\Microsoft\Outlook",
+    "$env:USERPROFILE\AppData\Local\Vivaldi",
+    "$env:USERPROFILE\AppData\LocalLow\Sun\Java", # need to check this location (some java apps store data here)
+    "$env:USERPROFILE\AppData\Roaming\eM Client",
+    "$env:USERPROFILE\AppData\Roaming\Mozilla\Firefox",
+    "$env:USERPROFILE\AppData\Roaming\Opera Software\Opera Stable",
+    "$env:USERPROFILE\AppData\Roaming\Thunderbird"
 )
 New-Item -Path "appdata" -ItemType Directory -ErrorAction SilentlyContinue >> $logFile
 foreach ($appDataPath in $appDataPaths) {
