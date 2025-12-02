@@ -153,7 +153,33 @@ foreach ($dep in $dependencies) {
     Write-Output ""
 }
 
-# cmd /k pause
+Write-Output "Backing up Relevant App Data..."
+Log "Backing up Relevant App Data..."
+$appDataPaths = @(
+    "$env:APPDATA\Mozilla\Firefox",
+    "$env:APPDATA\Opera Software\Opera Stable"
+    "$env:APPDATA\Thunderbird",
+    "$env:LOCALAPPDATA\AVG Software\Browser",
+    "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser",
+    "$env:LOCALAPPDATA\Google\Chrome",
+    "$env:LOCALAPPDATA\Microsoft\Edge",
+    "$env:LOCALAPPDATA\Microsoft\Outlook"
+)
+New-Item -Path "appdata" -ItemType Directory -ErrorAction SilentlyContinue >> $logFile
+foreach ($appDataPath in $appDataPaths) {
+    if (Test-Path $appDataPath) {
+        $folderName = Split-Path $appDataPath -Leaf
+        .\bin\rclone.exe copy $appDataPath ".\appdata\$folderName" --progress --log-file=_rclone.log
+        Write-Output "Backed up $appDataPath"
+        Log "Backed up $appDataPath"
+    }
+    else {
+        Write-Output "Path not found: $appDataPath"
+        Log "Path not found: $appDataPath"
+    }
+}
+
+cmd /k pause
 
 Write-Output "Backing up Desktop..."
 Log "Backing up Desktop..."
