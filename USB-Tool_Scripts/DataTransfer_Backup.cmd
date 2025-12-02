@@ -5,6 +5,10 @@
 
 title Data Transfer - Backup Script
 
+echo Data Transfer - Backup Script
+echo ----------------------------------------------------------------------
+echo:
+
 @REM update DataTransfer_Backup.cmd
 echo Checking for latest version of DataTransfer_Backup.cmd...
 powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/WelFedTed/Technician/refs/heads/main/USB-Tool_Scripts/DataTransfer_Backup.cmd' -OutFile '%temp%\DataTransfer_Backup_latest.cmd'"
