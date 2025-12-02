@@ -176,7 +176,7 @@ if ([Environment]::Is64BitOperatingSystem) {
 else {
     .\bin\UVK_en.exe -WriteSysInfo "$directory\system-info.html"
 }
-net users > users.txt
+net users | Out-File -FilePath "users.txt" -Width 200
 Write-Output "Done"
 Log "Done"
 write-Output ""
