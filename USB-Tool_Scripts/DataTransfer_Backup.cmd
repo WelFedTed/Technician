@@ -5,7 +5,24 @@
 
 title Data Transfer - Backup Script
 
-@REM check if DataTransfer_Backup.ps1 is up to date - if not, download latest version
+@REM update DataTransfer_Backup.cmd
+echo Checking for latest version of DataTransfer_Backup.cmd...
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/WelFedTed/Technician/refs/heads/main/USB-Tool_Scripts/DataTransfer_Backup.cmd' -OutFile '%temp%\DataTransfer_Backup_latest.cmd'"
+fc "%temp%\DataTransfer_Backup_latest.cmd" "%~dp0\DataTransfer_Backup.cmd" >nul
+if errorlevel 1 (
+    echo A newer version of DataTransfer_Backup.cmd is available
+    echo Updating...
+    move /Y "%temp%\DataTransfer_Backup_latest.cmd" "%~dp0\DataTransfer_Backup.cmd" >nul
+    echo Restarting script...
+    "%~dp0\DataTransfer_Backup.cmd" %*
+    exit /b
+) else (
+    echo You already have the latest version of DataTransfer_Backup.cmd
+    echo Proceeding...
+    del "%temp%\DataTransfer_Backup_latest.cmd"
+)
+
+@REM update DataTransfer_Backup.ps1
 echo Checking for latest version of DataTransfer_Backup.ps1...
 powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/WelFedTed/Technician/refs/heads/main/USB-Tool_Scripts/DataTransfer_Backup.ps1' -OutFile '%temp%\DataTransfer_Backup_latest.ps1'"
 fc "%temp%\DataTransfer_Backup_latest.ps1" "%~dp0\DataTransfer_Backup.ps1" >nul
