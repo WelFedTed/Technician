@@ -157,13 +157,15 @@ Write-Output "Backing up Relevant App Data..."
 Log "Backing up Relevant App Data..."
 $appDataPaths = @(
     "$env:APPDATA\Mozilla\Firefox",
+    "$env:APPDATA\eM Client",
     "$env:APPDATA\Opera Software\Opera Stable"
     "$env:APPDATA\Thunderbird",
     "$env:LOCALAPPDATA\AVG Software\Browser",
     "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser",
     "$env:LOCALAPPDATA\Google\Chrome",
     "$env:LOCALAPPDATA\Microsoft\Edge",
-    "$env:LOCALAPPDATA\Microsoft\Outlook"
+    "$env:LOCALAPPDATA\Microsoft\Outlook",
+    "$env:USERPROFILE\AppData\LocalLow\Sun\Java"
 )
 New-Item -Path "appdata" -ItemType Directory -ErrorAction SilentlyContinue >> $logFile
 foreach ($appDataPath in $appDataPaths) {
