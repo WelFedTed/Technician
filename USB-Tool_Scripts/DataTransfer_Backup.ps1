@@ -232,9 +232,9 @@ Write-Output ""
 Write-Output "Backing up Devices..."
 Log "Backing up Devices..."
 .\bin\DriveLetterView.exe /shtml "devices_nirsoft-driveletterview.html"
-hostname > hostname.txt
-net use > mapped-drives.txt
-Get-Printer > printers.txt # TODO: replace with better export than shell redirects, it misses some info if the window is too narrow
+hostname | Out-File -FilePath "hostname.txt" -Width 200
+net use | Out-File -FilePath "mapped-drives.txt" -Width 200
+Get-Printer | Out-File -FilePath "printers.txt" -Width 200
 if ([Environment]::Is64BitOperatingSystem) {
     .\bin\WizTree64.exe "$directory" /export="wiztree.csv"
 }
@@ -257,7 +257,7 @@ write-Output "Exporting Installed Programs..."
 Log "Exporting Installed Programs..."
 if (Get-Command winget -ErrorAction SilentlyContinue) {
     winget export -o "winget.json" --accept-source-agreements >> $logFile
-    winget export -o "winget.json" --accept-source-agreements > winget_unavailable.txt
+    winget export -o "winget.json" --accept-source-agreements | Out-File -FilePath "winget_unavailable.txt" -Width 200
 }
 else {
     Write-Output "Winget not found, skipping winget export."
