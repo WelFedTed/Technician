@@ -6,7 +6,9 @@
 title Data Transfer - Backup Script
 
 echo Data Transfer - Backup Script
-echo ----------------------------------------------------------------------
+@REM draw line to window width
+for /f "usebackq delims=" %%W in (`powershell -command "&{(get-host).ui.rawui.WindowSize.Width;}"`) do set "window_width=%%W"
+for /L %%i in (1,1,%window_width%) do <nul set /p=-
 echo:
 
 @REM update DataTransfer_Backup.cmd
