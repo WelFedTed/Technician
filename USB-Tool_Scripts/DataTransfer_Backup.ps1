@@ -153,37 +153,37 @@ foreach ($dep in $dependencies) {
     Write-Output ""
 }
 
-Write-Output "Backing up Relevant App Data..."
-Log "Backing up Relevant App Data..."
+Write-Output "Backing up relevant AppData..."
+Log "Backing up relevant AppData..."
 $appDataPaths = @(
-    "$env:USERPROFILE\AppData\Local\AVG Software\Browser",
-    "$env:USERPROFILE\AppData\Local\BraveSoftware\Brave-Browser",
-    "$env:USERPROFILE\AppData\Local\Chromium",
-    "$env:USERPROFILE\AppData\Local\Google\Chrome",
-    "$env:USERPROFILE\AppData\Local\Microsoft\Edge",
-    "$env:USERPROFILE\AppData\Local\Microsoft\Outlook",
-    "$env:USERPROFILE\AppData\Local\Vivaldi",
-    "$env:USERPROFILE\AppData\LocalLow\Sun\Java", # need to check this location (some java apps store data here)
-    "$env:USERPROFILE\AppData\Roaming\eM Client",
-    "$env:USERPROFILE\AppData\Roaming\Mozilla\Firefox",
-    "$env:USERPROFILE\AppData\Roaming\Opera Software\Opera Stable",
-    "$env:USERPROFILE\AppData\Roaming\Thunderbird"
+    "Local\AVG Software\Browser",
+    "Local\BraveSoftware\Brave-Browser",
+    "Local\Chromium",
+    "Local\Google\Chrome",
+    "Local\Microsoft\Edge",
+    "Local\Microsoft\Outlook",
+    "Local\Vivaldi",
+    "LocalLow\Sun\Java", # need to check this location (some java apps store data here)
+    "Roaming\eM Client",
+    "Roaming\Mozilla\Firefox",
+    "Roaming\Opera Software\Opera Stable",
+    "Roaming\Thunderbird"
 )
 New-Item -Path "appdata" -ItemType Directory -ErrorAction SilentlyContinue >> $logFile
 foreach ($appDataPath in $appDataPaths) {
-    if (Test-Path $appDataPath) {
-        $folderName = Split-Path $appDataPath -Leaf
-        .\bin\rclone.exe copy $appDataPath ".\appdata\$folderName" --progress --log-file=_rclone.log
-        Write-Output "Backed up $appDataPath"
-        Log "Backed up $appDataPath"
+    if (Test-Path "$env:USERPROFILE\AppData\$appDataPath") {
+        .\bin\rclone.exe copy "$env:USERPROFILE\AppData\$appDataPath" ".\appdata\$appDataPath" --progress --log-file=_rclone.log
+        Write-Output "Backed up AppData\$appDataPath"
+        Log "Backed up AppData\$appDataPath"
     }
     else {
-        Write-Output "Path not found: $appDataPath"
-        Log "Path not found: $appDataPath"
+        Write-Output "Path not found: AppData\$appDataPath"
+        Log "Path not found: AppData\$appDataPath"
     }
 }
-
-cmd /k pause
+Write-Output "Done"
+Log "Done"
+write-Output ""
 
 Write-Output "Backing up Desktop..."
 Log "Backing up Desktop..."
