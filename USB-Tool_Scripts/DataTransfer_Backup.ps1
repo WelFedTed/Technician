@@ -309,7 +309,7 @@ Write-Output ""
 
 Write-Output "Backing up User Profiles..."
 Log "Backing up User Profiles..."
-.\bin\rclone.exe copy "C:\Users" "users" --progress --log-file=_rclone.log
+.\bin\rclone.exe copy "C:\Users" "users" --progress --log-file=_rclone.log --exclude=/*/AppData/**
 write-Output "Done"
 Log "Done"
 Write-Output ""
