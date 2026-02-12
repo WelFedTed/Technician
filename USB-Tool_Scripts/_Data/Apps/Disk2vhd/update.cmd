@@ -2,12 +2,12 @@
 
 title App Updater
 
-echo Microsoft Activiation Scripts (MAS)
+echo Disk2vhd
 echo ----------------------------------------------------------------------------------------------------
 
-set "download=https://github.com/massgravel/Microsoft-Activation-Scripts/archive/refs/heads/master.zip"
+set "download=https://download.sysinternals.com/files/Disk2vhd.zip"
 set "update=update.zip"
-rem set "app=disk2vhd64.exe"
+set "app=disk2vhd64.exe"
 
 echo:
 echo Downloading 7zip (required for update)...
@@ -24,14 +24,12 @@ echo Applying update...
 tar -xf %update%
 del %update%
 
-rem echo:
-rem echo Updating version file...
-rem del *.version
-rem for /f "usebackq tokens=*" %%i in (`powershell -command "$version = (Get-Item '%app%').VersionInfo.FileVersionRaw; $version -replace '\s+', '.'"`) do set "version=%%i"
-rem for /f "usebackq tokens=*" %%i in (`powershell -command "(Get-Item '%app%').LastWriteTime.ToString('yyyy-MM-dd')"`) do set "date=%%i"
-rem type NUL > v%version%_%date%.version
-
-rem pull version + date values from "Microsoft-Activation-Scripts-master\README.md"
+echo:
+echo Updating version file...
+del *.version
+for /f "usebackq tokens=*" %%i in (`powershell -command "$version = (Get-Item '%app%').VersionInfo.FileVersionRaw; $version -replace '\s+', '.'"`) do set "version=%%i"
+for /f "usebackq tokens=*" %%i in (`powershell -command "(Get-Item '%app%').LastWriteTime.ToString('yyyy-MM-dd')"`) do set "date=%%i"
+type NUL > v%version%_%date%.version
 
 echo:
 echo Updating checksums...
@@ -50,7 +48,7 @@ echo Updating parity data...
 set "par2ver=1.0.0"
 wget https://github.com/Parchive/par2cmdline/releases/download/v%par2ver%/par2cmdline-%par2ver%-win-x64.zip -P %TEMP%
 tar -xf %TEMP%\par2cmdline-%par2ver%-win-x64.zip -C %TEMP%
-par2 c -v -b5000 -r5 -n1 -R parity.par2 *
+%TEMP%\par2 c -v -b5000 -r5 -n1 -R parity.par2 *
 
 echo:
 echo End of script

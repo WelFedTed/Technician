@@ -2,12 +2,12 @@
 
 title App Updater
 
-echo Microsoft Windows and Office ISO Download Tool
+echo Microsoft Activiation Scripts (MAS)
 echo ----------------------------------------------------------------------------------------------------
 
-set "download=https://www.heidoc.net/php/Windows-ISO-Downloader.exe"
-set "update=update.tmp"
-set "app=Windows-ISO-Downloader.exe"
+set "download=https://github.com/massgravel/Microsoft-Activation-Scripts/archive/refs/heads/master.zip"
+set "update=update.zip"
+rem set "app=disk2vhd64.exe"
 
 echo:
 echo Downloading 7zip (required for update)...
@@ -21,15 +21,17 @@ wget %download% -O %update%
 
 echo:
 echo Applying update...
-del %app%
-ren %update% %app%
+tar -xf %update%
+del %update%
 
-echo:
-echo Updating version file...
-del *.version
-for /f "usebackq tokens=*" %%i in (`powershell -command "$version = (Get-Item '%app%').VersionInfo.FileVersionRaw; $version -replace '\s+', '.'"`) do set "version=%%i"
-for /f "usebackq tokens=*" %%i in (`powershell -command "(Get-Item '%app%').LastWriteTime.ToString('yyyy-MM-dd')"`) do set "date=%%i"
-type NUL > v%version%_%date%.version
+rem echo:
+rem echo Updating version file...
+rem del *.version
+rem for /f "usebackq tokens=*" %%i in (`powershell -command "$version = (Get-Item '%app%').VersionInfo.FileVersionRaw; $version -replace '\s+', '.'"`) do set "version=%%i"
+rem for /f "usebackq tokens=*" %%i in (`powershell -command "(Get-Item '%app%').LastWriteTime.ToString('yyyy-MM-dd')"`) do set "date=%%i"
+rem type NUL > v%version%_%date%.version
+
+rem pull version + date values from "Microsoft-Activation-Scripts-master\README.md"
 
 echo:
 echo Updating checksums...
@@ -48,7 +50,7 @@ echo Updating parity data...
 set "par2ver=1.0.0"
 wget https://github.com/Parchive/par2cmdline/releases/download/v%par2ver%/par2cmdline-%par2ver%-win-x64.zip -P %TEMP%
 tar -xf %TEMP%\par2cmdline-%par2ver%-win-x64.zip -C %TEMP%
-par2 c -v -b5000 -r5 -n1 -R parity.par2 *
+%TEMP%\par2 c -v -b5000 -r5 -n1 -R parity.par2 *
 
 echo:
 echo End of script
