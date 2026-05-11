@@ -36,6 +36,9 @@ Write-Output "Logging to file: $logFile"
 Log "Logging to file: $logFile"
 Write-Output ""
 
+# ============================================================================
+# Set Power Settings
+# ============================================================================
 Write-Output "Setting power settings to prevent sleep on AC power..."
 Log "Setting power settings to prevent sleep on AC power..."
 powercfg /change standby-timeout-ac 0
@@ -44,6 +47,9 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Close Non-Essential Apps
+# ============================================================================
 Write-Output "Closing non-essential applications..."
 Log "Closing non-essential applications..."
 Get-Process | Where-Object { $_.MainWindowTitle -ne "" -and $_.Id -ne $PID -and $_.ProcessName -ne "explorer" } | Stop-Process -Force
@@ -51,6 +57,9 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Disable Security
+# ============================================================================
 Write-Output "Disabling Windows Defender..."
 Log "Disabling Windows Defender..."
 Add-MpPreference -ExclusionPath $directory
@@ -63,6 +72,9 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Download Dependancies
+# ============================================================================
 Write-Output "Checking dependencies..."
 Log "Checking dependencies..."
 Write-Output ""
@@ -76,9 +88,9 @@ $dependencies = @(
     @("7zip", "https://www.7-zip.org/a/7za920.zip", $null, $null, "7za.exe"),
     @("Nirsoft AdapterWatch", "https://www.nirsoft.net/utils/awatch.zip", $null, $null, "awatch.exe"),
     @("Nirsoft BrowserAddonsView", "https://www.nirsoft.net/utils/browseraddonsview.zip", "https://www.nirsoft.net/utils/browseraddonsview-x64.zip", $null, "BrowserAddonsView.exe"),
-    @("Nirsoft BulletsPassView", "https://www.nirsoft.net/utils/bulletspassview.zip", "https://www.nirsoft.net/utils/bulletspassview-x64.zip", $null, "BulletsPassView.exe"),
+    # @("Nirsoft BulletsPassView", "https://www.nirsoft.net/utils/bulletspassview.zip", "https://www.nirsoft.net/utils/bulletspassview-x64.zip", $null, "BulletsPassView.exe"),
     @("Nirsoft CredentialsFileView", "https://www.nirsoft.net/toolsdownload/credentialsfileview.zip", "https://www.nirsoft.net/toolsdownload/credentialsfileview-x64.zip", $null, "CredentialsFileView.exe"),
-    @("Nirsoft Dialupass", "https://www.nirsoft.net/toolsdownload/dialupass.zip", $null, "nsdlps3861@", "Dialupass.exe"),
+    # @("Nirsoft Dialupass", "https://www.nirsoft.net/toolsdownload/dialupass.zip", $null, "nsdlps3861@", "Dialupass.exe"),
     @("Nirsoft DriveLetterView", "https://www.nirsoft.net/utils/driveletterview.zip", "https://www.nirsoft.net/utils/driveletterview-x64.zip", $null, "DriveLetterView.exe"),
     @("Nirsoft DriverView", "https://www.nirsoft.net/utils/driverview.zip", "https://www.nirsoft.net/utils/driverview-x64.zip", $null, "DriverView.exe"),
     @("Nirsoft InstalledAppView", "https://www.nirsoft.net/utils/installedappview.zip", "https://www.nirsoft.net/utils/installedappview-x64.zip", $null, "InstalledAppView.exe"),
@@ -90,7 +102,7 @@ $dependencies = @(
     @("Nirsoft NTFSLinksView", "https://www.nirsoft.net/utils/ntfslinksview.zip", "https://www.nirsoft.net/utils/ntfslinksview-x64.zip", $null, "NTFSLinksView.exe"),
     @("Nirsoft OutlookAccountsView", "https://www.nirsoft.net/utils/outlookaccountsview.zip", "https://www.nirsoft.net/utils/outlookaccountsview-x64.zip", $null, "OutlookAccountsView.exe"),
     @("Nirsoft OutlookAddressBookView", "https://www.nirsoft.net/utils/outlookaddressbookview.zip", $null, $null, "OutlookAddressBookView.exe"),
-    @("Nirsoft Password Security Scanner", "https://www.nirsoft.net/utils/passwordscan.zip", "https://www.nirsoft.net/utils/passwordscan-x64.zip", $null, "PasswordScan.exe"),
+    # @("Nirsoft Password Security Scanner", "https://www.nirsoft.net/utils/passwordscan.zip", "https://www.nirsoft.net/utils/passwordscan-x64.zip", $null, "PasswordScan.exe"),
     # @("Nirsoft PCAnywhere PassView", "https://www.nirsoft.net/utils/pcanypass.zip", $null, $null, "PCAnyPass.exe"),
     @("Nirsoft Product Key Scanner", "https://www.nirsoft.net/utils/productkeyscanner.zip", "https://www.nirsoft.net/utils/productkeyscanner-x64.zip", $null, "ProductKeyScanner.exe"),
     @("Nirsoft ProduKey", "https://www.nirsoft.net/utils/produkey.zip", "https://www.nirsoft.net/utils/produkey-x64.zip", $null, "ProduKey.exe"),
@@ -153,6 +165,9 @@ foreach ($dep in $dependencies) {
     Write-Output ""
 }
 
+# ============================================================================
+# AppData
+# ============================================================================
 Write-Output "Backing up relevant AppData..."
 Log "Backing up relevant AppData..."
 $appDataPaths = @(
@@ -185,6 +200,9 @@ Write-Output "Done"
 Log "Done"
 write-Output ""
 
+# ============================================================================
+# Desktop / System / Users
+# ============================================================================
 Write-Output "Backing up Desktop..."
 Log "Backing up Desktop..."
 $wallpaperPath = $env:APPDATA + "\Microsoft\Windows\Themes\TranscodedWallpaper"
@@ -211,14 +229,17 @@ Write-Output "Done"
 Log "Done"
 write-Output ""
 
+# ============================================================================
+# Passwords
+# ============================================================================
 Write-Output "Extracting Passwords..."
 Log "Extracting Passwords..."
-.\bin\BulletsPassView.exe /shtml "passwords_nirsoft-bulletspassview.html"
+# .\bin\BulletsPassView.exe /shtml "passwords_nirsoft-bulletspassview.html"         # situational tool
 .\bin\CredentialsFileView.exe /shtml "passwords_nirsoft-credentialsfileview.html"   # no cli export
-.\bin\Dialupass.exe /shtml "passwords_nirsoft-dialupass.html"                       # no cli export
+# .\bin\Dialupass.exe /shtml "passwords_nirsoft-dialupass.html"                     # dial up connections are deprecated
 .\bin\LostMyPassword.exe /shtml "passwords_nirsoft-lostmypassword.html"             # no cli export
 .\bin\netpass.exe /shtml "passwords_nirsoft-network-password-recovery.html"         # no cli export
-.\bin\PasswordScan.exe /shtml "passwords_nirsoft-password-security-scanner.html"    # no cli export
+# .\bin\PasswordScan.exe /shtml "passwords_nirsoft-password-security-scanner.html"  # not required for data transfers
 # .\bin\PCAnyPass.exe /shtml "passwords_nirsoft-pcanywhere-passview.html"           # PCAnywhere is deprecated but may still be in use
 .\bin\rdpv.exe /shtml "passwords_nirsoft-remote-desktop-passview.html"              # no cli export
 .\bin\WebBrowserPassView.exe /shtml "passwords_nirsoft-webbrowserpassview.html"     # no cli export
@@ -228,6 +249,9 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Licenses
+# ============================================================================
 Write-Output "Exporting Licenses..."
 Log "Exporting Licenses..."
 .\bin\ProductKeyScanner.exe /shtml "licenses_nirsoft-productkeyscanner.html"        # no cli export
@@ -236,6 +260,9 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Mail Clients
+# ============================================================================
 Write-Output "Backing up Mail Clients..."
 Log "Backing up Mail Clients..."
 .\bin\mailpv.exe /shtml "mail-clients_nirsoft-mail-passview.html"                       # no cli export
@@ -250,6 +277,9 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Networking
+# ============================================================================
 Write-Output "Backing up Networking..."
 Log "Backing up Networking..."
 .\bin\awatch.exe /shtml "networking_nirsoft-adapterwatch.html"
@@ -259,6 +289,9 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Devices
+# ============================================================================
 Write-Output "Backing up Devices..."
 Log "Backing up Devices..."
 .\bin\DriveLetterView.exe /shtml "devices_nirsoft-driveletterview.html"
@@ -275,6 +308,9 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Web Browsers
+# ============================================================================
 Write-Output "Backing up Web Browsers..."
 Log "Backing up Web Browsers..."
 .\bin\BrowserAddonsView.exe /shtml "web-browsers_nirsoft-browseraddonsview.html"
@@ -283,6 +319,9 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Installed Programs
+# ============================================================================
 write-Output "Exporting Installed Programs..."
 Log "Exporting Installed Programs..."
 if (Get-Command winget -ErrorAction SilentlyContinue) {
@@ -300,6 +339,9 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Security Software
+# ============================================================================
 Write-Output "Exporting Security Software..."
 Log "Exporting Security Software..."
 .\bin\SecuritySoftView.exe /shtml "security-software_nirsoft-securitysoftview.html"
@@ -307,6 +349,126 @@ Write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Recent Documents
+# ============================================================================
+Write-Output "Exporting Recent Documents..."
+Log "Exporting Recent Documents..."
+
+$OutputDir = "recent-documents"
+
+if (-not (Test-Path $OutputDir)) {
+    New-Item -ItemType Directory -Path $OutputDir | Out-Null
+}
+
+$OfficeVersions = @(
+    @{ Version = "9.0";  Name = "2000"  }
+    @{ Version = "10.0"; Name = "2002"  }
+    @{ Version = "11.0"; Name = "2003"  }
+    @{ Version = "12.0"; Name = "2007"  }
+    @{ Version = "14.0"; Name = "2010"  }
+    @{ Version = "15.0"; Name = "2013"  }
+    @{ Version = "16.0"; Name = "2016+" }
+)
+
+$RegistryKeys = @(
+    # Word
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Word\File MRU"; File = "word_file-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Word\Place MRU"; File = "word_place-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Word\User MRU"; File = "word_user-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Word\Recent File List"; File = "word_recent-file-list.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Word\Data"; File = "word_data.reg" },
+
+    # Excel
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Excel\File MRU"; File = "excel_file-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Excel\Place MRU"; File = "excel_place-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Excel\User MRU"; File = "excel_user-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Excel\Recent Files"; File = "excel_recent-files.reg" },
+
+    # PowerPoint
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\PowerPoint\File MRU"; File = "powerpoint_file-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\PowerPoint\Place MRU"; File = "powerpoint_place-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\PowerPoint\User MRU"; File = "powerpoint_user-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\PowerPoint\Recent File List"; File = "powerpoint_recent-file-list.reg" },
+
+    # Access
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Access\File MRU"; File = "access_file-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Access\Place MRU"; File = "access_place-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Access\User MRU"; File = "access_user-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Access\Settings"; File = "access_settings.reg" },
+
+    # Outlook
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Outlook\File MRU"; File = "outlook_file-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Outlook\Place MRU"; File = "outlook_place-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Outlook\User MRU"; File = "outlook_user-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Outlook\Profiles"; File = "outlook_profiles.reg" },
+
+    # OneNote
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\OneNote\File MRU"; File = "onenote_file-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\OneNote\OpenNotebooks"; File = "onenote_open-notebooks.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\OneNote\RecentNotebooks"; File = "onenote_recent-notebooks.reg" },
+
+    # Publisher
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Publisher\File MRU"; File = "publisher_file-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Publisher\Recent File List"; File = "publisher_recent-file-list.reg" },
+
+    # Visio
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Visio\File MRU"; File = "visio_file-mru.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Visio\Application"; File = "visio_application.reg" },
+
+    # Project
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\MS Project\File MRU"; File = "project_file-mru.reg" },
+
+    # Common
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Common\Open Find"; File = "common_open-find.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Common\Internet"; File = "common_internet.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Common\Roaming"; File = "common_roaming.reg" },
+    @{ Path = "HKCU\Software\Microsoft\Office\{VERSION}\Common\Identity"; File = "common_identity.reg" }
+)
+
+foreach ($Office in $OfficeVersions) {
+    $Version = $Office.Version
+    $VersionName = $Office.Name
+
+    foreach ($Key in $RegistryKeys) {
+        $RegistryPath = $Key.Path.Replace("{VERSION}", $Version)
+
+        $OutputFilename = "office_${Version}_${VersionName}_" + $Key.File
+        $OutputFile = Join-Path $OutputDir $OutputFilename
+
+        reg export $RegistryPath $OutputFile /y >> $logFile
+    }
+}
+
+$WindowsKeys = @(
+    @{
+        Path = "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs"
+        File = "windows_recentdocs.reg"
+    },
+    @{
+        Path = "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSaveMRU"
+        File = "windows_opensavemru.reg"
+    },
+    @{
+        Path = "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedMRU"
+        File = "windows_lastvisitedmru.reg"
+    }
+)
+
+foreach ($Key in $WindowsKeys) {
+    $RegistryPath = $Key.Path
+    $OutputFile = Join-Path $OutputDir $Key.File
+
+    reg export $RegistryPath $OutputFile /y >> $logFile
+}
+
+Write-Output "Done"
+Log "Done"
+Write-Output ""
+
+# ============================================================================
+# User Profiles
+# ============================================================================
 Write-Output "Backing up User Profiles..."
 Log "Backing up User Profiles..."
 .\bin\rclone.exe copy "C:\Users" "users" --progress --log-file=_rclone.log --exclude=/*/AppData/**
@@ -314,6 +476,9 @@ write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Fonts
+# ============================================================================
 Write-Output "Backing up Fonts..."
 Log "Backing up Fonts..."
 .\bin\rclone.exe copy "C:\Windows\Fonts" "fonts" --progress --log-file=_rclone.log
@@ -321,6 +486,9 @@ write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Drivers
+# ============================================================================
 Write-Output "Exporting Drivers..."
 Log "Exporting Drivers..."
 New-Item -Path "drivers" -ItemType Directory -ErrorAction SilentlyContinue >> $logFile
@@ -330,6 +498,9 @@ write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Registry Hives
+# ============================================================================
 Write-Output "Backuping up Registry..."
 Log "Backing up Registry..."
 New-Item -Path "registry" -ItemType Directory -ErrorAction SilentlyContinue >> $logFile
@@ -342,6 +513,9 @@ write-Output "Done"
 Log "Done"
 Write-Output ""
 
+# ============================================================================
+# Reset Power Settings
+# ============================================================================
 Write-Output "Resetting power settings..."
 Log "Resetting power settings..."
 powercfg /restoredefaultschemes >> $logFile
