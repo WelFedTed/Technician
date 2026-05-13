@@ -138,7 +138,7 @@ foreach ($dep in $dependencies) {
         Write-Output ""
         continue
     }
-    
+
     # $ProgressPreference = "SilentlyContinue"    # Hides progress bar, but speeds up downloads
     Write-Output "Downloading $name..."
     Log "Downloading $name..."
@@ -514,6 +514,25 @@ Log "Done"
 Write-Output ""
 
 # ============================================================================
+# Other Directories
+# ============================================================================
+# check for other files on C:, D:, etc..
+# use rclone to copy contents to ".\c", ".\d", etc..
+#   -> Exclude list of stock Windows directories/files
+#   -> Exclude list of common leftover directories/files (from HP, Dell, Nvidia installers, etc..)
+
+# ============================================================================
+# OneDrive
+# ============================================================================
+Write-Output "Backing up OneDrive..."
+Log "Backing up OneDrive..."
+$onedriveDirectory = Get-ItemProperty -Path "HKCU:\Software\Microsoft\OneDrive" | Select-Object -ExpandProperty "UserFolder"
+New-Item -Path ".\onedrive_location.txt" -ItemType File -Value "$onedriveDirectory" -Force >> $logFile
+Copy-Item -Path "$onedriveDirectory" -Destination ".\onedrive" -Recurse -Force -ErrorAction Continue >> $logFile
+Log "Done"
+Write-Output ""
+
+# ============================================================================
 # Reset Power Settings
 # ============================================================================
 Write-Output "Resetting power settings..."
@@ -522,6 +541,11 @@ powercfg /restoredefaultschemes >> $logFile
 Write-Output "Done"
 Log "Done"
 Write-Output ""
+
+# ============================================================================
+# Report To-Do's
+# ============================================================================
+# Create a _backup_todos.txt and open at end of script for list of to-do's / calls to action for technician
 
 Write-Output "Backup Complete"
 Log "----------------------------------------"
