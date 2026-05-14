@@ -161,7 +161,7 @@ foreach ($dep in $dependencies) {
 # ============================================================================
 # Devices
 # ============================================================================
-# copy 'printers' to C:\COPS
+.\bin\rclone.exe copy printers C:\COPS\printers --progress --log-file=_rclone.log
 #   -> create 'Install Printer XXX' shortcuts on Public user's Desktop
 
 # ============================================================================
