@@ -357,7 +357,6 @@ $DriverFolder = "drivers"
 
 if (-not (Test-Path $DriverFolder)) {
     Write-Host "Drivers folder not found." -ForegroundColor Red
-    exit 1
 }
 
 $MissingDevices = Get-PnpDevice -Status Error |
@@ -365,7 +364,6 @@ Where-Object { $_.Problem -eq 28 }
 
 if (-not $MissingDevices) {
     Write-Host "No missing drivers found." -ForegroundColor Green
-    exit 0
 }
 
 foreach ($Device in $MissingDevices) {
