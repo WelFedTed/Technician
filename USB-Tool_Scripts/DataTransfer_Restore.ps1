@@ -259,10 +259,14 @@ winget import winget.json
 # ============================================================================
 # Recent Documents
 # ============================================================================
+Write-Output "Restoring Recent Documents Lists..."
+Log "Restoring Recent Documents Lists..."
 Get-ChildItem -Path ".\recent-documents" -Filter "*.reg" -File | ForEach-Object {
-    Write-Host "Importing $($_.FullName)..."
     reg import "$($_.FullName)"
 }
+Write-Output "Done"
+Log "Done"
+Write-Output ""
 
 # ============================================================================
 # User Profiles
@@ -301,7 +305,7 @@ if ($currentHome -ieq $expectedHome) {
     Log "`"$expectedHome`" -> `"$currentHome`""
     New-Item -ItemType Junction -Path $expectedHome -Target $currentHome
 }
-write-Output "Done"
+Write-Output "Done"
 Log "Done"
 Write-Output ""
 
