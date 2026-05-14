@@ -131,7 +131,86 @@ foreach ($dep in $dependencies) {
 # ============================================================================
 # AppData
 # ============================================================================
+Write-Output "Restoring AppData..."
+Log "Restoring AppData..."
 
+$appDataPaths = @(
+    @{
+        Path = "Local\AVG Software\Browser"
+        Processes = @("AVGBrowser")
+    },
+    @{
+        Path = "Local\BraveSoftware\Brave-Browser"
+        Processes = @("brave")
+    },
+    @{
+        Path = "Local\Chromium"
+        Processes = @("chromium")
+    },
+    @{
+        Path = "Local\Google\Chrome"
+        Processes = @("chrome")
+    },
+    @{
+        Path = "Local\Microsoft\Edge"
+        Processes = @("msedge")
+    },
+    @{
+        Path = "Local\Microsoft\Outlook"
+        Processes = @("outlook")
+    },
+    @{
+        Path = "Local\Vivaldi"
+        Processes = @("vivaldi")
+    },
+    @{
+        Path = "LocalLow\Sun\Java"
+        Processes = @("java", "javaw")
+    },
+    @{
+        Path = "Roaming\eM Client"
+        Processes = @("MailClient")
+    },
+    @{
+        Path = "Roaming\Mozilla\Firefox"
+        Processes = @("firefox")
+    },
+    @{
+        Path = "Roaming\Opera Software\Opera Stable"
+        Processes = @("opera")
+    },
+    @{
+        Path = "Roaming\Thunderbird"
+        Processes = @("thunderbird")
+    }
+)
+
+foreach ($item in $appDataPaths) {
+    $appDataPath = $item.Path
+    $targetPath  = "$env:USERPROFILE\AppData\$appDataPath"
+
+    foreach ($process in $item.Processes) {
+        $proc = Get-Process -Name $process -ErrorAction SilentlyContinue
+        if ($proc) {
+            Write-Output "Closing process: $process"
+            Log "Closing process: $process"
+            $proc | Stop-Process -Force
+        }
+    }
+
+    # Wait briefly to ensure processes fully exit
+    Start-Sleep -Seconds 2
+
+    if (Test-Path $targetPath) {
+        Rename-Item -Path $targetPath -NewName "$(Split-Path $targetPath -Leaf).old" -ErrorAction SilentlyContinue
+        .\bin\rclone.exe copy ".\appdata\$appDataPath" $targetPath --progress --log-file=_rclone.log
+        Write-Output "Restored AppData\$appDataPath"
+        Log "Restored AppData\$appDataPath"
+    }
+}
+Write-Output "Done"
+Log "Done"
+write-Output ""
 
 # ============================================================================
 # Desktop / System / Users
@@ -196,7 +275,43 @@ Get-ChildItem -Path ".\recent-documents" -Filter "*.reg" -File | ForEach-Object 
 # ============================================================================
 # User Profiles
 # ============================================================================
+Write-Output "Restoring User Profiles..."
+Log "Restoring User Profiles..."
+.\bin\rclone.exe copy "users" "C:\Users" `
+    --progress `
+    --log-file=_rclone.log `
+    --exclude "**/AppData/**" `
+    --exclude "**/Dropbox/**" `
+    --exclude "**/OneDrive/**" `
+    --exclude "**/NTUSER*"
 
+# create symlink if user's HOME directory is different
+$expectedHome = (Get-Content ".\home-folder.txt" -Raw).Trim()
+$expectedHome = $expectedHome.TrimEnd('\')
+$currentHome = $HOME.TrimEnd('\')
+
+if ($currentHome -ieq $expectedHome) {
+    Write-Host "Current HOME path already matches: $currentHome"
+    Log "Current HOME path already matches: $currentHome"
+} elseif (Test-Path $expectedHome) {
+    Write-Host "Expected HOME path already exists: $expectedHome"
+    Log "Expected HOME path already exists: $expectedHome"
+} else {
+    # Create the parent directory if needed
+    $parentDir = Split-Path $expectedHome -Parent
+    if (-not (Test-Path $parentDir)) {
+        New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+    }
+
+    Write-Host "Creating HOME path junction:"
+    Write-Host "`"$expectedHome`" -> `"$currentHome`""
+    Log "Creating HOME path junction:"
+    Log "`"$expectedHome`" -> `"$currentHome`""
+    New-Item -ItemType Junction -Path $expectedHome -Target $currentHome
+}
+write-Output "Done"
+Log "Done"
+Write-Output ""
 
 # ============================================================================
 # Fonts
@@ -304,12 +419,12 @@ pnputil /scan-devices
 # ============================================================================
 # Registry Hives
 # ============================================================================
-.\bin\rclone.exe copy registry C:\COPS\old-registry-backup --progress --log-file=_rclone.log
+.\bin\rclone.exe copy "registry" "C:\COPS\old-registry-backup" --progress --log-file=_rclone.log
 
 # ============================================================================
 # Other C: Drive Directories
 # ============================================================================
-.\bin\rclone.exe copy c C:\ --progress --log-file=_rclone.log
+.\bin\rclone.exe copy "c" "C:\" --progress --log-file=_rclone.log
 
 # ============================================================================
 # OneDrive
