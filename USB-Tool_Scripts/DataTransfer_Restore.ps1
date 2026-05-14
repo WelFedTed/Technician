@@ -121,14 +121,6 @@ foreach ($dep in $dependencies) {
 }
 
 # ============================================================================
-# Check User
-# ============================================================================
-#  -->> UPDATE BACKUP SCRIPT TO ONLY GRAB 'PUBLIC' and current user directories, and skip AppData, ntuser.dat, etc..
-# Check the backup's 'user' directory for number of users backed up, if more than 1, ask which user to restore
-#   -> warn the user that if the user account folder name doesn't match, and if they proceed anyway, create symlink junction to new user folder name from old user folder name (this can fix migrated apps like Outlook looking for data files)
-
-
-# ============================================================================
 # AppData
 # ============================================================================
 Write-Output "Restoring AppData..."
