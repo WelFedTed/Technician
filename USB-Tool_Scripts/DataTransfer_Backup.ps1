@@ -514,12 +514,78 @@ Log "Done"
 Write-Output ""
 
 # ============================================================================
-# Other Directories
+# Other C: Drive Directories
 # ============================================================================
-# check for other files on C:, D:, etc..
-# use rclone to copy contents to ".\c", ".\d", etc..
-#   -> Exclude list of stock Windows directories/files
-#   -> Exclude list of common leftover directories/files (from HP, Dell, Nvidia installers, etc..)
+$ExcludeDirs = @(
+    '$Extend/**'
+    '$Recycle.Bin/**'
+    '$SysReset/**'
+    '$Windows.~WS'
+    '$WinREAgent/**'
+    'AdwCleaner/**'
+    'AMD/**'
+    'Boot/**'
+    'Dell/**'
+    'Documents and Settings/**'
+    'ESD/**'
+    'Games/**'
+    'HP/**'
+    'inetpub/**'
+    'Intel/**'
+    'NVIDIA/**'
+    'OneDriveTemp/**'
+    'PerfLogs/**'
+    'Program Files/**'
+    'Program Files (x86)/**'
+    'ProgramData/**'
+    'Recovery/**'
+    'Riot Games/**'
+    'Scratch/**'
+    'Scripts/**'
+    'System Volume Information/**'
+    'Temp/**'
+    'tools/**'
+    'Users/**'
+    'Windows/**'
+    'Windows.old/**'
+    'WindowsApps/**'
+    'XboxGames/**'
+    '$WINRE_BACKUP_PARTITION.MARKER'
+    '.GamingRoot'
+    'appverifUI.dll'
+    'autoexec.bat'
+    'bootmgr'
+    'BOOTNXT'
+    'config.sys'
+    'DumpStack.log'
+    'DumpStack.log.tmp'
+    'hiberfil.sys'
+    'IO.SYS'
+    'MSDOS.SYS'
+    'logUploaderSettings.ini'
+    'logUploaderSettings_temp.ini'
+    'pagefile.sys'
+    'swapfile.sys'
+    'SYSTAG.BIN'
+    'vfcompat.dll'
+)
+
+$ExcludeArgs = @()
+foreach ($Exclude in $ExcludeDirs) {
+    $ExcludeArgs += "--exclude"
+    $ExcludeArgs += $Exclude
+}
+
+$RcloneArgs = @(
+    "copy"
+    "C:\"
+    "c"
+    "--progress"
+    "--log-file=_rclone.log"
+) + $ExcludeArgs
+
+.\bin\rclone.exe @RcloneArgs
+
 
 # ============================================================================
 # OneDrive
