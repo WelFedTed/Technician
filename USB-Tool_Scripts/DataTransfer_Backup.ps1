@@ -471,7 +471,14 @@ Write-Output ""
 # ============================================================================
 Write-Output "Backing up User Profiles..."
 Log "Backing up User Profiles..."
-.\bin\rclone.exe copy "C:\Users" "users" --progress --log-file=_rclone.log --exclude=/*/AppData/**
+$HOME | Out-File -FilePath "home-folder.txt" -Width 200
+# .\bin\rclone.exe copy "C:\Users" "users" --progress --log-file=_rclone.log --exclude=/*/AppData/**
+.\bin\rclone.exe copy "C:\Users" "users" `
+    --progress `
+    --log-file=_rclone.log `
+    --exclude "**/AppData/**" `
+    --exclude "**/OneDrive/**" `
+    --exclude "**/NTUSER*"
 write-Output "Done"
 Log "Done"
 Write-Output ""
