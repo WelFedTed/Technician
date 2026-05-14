@@ -123,7 +123,7 @@ foreach ($dep in $dependencies) {
 # ============================================================================
 # Check User
 # ============================================================================
-
+#  -->> UPDATE BACKUP SCRIPT TO ONLY GRAB 'PUBLIC' and current user directories, and skip AppData, ntuser.dat, etc..
 # Check the backup's 'user' directory for number of users backed up, if more than 1, ask which user to restore
 #   -> warn the user that if the user account folder name doesn't match, and if they proceed anyway, create symlink junction to new user folder name from old user folder name (this can fix migrated apps like Outlook looking for data files)
 
@@ -172,9 +172,9 @@ foreach ($dep in $dependencies) {
 # ============================================================================
 # Installed Programs
 # ============================================================================
-
 # fix winget if required (check this at beginnging of script, as it may cause script to crash)
 # attempt to import winget.json
+winget import winget.json
 # check 'winget list' against winget.json and make list of apps that didnt install ($missingApps)
 # check winget_unavailable.txt and update $missingApps
 # check other 'installed programs' exports and update $missingApps
@@ -188,7 +188,10 @@ foreach ($dep in $dependencies) {
 # ============================================================================
 # Recent Documents
 # ============================================================================
-
+Get-ChildItem -Path ".\recent-documents" -Filter "*.reg" -File | ForEach-Object {
+    Write-Host "Importing $($_.FullName)..."
+    reg import "$($_.FullName)"
+}
 
 # ============================================================================
 # User Profiles
@@ -198,26 +201,115 @@ foreach ($dep in $dependencies) {
 # ============================================================================
 # Fonts
 # ============================================================================
-# install all fonts found in 'fonts' folder
+$fontFolder   = "fonts"
+$fontsRegPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"
+$windowsFonts = Join-Path $env:WINDIR "Fonts"
+
+Get-ChildItem $fontFolder -Recurse -Include *.ttf, *.otf, *.ttc, *.fon | ForEach-Object {
+    $source      = $_.FullName
+    $fontFile    = $_.Name
+    $destination = Join-Path $windowsFonts $fontFile
+
+    if (Test-Path $destination) {
+        Write-Host "Skipping already installed font: $fontFile"
+        return
+    }
+
+    Copy-Item $source $destination
+
+    switch ($_.Extension.ToLower()) {
+        ".ttf" { $suffix = " (TrueType)" }
+        ".otf" { $suffix = " (OpenType)" }
+        ".ttc" { $suffix = " (TrueType)" }
+        ".fon" { $suffix = "" }
+        default { $suffix = "" }
+    }
+
+    New-ItemProperty `
+        -Path $fontsRegPath `
+        -Name ($_.BaseName + $suffix) `
+        -Value $fontFile `
+        -PropertyType String `
+        -Force | Out-Null
+
+    Write-Host "Installed: $fontFile"
+}
 
 # ============================================================================
 # Drivers
 # ============================================================================
-# check if any devices are missing drivers and update $missingDrivers
-# attempt installing driver from export?
-# preset $missingDrivers at end of script
+$DriverFolder = "drivers"
+
+if (-not (Test-Path $DriverFolder)) {
+    Write-Host "Drivers folder not found." -ForegroundColor Red
+    exit 1
+}
+
+$MissingDevices = Get-PnpDevice -Status Error |
+Where-Object { $_.Problem -eq 28 }
+
+if (-not $MissingDevices) {
+    Write-Host "No missing drivers found." -ForegroundColor Green
+    exit 0
+}
+
+foreach ($Device in $MissingDevices) {
+    Write-Host ""
+    Write-Host "Searching driver for:" -ForegroundColor Cyan
+    Write-Host "  $($Device.FriendlyName)"
+
+    $HardwareIds = (
+        Get-PnpDeviceProperty `
+            -InstanceId $Device.InstanceId `
+            -KeyName 'DEVPKEY_Device_HardwareIds'
+    ).Data
+
+    if (-not $HardwareIds) {
+        Write-Host "  No hardware IDs found." -ForegroundColor Yellow
+        continue
+    }
+
+    $MatchingInfs = Get-ChildItem $DriverFolder -Recurse -Filter *.inf |
+    Where-Object {
+
+        $Content = Get-Content $_.FullName -ErrorAction SilentlyContinue
+
+        foreach ($HWID in $HardwareIds) {
+            if ($Content -match [regex]::Escape($HWID)) {
+                return $true
+            }
+        }
+
+        return $false
+    }
+
+    if (-not $MatchingInfs) {
+        Write-Host "  No matching drivers found." -ForegroundColor Yellow
+        continue
+    }
+
+    foreach ($Inf in $MatchingInfs) {
+        Write-Host "  Installing: $($Inf.Name)" -ForegroundColor Green
+
+        pnputil /add-driver "$($Inf.FullName)" /install
+    }
+}
+
+Write-Host ""
+Write-Host "Rescanning devices..." -ForegroundColor Cyan
+
+pnputil /scan-devices
 
 
 # ============================================================================
 # Registry Hives
 # ============================================================================
-# copy 'registry' to 'C:\COPS\old-registry-backup'
-
+.\bin\rclone.exe copy registry C:\COPS\old-registry-backup --progress --log-file=_rclone.log
 
 # ============================================================================
 # Other C: Drive Directories
 # ============================================================================
-
+.\bin\rclone.exe copy c C:\ --progress --log-file=_rclone.log
 
 # ============================================================================
 # OneDrive
