@@ -679,7 +679,7 @@ Write-Output ""
 # Report To-Do's
 # ============================================================================
 Write-Output "Reporting Outstanding To-Do's to complete Backup process..."
-Log "Reporting Outstanding To-Do's to complete BackupBackupBackupBackup process..."
+Log "Reporting Outstanding To-Do's to complete Backup process..."
 start $todoFile
 Write-Output "Done"
 Log "Done"
