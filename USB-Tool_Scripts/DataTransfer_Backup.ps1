@@ -28,6 +28,13 @@ function Todo {
     Write-Output "$message" | Out-File -FilePath $todoFile -Append
 }
 
+    Todo "============================================================================"
+    Todo "Nirsoft Tools"
+    Todo "============================================================================"
+    Todo "  Save out exports from Nirsoft tools that no longer have command line interfaces"
+    Todo "  (these tools should have opened automatically during the backup script)"
+    Todo ""
+
 Set-Location -Path $directory
 
 Write-Output "Data Transfer - Backup Script"
@@ -234,6 +241,14 @@ else {
     .\bin\UVK_en.exe -WriteSysInfo "$directory\system-info.html"
 }
 net users | Out-File -FilePath "users.txt" -Width 200
+
+if (-not (Test-Path "desktop_screenshot.png")) {
+    Todo "============================================================================"
+    Todo "Desktop / System / Users"
+    Todo "============================================================================"
+    Todo "  Save a screenshot (desktop_screenshot.png) of the old device's desktop for reference during restore"
+    Todo ""
+}
 Write-Output "Done"
 Log "Done"
 write-Output ""
@@ -282,6 +297,12 @@ Log "Backing up Mail Clients..."
 reg export "HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook" "outlook_profile_2007-2010.reg" /y >> $logFile
 reg export "HKEY_CURRENT_USER\Software\Microsoft\Office\15.0\Outlook" "outlook_profile_2013.reg" /y >> $logFile
 reg export "HKEY_CURRENT_USER\Software\Microsoft\Office\16.0\Outlook" "outlook_profile_2016-onwards.reg" /y >> $logFile
+
+    Todo "============================================================================"
+    Todo "Mail Clients"
+    Todo "============================================================================"
+    Todo "  Export Contacts from 'Windows Mail' or 'Outlook (new)' as required"
+    Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -313,6 +334,12 @@ if ([Environment]::Is64BitOperatingSystem) {
 else {
     .\bin\WizTree.exe "$directory" /export="wiztree.csv"
 }
+
+    Todo "============================================================================"
+    Todo "Devices"
+    Todo "============================================================================"
+    Todo "  Download full software/driver installers for all installed printers and save them to a folder named 'printers'"
+    Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -324,6 +351,11 @@ Write-Output "Backing up Web Browsers..."
 Log "Backing up Web Browsers..."
 .\bin\BrowserAddonsView.exe /shtml "web-browsers_nirsoft-browseraddonsview.html"
 .\bin\WebBrowserBookmarksView.exe /shtml "web-browsers_nirsoft-webbrowserbookmarksview.html"
+    Todo "============================================================================"
+    Todo "Web Browsers"
+    Todo "============================================================================"
+    Todo "  Export Passwords for each installed Web Browser"
+    Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -354,6 +386,14 @@ Write-Output ""
 Write-Output "Exporting Security Software..."
 Log "Exporting Security Software..."
 .\bin\SecuritySoftView.exe /shtml "security-software_nirsoft-securitysoftview.html"
+
+if (-not (Test-Path "security.txt")) {
+    Todo "============================================================================"
+    Todo "Security Software"
+    Todo "============================================================================"
+    Todo "  Create 'security.txt' with package and activation information for in installed 3rd party security software"
+    Todo ""
+}
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -605,6 +645,11 @@ $RcloneArgs = @(
 
 .\bin\rclone.exe @RcloneArgs
 
+    Todo "============================================================================"
+    Todo "Additional Drives"
+    Todo "============================================================================"
+    Todo "  Backup data from addition drive letters as required ('D:\' -> 'd' folder, etc.."
+    Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""

@@ -335,7 +335,7 @@ Write-Output ""
 Write-Output "Restoring Installed Programs..."
 Log "Restoring Installed Programs..."
 winget import winget.json --accept-source-agreements >> $logFile
-winget install -e --id DucFabulous.UltraViewer      # we use this for remote access support
+winget install -e --id DucFabulous.UltraViewer --silent --accept-source-agreements # we use this for remote access support
     Todo "============================================================================"
     Todo "Installed Programs"
     Todo "============================================================================"
@@ -543,6 +543,11 @@ Write-Output ""
 Write-Output "Restoring Other C: Drive Directories..."
 Log "Restoring Other C: Drive Directories..."
 .\bin\rclone.exe copy "c" "C:\" --progress --log-file=_rclone.log
+    Todo "============================================================================"
+    Todo "Additional Drives"
+    Todo "============================================================================"
+    Todo "  Restore data from addition drive letters as required ('d' folder -> 'D:\', etc.."
+    Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -565,11 +570,19 @@ Log "Done"
 Write-Output ""
 
 # ============================================================================
-# Reset Power Settings
+# Windows Update
 # ============================================================================
-Write-Output "Resetting power settings..."
-Log "Resetting power settings..."
-powercfg /restoredefaultschemes >> $logFile
+Write-Output "Configuring Windows Update..."
+Log "Configuring Windows Update..."
+    Todo "============================================================================"
+    Todo "Windows Update"
+    Todo "============================================================================"
+    Todo "  Configure Windows Update's 'Advanced options':"
+    Todo "      -> Turn ON 'Receive updates for other Microsoft products"
+    Todo "      -> Turn OFF 'Get me up to date'"
+    Todo "      -> Turn OFF 'Download updates over metered connetions'"
+    Todo "      -> Turn ON 'Notify me when a restart is required to finish updating'"
+    Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -580,6 +593,39 @@ Write-Output ""
 Write-Output "Reporting Outstanding To-Do's to complete Restore process..."
 Log "Reporting Outstanding To-Do's to complete Restore process..."
 start $todoFile
+Write-Output "Done"
+Log "Done"
+Write-Output ""
+
+# ============================================================================
+# System Maintenance
+# ============================================================================
+Write-Output "Running System Maintenance..."
+Log "Running System Maintenance..."
+winget install -e --id topgrade-rs.topgrade --silent --accept-source-agreements
+Install-Module PSWindowsUpdate
+Import-Module PSWindowsUpdate
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+topgrade --yes --no-ask-retry
+winget source reset --force
+winget source update
+winget upgrade --all --silent --accept-source-agreements
+sfc /scannow
+dism /online /cleanup-image /startcomponentcleanup /resetbase
+dism /online /cleanup-image /restorehealth
+sfc /scannow
+defrag /c /o
+chkdsk c: /r /scan /perf
+Write-Output "Done"
+Log "Done"
+Write-Output ""
+
+# ============================================================================
+# Reset Power Settings
+# ============================================================================
+Write-Output "Resetting power settings..."
+Log "Resetting power settings..."
+powercfg /restoredefaultschemes >> $logFile
 Write-Output "Done"
 Log "Done"
 Write-Output ""
