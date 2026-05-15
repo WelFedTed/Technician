@@ -8,6 +8,7 @@
 
 $directory = $args[0]
 $logFile = "_backup.log"
+$todoFile = "_backup_todos.txt"
 
 function Log {
     param (
@@ -17,6 +18,14 @@ function Log {
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $logEntry = "$timestamp - $message"
     Write-Output $logEntry | Out-File -FilePath $logFile -Append
+}
+
+function Todo {
+    param (
+        [string]$message
+    )
+    New-Item -ItemType File -Path $todoFile -ErrorAction SilentlyContinue | Out-Null
+    Write-Output "$message" | Out-File -FilePath $todoFile -Append
 }
 
 Set-Location -Path $directory
@@ -322,7 +331,7 @@ Write-Output ""
 # ============================================================================
 # Installed Programs
 # ============================================================================
-write-Output "Exporting Installed Programs..."
+Write-Output "Exporting Installed Programs..."
 Log "Exporting Installed Programs..."
 if (Get-Command winget -ErrorAction SilentlyContinue) {
     winget export -o "winget.json" --accept-source-agreements >> $logFile
@@ -489,7 +498,7 @@ Write-Output ""
 Write-Output "Backing up Fonts..."
 Log "Backing up Fonts..."
 .\bin\rclone.exe copy "C:\Windows\Fonts" "fonts" --progress --log-file=_rclone.log
-write-Output "Done"
+Write-Output "Done"
 Log "Done"
 Write-Output ""
 
@@ -501,7 +510,7 @@ Log "Exporting Drivers..."
 New-Item -Path "drivers" -ItemType Directory -ErrorAction SilentlyContinue >> $logFile
 Export-WindowsDriver -Online -Destination ".\drivers"
 .\bin\DriverView.exe /shtml "drivers_nirsoft-driverview.html"
-write-Output "Done"
+Write-Output "Done"
 Log "Done"
 Write-Output ""
 
@@ -516,13 +525,16 @@ reg export "HKEY_CURRENT_USER" ".\registry\HKEY_CURRENT_USER.reg" /y >> $logFile
 reg export "HKEY_LOCAL_MACHINE" ".\registry\HKEY_LOCAL_MACHINE.reg" /y >> $logFile
 reg export "HKEY_USERS" ".\registry\HKEY_USERS.reg" /y >> $logFile
 reg export "HKEY_CURRENT_CONFIG" ".\registry\HKEY_CURRENT_CONFIG.reg" /y >> $logFile
-write-Output "Done"
+Write-Output "Done"
 Log "Done"
 Write-Output ""
 
 # ============================================================================
 # Other C: Drive Directories
 # ============================================================================
+Write-Output "Backing up Other C: Drive Directories..."
+Log "Backing up Other C: Drive Directories..."
+
 $ExcludeDirs = @(
     '$Extend/**'
     '$Recycle.Bin/**'
@@ -593,6 +605,10 @@ $RcloneArgs = @(
 
 .\bin\rclone.exe @RcloneArgs
 
+Write-Output "Done"
+Log "Done"
+Write-Output ""
+
 # ============================================================================
 # OneDrive
 # ============================================================================
@@ -617,7 +633,12 @@ Write-Output ""
 # ============================================================================
 # Report To-Do's
 # ============================================================================
-# Create a _backup_todos.txt and open at end of script for list of to-do's / calls to action for technician
+Write-Output "Reporting Outstanding To-Do's to complete Backup process..."
+Log "Reporting Outstanding To-Do's to complete BackupBackupBackupBackup process..."
+start $todoFile
+Write-Output "Done"
+Log "Done"
+Write-Output ""
 
 Write-Output "Backup Complete"
 Log "----------------------------------------"
