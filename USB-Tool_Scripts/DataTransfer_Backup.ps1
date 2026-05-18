@@ -28,12 +28,12 @@ function Todo {
     Write-Output "$message" | Out-File -FilePath $todoFile -Append
 }
 
-    Todo "============================================================================"
-    Todo "Nirsoft Tools"
-    Todo "============================================================================"
-    Todo "  Save out exports from Nirsoft tools that no longer have command line interfaces"
-    Todo "  (these tools should have opened automatically during the backup script)"
-    Todo ""
+Todo "============================================================================"
+Todo "Nirsoft Tools"
+Todo "============================================================================"
+Todo "  Save out exports from Nirsoft tools that no longer have command line interfaces"
+Todo "  (these tools should have opened automatically during the backup script)"
+Todo ""
 
 Set-Location -Path $directory
 
@@ -298,11 +298,11 @@ reg export "HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Windo
 reg export "HKEY_CURRENT_USER\Software\Microsoft\Office\15.0\Outlook" "outlook_profile_2013.reg" /y >> $logFile
 reg export "HKEY_CURRENT_USER\Software\Microsoft\Office\16.0\Outlook" "outlook_profile_2016-onwards.reg" /y >> $logFile
 
-    Todo "============================================================================"
-    Todo "Mail Clients"
-    Todo "============================================================================"
-    Todo "  Export Contacts from 'Windows Mail' or 'Outlook (new)' as required"
-    Todo ""
+Todo "============================================================================"
+Todo "Mail Clients"
+Todo "============================================================================"
+Todo "  Export Contacts from 'Windows Mail' or 'Outlook (new)' as required"
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -335,11 +335,11 @@ else {
     .\bin\WizTree.exe "$directory" /export="wiztree.csv"
 }
 
-    Todo "============================================================================"
-    Todo "Devices"
-    Todo "============================================================================"
-    Todo "  Download full software/driver installers for all installed printers and save them to a folder named 'printers'"
-    Todo ""
+Todo "============================================================================"
+Todo "Devices"
+Todo "============================================================================"
+Todo "  Download full software/driver installers for all installed printers and save them to a folder named 'printers'"
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -351,11 +351,11 @@ Write-Output "Backing up Web Browsers..."
 Log "Backing up Web Browsers..."
 .\bin\BrowserAddonsView.exe /shtml "web-browsers_nirsoft-browseraddonsview.html"
 .\bin\WebBrowserBookmarksView.exe /shtml "web-browsers_nirsoft-webbrowserbookmarksview.html"
-    Todo "============================================================================"
-    Todo "Web Browsers"
-    Todo "============================================================================"
-    Todo "  Export Passwords for each installed Web Browser"
-    Todo ""
+Todo "============================================================================"
+Todo "Web Browsers"
+Todo "============================================================================"
+Todo "  Export Passwords for each installed Web Browser"
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -411,12 +411,12 @@ if (-not (Test-Path $OutputDir)) {
 }
 
 $OfficeVersions = @(
-    @{ Version = "9.0";  Name = "2000"  }
-    @{ Version = "10.0"; Name = "2002"  }
-    @{ Version = "11.0"; Name = "2003"  }
-    @{ Version = "12.0"; Name = "2007"  }
-    @{ Version = "14.0"; Name = "2010"  }
-    @{ Version = "15.0"; Name = "2013"  }
+    @{ Version = "9.0"; Name = "2000" }
+    @{ Version = "10.0"; Name = "2002" }
+    @{ Version = "11.0"; Name = "2003" }
+    @{ Version = "12.0"; Name = "2007" }
+    @{ Version = "14.0"; Name = "2010" }
+    @{ Version = "15.0"; Name = "2013" }
     @{ Version = "16.0"; Name = "2016+" }
 )
 
@@ -645,11 +645,11 @@ $RcloneArgs = @(
 
 .\bin\rclone.exe @RcloneArgs
 
-    Todo "============================================================================"
-    Todo "Additional Drives"
-    Todo "============================================================================"
-    Todo "  Backup data from addition drive letters as required ('D:\' -> 'd' folder, etc.."
-    Todo ""
+Todo "============================================================================"
+Todo "Additional Drives"
+Todo "============================================================================"
+Todo "  Backup data from addition drive letters as required ('D:\' -> 'd' folder, etc.."
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -662,6 +662,14 @@ Log "Backing up OneDrive..."
 $onedriveDirectory = Get-ItemProperty -Path "HKCU:\Software\Microsoft\OneDrive" | Select-Object -ExpandProperty "UserFolder"
 New-Item -Path ".\onedrive_location.txt" -ItemType File -Value "$onedriveDirectory" -Force >> $logFile
 Copy-Item -Path "$onedriveDirectory" -Destination ".\onedrive" -Recurse -Force -ErrorAction Continue >> $logFile
+
+if (-not (Test-Path "onedrive.txt")) {
+    Todo "============================================================================"
+    Todo "OneDrive"
+    Todo "============================================================================"
+    Todo "  Create 'onedrive.txt' with the Microsoft Account email address associated with OneDrive and any relevant sync information (selective sync settings, is sync up to date?, etc..)"
+    Todo ""
+}
 Log "Done"
 Write-Output ""
 
