@@ -249,6 +249,15 @@ if (-not (Test-Path "desktop_screenshot.png")) {
     Todo "  Save a screenshot (desktop_screenshot.png) of the old device's desktop for reference during restore"
     Todo ""
 }
+
+if (-not (Test-Path "default-apps.txt")) {
+    Todo "============================================================================"
+    Todo "Default Apps"
+    Todo "============================================================================"
+    Todo "  Create 'default-apps.txt' with the list of default applications and their associated file app categories (i.e default Web Browser, default Email client, etc..)"
+    Todo ""
+}
+
 Write-Output "Done"
 Log "Done"
 write-Output ""
