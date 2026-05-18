@@ -135,58 +135,58 @@ Log "Restoring AppData..."
 
 $appDataPaths = @(
     @{
-        Path = "Local\AVG Software\Browser"
+        Path      = "Local\AVG Software\Browser"
         Processes = @("AVGBrowser")
     },
     @{
-        Path = "Local\BraveSoftware\Brave-Browser"
+        Path      = "Local\BraveSoftware\Brave-Browser"
         Processes = @("brave")
     },
     @{
-        Path = "Local\Chromium"
+        Path      = "Local\Chromium"
         Processes = @("chromium")
     },
     @{
-        Path = "Local\Google\Chrome"
+        Path      = "Local\Google\Chrome"
         Processes = @("chrome")
     },
     @{
-        Path = "Local\Microsoft\Edge"
+        Path      = "Local\Microsoft\Edge"
         Processes = @("msedge")
     },
     @{
-        Path = "Local\Microsoft\Outlook"
+        Path      = "Local\Microsoft\Outlook"
         Processes = @("outlook")
     },
     @{
-        Path = "Local\Vivaldi"
+        Path      = "Local\Vivaldi"
         Processes = @("vivaldi")
     },
     @{
-        Path = "LocalLow\Sun\Java"
+        Path      = "LocalLow\Sun\Java"
         Processes = @("java", "javaw")
     },
     @{
-        Path = "Roaming\eM Client"
+        Path      = "Roaming\eM Client"
         Processes = @("MailClient")
     },
     @{
-        Path = "Roaming\Mozilla\Firefox"
+        Path      = "Roaming\Mozilla\Firefox"
         Processes = @("firefox")
     },
     @{
-        Path = "Roaming\Opera Software\Opera Stable"
+        Path      = "Roaming\Opera Software\Opera Stable"
         Processes = @("opera")
     },
     @{
-        Path = "Roaming\Thunderbird"
+        Path      = "Roaming\Thunderbird"
         Processes = @("thunderbird")
     }
 )
 
 foreach ($item in $appDataPaths) {
     $appDataPath = $item.Path
-    $targetPath  = "$env:USERPROFILE\AppData\$appDataPath"
+    $targetPath = "$env:USERPROFILE\AppData\$appDataPath"
 
     foreach ($process in $item.Processes) {
         $proc = Get-Process -Name $process -ErrorAction SilentlyContinue
@@ -216,11 +216,11 @@ write-Output ""
 # ============================================================================
 Write-Output "Restoring Desktop..."
 Log "Restoring Desktop..."
-    Todo "============================================================================"
-    Todo "Desktop / System / Users"
-    Todo "============================================================================"
-    Todo "  Restore Wallpaper"
-    Todo ""
+Todo "============================================================================"
+Todo "Desktop / System / Users"
+Todo "============================================================================"
+Todo "  Restore Wallpaper"
+Todo ""
 Write-Output "Done"
 Log "Done"
 write-Output ""
@@ -230,13 +230,13 @@ write-Output ""
 # ============================================================================
 Write-Output "Restoring Passwords..."
 Log "Restoring Passwords..."
-    Todo "============================================================================"
-    Todo "Passwords"
-    Todo "============================================================================"
-    Todo "  Restore Network Passwords"
-    Todo "  Restore Remote Desktop Passwords"
-    Todo "  Restore VNC Passwords"
-    Todo ""
+Todo "============================================================================"
+Todo "Passwords"
+Todo "============================================================================"
+Todo "  Restore Network Passwords"
+Todo "  Restore Remote Desktop Passwords"
+Todo "  Restore VNC Passwords"
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -246,12 +246,12 @@ Write-Output ""
 # ============================================================================
 Write-Output "Restoring Licenses..."
 Log "Restoring Licenses..."
-    Todo "============================================================================"
-    Todo "Licenses"
-    Todo "============================================================================"
-    Todo "  Restore Windows License as required"
-    Todo "  Restore Microsoft Office License as required"
-    Todo ""
+Todo "============================================================================"
+Todo "Licenses"
+Todo "============================================================================"
+Todo "  Restore Windows License as required"
+Todo "  Restore Microsoft Office License as required"
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -264,15 +264,15 @@ Log "Restoring Mail Clients..."
 reg import "outlook_profile_2007-2010.reg" >> $logFile
 reg import "outlook_profile_2013.reg" >> $logFile
 reg import "outlook_profile_2016-onwards.reg" >> $logFile
-    Todo "============================================================================"
-    Todo "Mail Clients"
-    Todo "============================================================================"
-    Todo "  Test Outlook (classic) migrated correctly (may require account passwords)"
-    Todo "  Test Thunderbird migrated correctly"
-    Todo "  Test eM Client migrated correctly"
-    Todo "  Setup 'Outlook (new)' as required (will require contacts to be imported manually)"
-    Todo "  Setup other mail clients as required"
-    Todo ""
+Todo "============================================================================"
+Todo "Mail Clients"
+Todo "============================================================================"
+Todo "  Test Outlook (classic) migrated correctly (may require account passwords)"
+Todo "  Test Thunderbird migrated correctly"
+Todo "  Test eM Client migrated correctly"
+Todo "  Setup 'Outlook (new)' as required (will require contacts to be imported manually)"
+Todo "  Setup other mail clients as required"
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -283,11 +283,11 @@ Write-Output ""
 Write-Output "Restoring Networking..."
 Log "Restoring Networking..."
 .\bin\WirelessKeyView.exe /import "wireless-networks_nirsoft-wirelesskeyview.txt"
-    Todo "============================================================================"
-    Todo "Networking"
-    Todo "============================================================================"
-    Todo "  Restore Network Adapter Settings as required (static IP's, DNS settings, etc..)"
-    Todo ""
+Todo "============================================================================"
+Todo "Networking"
+Todo "============================================================================"
+Todo "  Restore Network Adapter Settings as required (static IP's, DNS settings, etc..)"
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -297,13 +297,13 @@ Write-Output ""
 # ============================================================================
 Write-Output "Restoring Devices..."
 Log "Restoring Devices..."
-    Todo "============================================================================"
-    Todo "Devices"
-    Todo "============================================================================"
-    Todo "  Create desktop shortcuts to Printer installers (i.e. 'Install Printer - Canon TS5100 Series', put them in the top right hand corner of the desktop if available"
-    Todo "  Restore device HOSTNAME as required"
-    Todo "  Restore Mapped Network Drives as required"
-    Todo ""
+Todo "============================================================================"
+Todo "Devices"
+Todo "============================================================================"
+Todo "  Create desktop shortcuts to Printer installers (i.e. 'Install Printer - Canon TS5100 Series', put them in the top right hand corner of the desktop if available"
+Todo "  Restore device HOSTNAME as required"
+Todo "  Restore Mapped Network Drives as required"
+Todo ""
 .\bin\rclone.exe copy "printers" "C:\COPS\printers" --progress --log-file=_rclone.log
 Write-Output "Done"
 Log "Done"
@@ -314,11 +314,11 @@ Write-Output ""
 # ============================================================================
 Write-Output "Restoring Web Browsers..."
 Log "Restoring Web Browsers..."
-    Todo "============================================================================"
-    Todo "Web Browsers"
-    Todo "============================================================================"
-    Todo "  Import Passwords in to all Web Browsers as per exports"
-    Todo ""
+Todo "============================================================================"
+Todo "Web Browsers"
+Todo "============================================================================"
+Todo "  Import Passwords in to all Web Browsers as per exports"
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -336,11 +336,11 @@ Write-Output "Restoring Installed Programs..."
 Log "Restoring Installed Programs..."
 winget import winget.json --accept-source-agreements >> $logFile
 winget install -e --id DucFabulous.UltraViewer --silent --accept-source-agreements # we use this for remote access support
-    Todo "============================================================================"
-    Todo "Installed Programs"
-    Todo "============================================================================"
-    Todo "  Install missing programs"
-    Todo ""
+Todo "============================================================================"
+Todo "Installed Programs"
+Todo "============================================================================"
+Todo "  Install missing programs"
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -350,11 +350,11 @@ Write-Output ""
 # ============================================================================
 Write-Output "Restoring Security Software..."
 Log "Restoring Security Software..."
-    Todo "============================================================================"
-    Todo "Security Software"
-    Todo "============================================================================"
-    Todo "  Setup Security Software as required"
-    Todo ""
+Todo "============================================================================"
+Todo "Security Software"
+Todo "============================================================================"
+Todo "  Setup Security Software as required"
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -392,10 +392,12 @@ $currentHome = $HOME.TrimEnd('\')
 if ($currentHome -ieq $expectedHome) {
     Write-Host "Current HOME path already matches: $currentHome"
     Log "Current HOME path already matches: $currentHome"
-} elseif (Test-Path $expectedHome) {
+}
+elseif (Test-Path $expectedHome) {
     Write-Host "Expected HOME path already exists: $expectedHome"
     Log "Expected HOME path already exists: $expectedHome"
-} else {
+}
+else {
     # Create the parent directory if needed
     $parentDir = Split-Path $expectedHome -Parent
     if (-not (Test-Path $parentDir)) {
@@ -417,13 +419,13 @@ Write-Output ""
 # ============================================================================
 Write-Output "Restoring Fonts..."
 Log "Restoring Fonts..."
-$fontFolder   = "fonts"
+$fontFolder = "fonts"
 $fontsRegPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"
 $windowsFonts = Join-Path $env:WINDIR "Fonts"
 
 Get-ChildItem $fontFolder -Recurse -Include *.ttf, *.otf, *.ttc, *.fon | ForEach-Object {
-    $source      = $_.FullName
-    $fontFile    = $_.Name
+    $source = $_.FullName
+    $fontFile = $_.Name
     $destination = Join-Path $windowsFonts $fontFile
 
     if (Test-Path $destination) {
@@ -543,11 +545,11 @@ Write-Output ""
 Write-Output "Restoring Other C: Drive Directories..."
 Log "Restoring Other C: Drive Directories..."
 .\bin\rclone.exe copy "c" "C:\" --progress --log-file=_rclone.log
-    Todo "============================================================================"
-    Todo "Additional Drives"
-    Todo "============================================================================"
-    Todo "  Restore data from addition drive letters as required ('d' folder -> 'D:\', etc.."
-    Todo ""
+Todo "============================================================================"
+Todo "Additional Drives"
+Todo "============================================================================"
+Todo "  Restore data from addition drive letters as required ('d' folder -> 'D:\', etc.."
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -557,15 +559,15 @@ Write-Output ""
 # ============================================================================
 Write-Output "Restoring OneDrive..."
 Log "Restoring OneDrive..."
-    Todo "============================================================================"
-    Todo "OneDrive"
-    Todo "============================================================================"
-    Todo "  If OneDrive is fully synced on old device:"
-    Todo "      -> Log in to OneDrive and use same settings for folders (i.e. Desktop, Documents, Photos, etc..)"
-    Todo ""
-    Todo "  If OneDrive is NOT fully synced on old device:"
-    Todo "      -> Merge backed up OneDrive data back in to User directory"
-    Todo ""
+Todo "============================================================================"
+Todo "OneDrive"
+Todo "============================================================================"
+Todo "  If OneDrive is fully synced on old device:"
+Todo "      -> Log in to OneDrive and use same settings for folders (i.e. Desktop, Documents, Photos, etc..)"
+Todo ""
+Todo "  If OneDrive is NOT fully synced on old device:"
+Todo "      -> Merge backed up OneDrive data back in to User directory"
+Todo ""
 Log "Done"
 Write-Output ""
 
@@ -574,15 +576,15 @@ Write-Output ""
 # ============================================================================
 Write-Output "Configuring Windows Update..."
 Log "Configuring Windows Update..."
-    Todo "============================================================================"
-    Todo "Windows Update"
-    Todo "============================================================================"
-    Todo "  Configure Windows Update's 'Advanced options':"
-    Todo "      -> Turn ON 'Receive updates for other Microsoft products"
-    Todo "      -> Turn OFF 'Get me up to date'"
-    Todo "      -> Turn OFF 'Download updates over metered connetions'"
-    Todo "      -> Turn ON 'Notify me when a restart is required to finish updating'"
-    Todo ""
+Todo "============================================================================"
+Todo "Windows Update"
+Todo "============================================================================"
+Todo "  Configure Windows Update's 'Advanced options':"
+Todo "      -> Turn ON 'Receive updates for other Microsoft products"
+Todo "      -> Turn OFF 'Get me up to date'"
+Todo "      -> Turn OFF 'Download updates over metered connetions'"
+Todo "      -> Turn ON 'Notify me when a restart is required to finish updating'"
+Todo ""
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -592,7 +594,7 @@ Write-Output ""
 # ============================================================================
 Write-Output "Reporting Outstanding To-Do's to complete Restore process..."
 Log "Reporting Outstanding To-Do's to complete Restore process..."
-start $todoFile
+Start-Process $todoFile
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -605,7 +607,7 @@ Log "Running System Maintenance..."
 winget install -e --id topgrade-rs.topgrade --silent --accept-source-agreements
 Install-Module PSWindowsUpdate
 Import-Module PSWindowsUpdate
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 topgrade --yes --no-ask-retry
 winget source reset --force
 winget source update
