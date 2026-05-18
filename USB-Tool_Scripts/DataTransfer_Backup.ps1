@@ -338,10 +338,10 @@ hostname | Out-File -FilePath "hostname.txt" -Width 200
 net use | Out-File -FilePath "mapped-drives.txt" -Width 200
 Get-Printer | Out-File -FilePath "printers.txt" -Width 200
 if ([Environment]::Is64BitOperatingSystem) {
-    .\bin\WizTree64.exe "$directory" /export="wiztree.csv"
+    .\bin\WizTree64.exe "C:\" /export="wiztree.csv"
 }
 else {
-    .\bin\WizTree.exe "$directory" /export="wiztree.csv"
+    .\bin\WizTree.exe "C:\" /export="wiztree.csv"
 }
 
 Todo "============================================================================"
