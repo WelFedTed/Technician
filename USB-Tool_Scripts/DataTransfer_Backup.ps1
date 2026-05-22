@@ -357,6 +357,10 @@ if ([Environment]::Is64BitOperatingSystem) {
 else {
     .\bin\WizTree.exe "C:\" /export="wiztree.csv"
 }
+# export mapped network drives
+reg export "HKCU\Network" ".\mapped-drives.reg" /y
+Get-SmbMapping | Select-Object LocalPath, RemotePath, UserName | Export-Csv ".\mapped-drives.csv" -NoTypeInformation
+cmdkey /list | Out-File -FilePath ".\mapped-drives-credentials.txt" -Width 200
 
 Todo "============================================================================"
 Todo "Devices"
