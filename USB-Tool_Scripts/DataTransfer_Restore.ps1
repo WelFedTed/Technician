@@ -384,7 +384,21 @@ Write-Output ""
 # ============================================================================
 Write-Output "Restoring User Profiles..."
 Log "Restoring User Profiles..."
-.\bin\rclone.exe copy "users" "C:\Users" `
+$expectedHomePath = (Get-Content ".\home-folder.txt" -Raw).Trim()
+$expectedHomePath = $expectedHomePath.TrimEnd('\')
+$expectedHomeFolder = Split-Path -Path $expectedHomePath -Leaf
+$currentHomePath = $HOME.TrimEnd('\')
+$currentHomeFolder = Split-Path -Path $currentHomePath -Leaf
+
+.\bin\rclone.exe copy "users\$expectedHomeFolder" "C:\Users\$currentHomeFolder" `
+    --progress `
+    --log-file=_rclone.log `
+    --exclude "**/AppData/**" `
+    --exclude "**/Dropbox/**" `
+    --exclude "**/OneDrive/**" `
+    --exclude "**/NTUSER*"
+
+.\bin\rclone.exe copy "users\Public" "C:\Users\Public" `
     --progress `
     --log-file=_rclone.log `
     --exclude "**/AppData/**" `
@@ -393,30 +407,26 @@ Log "Restoring User Profiles..."
     --exclude "**/NTUSER*"
 
 # create symlink if user's HOME directory is different
-$expectedHome = (Get-Content ".\home-folder.txt" -Raw).Trim()
-$expectedHome = $expectedHome.TrimEnd('\')
-$currentHome = $HOME.TrimEnd('\')
-
-if ($currentHome -ieq $expectedHome) {
-    Write-Host "Current HOME path already matches: $currentHome"
-    Log "Current HOME path already matches: $currentHome"
+if ($currentHomePath -ieq $expectedHomePath) {
+    Write-Host "Current HOME path already matches: $currentHomePath"
+    Log "Current HOME path already matches: $currentHomePath"
 }
-elseif (Test-Path $expectedHome) {
-    Write-Host "Expected HOME path already exists: $expectedHome"
-    Log "Expected HOME path already exists: $expectedHome"
+elseif (Test-Path $expectedHomePath) {
+    Write-Host "Expected HOME path already exists: $expectedHomePath"
+    Log "Expected HOME path already exists: $expectedHomePath"
 }
 else {
     # Create the parent directory if needed
-    $parentDir = Split-Path $expectedHome -Parent
+    $parentDir = Split-Path $expectedHomePath -Parent
     if (-not (Test-Path $parentDir)) {
         New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
     }
 
     Write-Host "Creating HOME path junction:"
-    Write-Host "`"$expectedHome`" -> `"$currentHome`""
+    Write-Host "`"$expectedHomePath`" -> `"$currentHomePath`""
     Log "Creating HOME path junction:"
-    Log "`"$expectedHome`" -> `"$currentHome`""
-    New-Item -ItemType Junction -Path $expectedHome -Target $currentHome
+    Log "`"$expectedHomePath`" -> `"$currentHomePath`""
+    New-Item -ItemType Junction -Path $expectedHomePath -Target $currentHomePath
 }
 Write-Output "Done"
 Log "Done"
