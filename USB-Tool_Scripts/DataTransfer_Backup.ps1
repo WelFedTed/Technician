@@ -362,6 +362,9 @@ reg export "HKCU\Network" ".\mapped-drives.reg" /y
 Get-SmbMapping | Select-Object LocalPath, RemotePath, UserName | Export-Csv ".\mapped-drives.csv" -NoTypeInformation
 cmdkey /list | Out-File -FilePath ".\mapped-drives-credentials.txt" -Width 200
 
+# export installed printers
+C:\Windows\System32\spool\tools\PrintBrm.exe -b -f "printers.printerExport" -o FORCE
+
 Todo "============================================================================"
 Todo "Devices"
 Todo "============================================================================"

@@ -223,9 +223,6 @@ Log "Restoring Desktop..."
 .\bin\rclone.exe copy "desktop_screenshot.png" "C:\COPS\" --progress --log-file=_rclone.log
 .\bin\rclone.exe copy "desktop_wallpaper.png" "C:\COPS\" --progress --log-file=_rclone.log
 
-# restore mapped drives
-reg import ".\mapped-drives.reg" >> $logFile
-
 # restore taskbar items
 Copy-Item `
     ".\taskbar-backup\TaskBar\*" `
@@ -266,13 +263,15 @@ write-Output ""
 # ============================================================================
 Write-Output "Restoring Passwords..."
 Log "Restoring Passwords..."
-Todo "============================================================================"
-Todo "Passwords"
-Todo "============================================================================"
-Todo "  Restore Network Passwords"
-Todo "  Restore Remote Desktop Passwords"
-Todo "  Restore VNC Passwords"
+
+# update todos
+Todo "PASSWORDS"
+Todo "      Restore Network Passwords"
+Todo "      Restore Remote Desktop Passwords"
+Todo "      Restore VNC Passwords"
 Todo ""
+Todo ""
+
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -282,12 +281,14 @@ Write-Output ""
 # ============================================================================
 Write-Output "Restoring Licenses..."
 Log "Restoring Licenses..."
-Todo "============================================================================"
-Todo "Licenses"
-Todo "============================================================================"
-Todo "  Restore Windows License as required"
-Todo "  Restore Microsoft Office License as required"
+
+# update todos
+Todo "LICENSES"
+Todo "      Restore Windows License as required"
+Todo "      Restore Microsoft Office License as required"
 Todo ""
+Todo ""
+
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -300,15 +301,17 @@ Log "Restoring Mail Clients..."
 reg import "outlook_profile_2007-2010.reg" >> $logFile
 reg import "outlook_profile_2013.reg" >> $logFile
 reg import "outlook_profile_2016-onwards.reg" >> $logFile
-Todo "============================================================================"
-Todo "Mail Clients"
-Todo "============================================================================"
-Todo "  Test Outlook (classic) migrated correctly (may require account passwords)"
-Todo "  Test Thunderbird migrated correctly"
-Todo "  Test eM Client migrated correctly"
-Todo "  Setup 'Outlook (new)' as required (will require contacts to be imported manually)"
-Todo "  Setup other mail clients as required"
+
+# update todos
+Todo "MAIL CLIENTS"
+Todo "      Test Outlook (classic) migrated correctly (may require account passwords)"
+Todo "      Test Thunderbird migrated correctly"
+Todo "      Test eM Client migrated correctly"
+Todo "      Setup 'Outlook (new)' as required (will require contacts to be imported manually)"
+Todo "      Setup other mail clients as required"
 Todo ""
+Todo ""
+
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -319,11 +322,13 @@ Write-Output ""
 Write-Output "Restoring Networking..."
 Log "Restoring Networking..."
 .\bin\WirelessKeyView.exe /import "wireless-networks_nirsoft-wirelesskeyview.txt"
-Todo "============================================================================"
-Todo "Networking"
-Todo "============================================================================"
-Todo "  Restore Network Adapter Settings as required (static IP's, DNS settings, etc..)"
+
+# update todos
+Todo "NETWORKING"
+Todo "      Restore Network Adapter Settings as required (static IP's, DNS settings, etc..)"
 Todo ""
+Todo ""
+
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -333,14 +338,21 @@ Write-Output ""
 # ============================================================================
 Write-Output "Restoring Devices..."
 Log "Restoring Devices..."
-Todo "============================================================================"
-Todo "Devices"
-Todo "============================================================================"
-Todo "  Create desktop shortcuts to Printer installers (i.e. 'Install Printer - Canon TS5100 Series', put them in the top right hand corner of the desktop if available"
-Todo "  Restore device HOSTNAME as required"
-Todo "  Restore Mapped Network Drives as required"
+# restore mapped drives
+reg import ".\mapped-drives.reg" >> $logFile
+
+# restore installed printers
+C:\Windows\System32\spool\tools\PrintBrm.exe -r -f "printers.printerExport"
+Copy-Item -Path ".\printers\*" -Destination "C:\COPS\printers" -Recurse -Force
+
+# update todos
+Todo "DEVICES"
+Todo "      Create desktop shortcuts to Printer installers (i.e. 'Install Printer - Canon TS5100 Series', put them in the top right hand corner of the desktop if available"
+Todo "      Restore device HOSTNAME as required"
+Todo "      Restore Mapped Network Drives as required"
 Todo ""
-.\bin\rclone.exe copy "printers" "C:\COPS\printers" --progress --log-file=_rclone.log
+Todo ""
+
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -350,11 +362,13 @@ Write-Output ""
 # ============================================================================
 Write-Output "Restoring Web Browsers..."
 Log "Restoring Web Browsers..."
-Todo "============================================================================"
-Todo "Web Browsers"
-Todo "============================================================================"
-Todo "  Import Passwords in to all Web Browsers as per exports"
+
+# update todos
+Todo "WEB BROWSERS"
+Todo "      Import Passwords in to all Web Browsers as per exports"
 Todo ""
+Todo ""
+
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -372,11 +386,13 @@ Write-Output "Restoring Installed Programs..."
 Log "Restoring Installed Programs..."
 winget import winget.json --accept-source-agreements >> $logFile
 winget install -e --id DucFabulous.UltraViewer --silent --accept-source-agreements # we use this for remote access support
-Todo "============================================================================"
-Todo "Installed Programs"
-Todo "============================================================================"
-Todo "  Install missing programs"
+
+# update todos
+Todo "INSTALLED PROGRAMS"
+Todo "      Install missing programs"
 Todo ""
+Todo ""
+
 Write-Output "Done"
 Log "Done"
 Write-Output ""
@@ -386,11 +402,13 @@ Write-Output ""
 # ============================================================================
 Write-Output "Restoring Security Software..."
 Log "Restoring Security Software..."
-Todo "============================================================================"
-Todo "Security Software"
-Todo "============================================================================"
-Todo "  Setup Security Software as required"
+
+# update todos
+Todo "SECURITY SOFTWARE"
+Todo "      Setup Security Software as required"
 Todo ""
+Todo ""
+
 Write-Output "Done"
 Log "Done"
 Write-Output ""
