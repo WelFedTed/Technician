@@ -242,6 +242,20 @@ else {
 }
 net users | Out-File -FilePath "users.txt" -Width 200
 
+# backup pinned taskbar items
+$BackupDir = ".\taskbar"
+
+New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null
+
+Copy-Item `
+    "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar" `
+    -Destination "$BackupDir\TaskBar" `
+    -Recurse `
+    -Force
+
+reg export "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband" "$BackupDir\taskbar-pins.reg" /y
+
+# update todos
 if (-not (Test-Path "desktop_screenshot.png")) {
     Todo "============================================================================"
     Todo "Desktop / System / Users"

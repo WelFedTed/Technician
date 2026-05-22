@@ -223,6 +223,17 @@ Log "Restoring Desktop..."
 .\bin\rclone.exe copy "desktop_screenshot.png" "C:\COPS\" --progress --log-file=_rclone.log
 .\bin\rclone.exe copy "desktop_wallpaper.png" "C:\COPS\" --progress --log-file=_rclone.log
 
+# restore taskbar items
+Copy-Item `
+    ".\taskbar-backup\TaskBar\*" `
+    "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar" `
+    -Recurse `
+    -Force
+reg import ".\taskbar-backup\taskbar-pins.reg"
+Stop-Process -Name explorer -Force
+Start-Process explorer.exe
+
+# update todos
     Todo "============================================================================"
     Todo "Desktop / System / Users"
     Todo "============================================================================"
