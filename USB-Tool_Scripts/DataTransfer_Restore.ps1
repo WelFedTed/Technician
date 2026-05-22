@@ -588,7 +588,8 @@ Write-Host "Rescanning devices..." -ForegroundColor Cyan
 pnputil /scan-devices
 
 # copy drivers backup
-.\bin\rclone.exe copy "drivers" "C:\COPS\old-drivers-backup" --progress --log-file=_rclone.log
+Copy-Item -Path ".\drivers\*" -Destination "C:\COPS\old-drivers-backup" -Recurse -Force
+
 Write-Output "Done"
 Log "Done"
 Write-Output ""
