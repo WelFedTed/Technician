@@ -233,12 +233,26 @@ reg import ".\taskbar-backup\taskbar-pins.reg"
 Stop-Process -Name explorer -Force
 Start-Process explorer.exe
 
-# update todos
+# restore wallpaper
+$wallpaperLocation = "C:\COPS\desktop_wallpaper.png"
+Add-Type @"
+using System.Runtime.InteropServices;
+public class Wallpaper {
+    [DllImport("user32.dll", SetLastError=true)]
+    public static extern bool SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
+}
+"@
+if (Test-Path $wallpaperLocation) {
+    [Wallpaper]::SystemParametersInfo(20, 0, $wallpaperLocation, 3)
+    Write-Host "Wallpaper updated"
+    Log "Wallpaper updated"
+} else {
     Todo "============================================================================"
     Todo "Desktop / System / Users"
     Todo "============================================================================"
     Todo "  Restore Wallpaper"
     Todo ""
+}
 
 Write-Output "Done"
 Log "Done"
