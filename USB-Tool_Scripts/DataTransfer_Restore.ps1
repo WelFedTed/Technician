@@ -202,7 +202,11 @@ foreach ($item in $appDataPaths) {
 
     if (Test-Path $targetPath) {
         Rename-Item -Path $targetPath -NewName "$(Split-Path $targetPath -Leaf).old" -ErrorAction SilentlyContinue
-        .\bin\rclone.exe copy ".\appdata\$appDataPath" $targetPath --progress --log-file=_rclone.log
+    }
+
+    .\bin\rclone.exe copy ".\appdata\$appDataPath" $targetPath --progress --log-file=_rclone.log
+
+    if (Test-Path $targetPath) {
         Write-Output "Restored AppData\$appDataPath"
         Log "Restored AppData\$appDataPath"
     }
