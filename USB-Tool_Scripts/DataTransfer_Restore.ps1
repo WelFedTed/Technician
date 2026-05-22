@@ -220,11 +220,15 @@ write-Output ""
 # ============================================================================
 Write-Output "Restoring Desktop..."
 Log "Restoring Desktop..."
-Todo "============================================================================"
-Todo "Desktop / System / Users"
-Todo "============================================================================"
-Todo "  Restore Wallpaper"
-Todo ""
+.\bin\rclone.exe copy "desktop_screenshot.png" "C:\COPS\" --progress --log-file=_rclone.log
+.\bin\rclone.exe copy "desktop_wallpaper.png" "C:\COPS\" --progress --log-file=_rclone.log
+
+    Todo "============================================================================"
+    Todo "Desktop / System / Users"
+    Todo "============================================================================"
+    Todo "  Restore Wallpaper"
+    Todo ""
+
 Write-Output "Done"
 Log "Done"
 write-Output ""
