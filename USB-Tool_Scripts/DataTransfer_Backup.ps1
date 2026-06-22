@@ -607,6 +607,7 @@ Log "Backing up Other C: Drive Directories..."
 
 $ExcludeDirs = @(
     '$Extend/**'
+    '$RECYCLE.BIN/**'
     '$Recycle.Bin/**'
     '$SysReset/**'
     '$Windows.~WS'
@@ -619,6 +620,7 @@ $ExcludeDirs = @(
     'ESD/**'
     'Games/**'
     'HP/**'
+    'hpswsetup/**'
     'inetpub/**'
     'Intel/**'
     'NVIDIA/**'
@@ -631,6 +633,7 @@ $ExcludeDirs = @(
     'Riot Games/**'
     'Scratch/**'
     'Scripts/**'
+    'SWSetup/**'
     'System Volume Information/**'
     'Temp/**'
     'tools/**'
