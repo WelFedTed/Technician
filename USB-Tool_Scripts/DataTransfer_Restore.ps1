@@ -246,7 +246,8 @@ if (Test-Path $wallpaperLocation) {
     [Wallpaper]::SystemParametersInfo(20, 0, $wallpaperLocation, 3)
     Write-Host "Wallpaper updated"
     Log "Wallpaper updated"
-} else {
+}
+else {
     Todo "============================================================================"
     Todo "Desktop / System / Users"
     Todo "============================================================================"
@@ -343,7 +344,8 @@ reg import ".\mapped-drives.reg" >> $logFile
 
 # restore installed printers
 C:\Windows\System32\spool\tools\PrintBrm.exe -r -f "printers.printerExport"
-Copy-Item -Path ".\printers\*" -Destination "C:\COPS\printers" -Recurse -Force
+New-Item -Path "C:\COPS\printers\" -ItemType Directory -Force
+Copy-Item -Path ".\printers\*" -Destination "C:\COPS\printers\" -Recurse -Force
 
 # update todos
 Todo "DEVICES"
@@ -647,7 +649,7 @@ Todo "==========================================================================
 Todo "  Configure Windows Update's 'Advanced options':"
 Todo "      -> Turn ON 'Receive updates for other Microsoft products"
 Todo "      -> Turn OFF 'Get me up to date'"
-Todo "      -> Turn OFF 'Download updates over metered connetions'"
+Todo "      -> Turn OFF 'Download updates over metered connections'"
 Todo "      -> Turn ON 'Notify me when a restart is required to finish updating'"
 Todo ""
 Write-Output "Done"
