@@ -14,14 +14,16 @@ exit /b
 :gotPrivileges
 rem is elevated, continue script
 echo Running as Administrator
+echo:
 
 
 echo Performing system maintenance tasks...
 echo:
 
 echo Updating system packages...
-topgrade --yes --no-ask-retry --disable system
+topgrade --yes --no-ask-retry --disable system bin
 echo:
+title Maintenance Script
 
 echo Updating package sources...
 winget source update
