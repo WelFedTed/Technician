@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title File-Drop
 
-set "directory=_Data\Apps\File-Drop"
+set "directory=_Data\Apps\File Drop"
 set "application=file-drop.exe"
 
 set skipCheckElevated=1
