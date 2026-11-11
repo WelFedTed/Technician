@@ -2,17 +2,17 @@ TODO
 --------------------------------------------------------------------------------------
 
 - all scripts should check if x86 or x64 system and run appropriate .exe or give a message saying wrong architecture?
-- Create G:\Eject.bat to force eject the drive?
+- Create G:\Eject.cmd to force eject the drive?
 - Create a script to configure a system + install a fresh loadout of apps + runtimes (also enable System Restore etc..)
-	-> Service.bat?
+	-> Service.cmd?
 - Create a Scripts\Bypass-Windows-11-Upgrade-Requirements.ps1
-- Create a G:\WinDirStat.bat
-- Create a G:\RKill.bat
-- Create a G:\Debloat.bat for Windows 10 + Windows 11?
+- Create a G:\WinDirStat.cmd
+- Create a G:\RKill.cmd
+- Create a G:\Debloat.cmd for Windows 10 + Windows 11?
 - Download different versions of Windows installers for offline DISM repairs?
 - Download old Windows Service Packs (XP, Vista, 7, 8?)
 
-- Create G:\Report.bat to generate a system report:
+- Create G:\Report.cmd to generate a system report:
   including specs (link to manufacturer's pages?), age, WinVer, Windows 11 ready?, any missing Drivers,
   is System Restore enabled and what percent allocated?, how many restore points, how long since last full shutdown/reboot, is Windows up to date?, Disks & their usage %'s, email report prompt? (ask for email + job#), BIOS Time,
   Disk Speeds?, model numbers + serial numbers, user accounts (names + sizes), email accounts?, MS Accounts?, BitLocker?,
