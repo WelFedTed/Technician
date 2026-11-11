@@ -707,6 +707,21 @@ Log "Done"
 Write-Output ""
 
 # ============================================================================
+# Re-enable Security
+# ============================================================================
+Write-Output "Re-enabling Windows Defender..."
+Log "Re-enabling Windows Defender..."
+Set-MpPreference -DisableRealtimeMonitoring $false
+Set-MpPreference -DisableScriptScanning $false
+Set-MpPreference -DisableBehaviorMonitoring $false
+Set-MpPreference -DisableIOAVProtection $false
+Set-MpPreference -DisableIntrusionPreventionSystem $false
+Remove-MpPreference -ExclusionPath $directory
+Write-Output "Done"
+Log "Done"
+Write-Output ""
+
+# ============================================================================
 # Reset Power Settings
 # ============================================================================
 Write-Output "Resetting power settings..."

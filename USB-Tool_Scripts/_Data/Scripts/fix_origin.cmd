@@ -25,7 +25,7 @@ XCOPY "%TEMP%\%tempFolder%\*" "%PROGRAMDATA%\Origin\LocalContent" /s /i
 RD /S /Q "%TEMP%\%tempFolder%"
 echo:
 echo Clearing AppData Cache...
-RD /S /Q "C:\Users\bucky\AppData\Local\Origin"
+RD /S /Q "%LOCALAPPDATA%\Origin"
 echo:
 echo Starting Origin...
 start "" "C:\Program Files (x86)\Origin\%processA%"

@@ -4,7 +4,7 @@ setlocal enabledelayedexpansion
 title Update Office Apps
 
 set "directory=_Data\Scripts"
-set "application=update-office-apps.bat"
+set "application=update-office-apps.cmd"
 
 set skipCheckElevated=1
 set skipCheckArchitecture=1
@@ -58,7 +58,8 @@ rem ----------------------------------------------------------------------------
 	if %skipCheckArchitecture% == 1 ( goto skipCheckArchitecture )
 
 	rem check if x86 or x64
-	if %PROCESSOR_ARCHITECTURE% == x86 ( if NOT DEFINED PROCESSOR_ARCHITEW6432 goto x86 ) else ( goto x64 )
+	if /i "%PROCESSOR_ARCHITECTURE%" == "x86" if not defined PROCESSOR_ARCHITEW6432 goto x86
+	goto x64
 
 	:x86
 	rem overwrite with x86 variables

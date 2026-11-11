@@ -221,15 +221,15 @@ write-Output ""
 Write-Output "Restoring Desktop..."
 Log "Restoring Desktop..."
 .\bin\rclone.exe copy "desktop_screenshot.png" "C:\COPS\" --progress --log-file=_rclone.log
-.\bin\rclone.exe copy "desktop_wallpaper.png" "C:\COPS\" --progress --log-file=_rclone.log
+.\bin\rclone.exe copy "desktop_wallpaper.jpg" "C:\COPS\" --progress --log-file=_rclone.log
 
 # restore taskbar items
 Copy-Item `
-    ".\taskbar-backup\TaskBar\*" `
+    ".\taskbar\TaskBar\*" `
     "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar" `
     -Recurse `
     -Force
-reg import ".\taskbar-backup\taskbar-pins.reg" >> $logFile
+reg import ".\taskbar\taskbar-pins.reg" >> $logFile
 Stop-Process -Name explorer -Force
 Start-Process explorer.exe
 
@@ -685,6 +685,21 @@ dism /online /cleanup-image /restorehealth
 sfc /scannow
 defrag /c /o
 chkdsk c: /r /scan /perf
+Write-Output "Done"
+Log "Done"
+Write-Output ""
+
+# ============================================================================
+# Re-enable Security
+# ============================================================================
+Write-Output "Re-enabling Windows Defender..."
+Log "Re-enabling Windows Defender..."
+Set-MpPreference -DisableRealtimeMonitoring $false
+Set-MpPreference -DisableScriptScanning $false
+Set-MpPreference -DisableBehaviorMonitoring $false
+Set-MpPreference -DisableIOAVProtection $false
+Set-MpPreference -DisableIntrusionPreventionSystem $false
+Remove-MpPreference -ExclusionPath $directory
 Write-Output "Done"
 Log "Done"
 Write-Output ""

@@ -14,11 +14,11 @@ rem	powershell.exe -NoProfile -ExecutionPolicy bypass -Command "& '%~dpn0.ps1' "
 		echo Recursively processing folder "%~n1"...
 		for /d %%d in (%1\*) do (
 			rem echo %%d
-			start /wait /b cmd /k call "%~dpn0.bat" "%%d"
+			start /wait /b cmd /k call "%~f0" "%%d"
 		)
 		for %%f in (%1\*) do (
 			rem echo %%f
-			start /wait /b cmd /k call "%~dpn0.bat" "%%f"
+			start /wait /b cmd /k call "%~f0" "%%f"
 		)
 	) else if "%%A" neq "-" (
 		rem echo %1 is a file
