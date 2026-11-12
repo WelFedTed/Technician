@@ -10,7 +10,7 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "Windows 10 Update Assistant" ^
     -Url "https://go.microsoft.com/fwlink/?LinkID=799445" ^
-    -Clean
+    -Into "x86" -Clean
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

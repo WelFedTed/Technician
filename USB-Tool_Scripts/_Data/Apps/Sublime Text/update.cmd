@@ -12,7 +12,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.sublimetext.com/download" ^
     -Link "Build (\d{4})" ^
     -UrlFormat "https://download.sublimetext.com/sublime_text_build_{0}_x64.zip" ^
-    -Extract -Clean -Keep "Data"
+    -Extract -Into "x64" -Clean -Keep "Data"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

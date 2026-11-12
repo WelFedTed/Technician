@@ -10,7 +10,7 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "Bandizip" ^
     -Url "https://en.bandisoft.com/bandizip/dl.php?web" ^
-    -SaveAs "BANDIZIP-SETUP-STD-ALL.EXE"
+    -SaveAs "BANDIZIP-SETUP-STD-ALL.EXE" -Into "x86"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

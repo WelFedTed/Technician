@@ -11,7 +11,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Tron Script" ^
     -Page "https://bmrf.org/repos/tron/" ^
     -Link "Tron%%20v[\d.]+%%20\([\d-]+\)\.exe" ^
-    -Clean
+    -Into "x86" -Clean
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

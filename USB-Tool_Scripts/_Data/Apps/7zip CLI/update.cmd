@@ -10,7 +10,7 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "7-Zip command line (7zr.exe)" ^
     -Url "https://www.7-zip.org/a/7zr.exe" ^
-    -SaveAs "7zr.exe"
+    -SaveAs "7zr.exe" -Into "x86"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

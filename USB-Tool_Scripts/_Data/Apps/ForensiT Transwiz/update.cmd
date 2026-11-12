@@ -10,7 +10,7 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "ForensiT Transwiz" ^
     -Url "https://www.forensit.com/Downloads/Transwiz.msi" ^
-    -SaveAs "Transwiz.msi"
+    -SaveAs "Transwiz.msi" -Into "x86"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

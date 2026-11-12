@@ -11,7 +11,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "WizFile" ^
     -Page "https://antibody-software.com/wizfile/download" ^
     -Link "/files/wizfile_[\d_]+_portable\.zip" ^
-    -Extract -Clean
+    -Extract -Into "x86" -Clean
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

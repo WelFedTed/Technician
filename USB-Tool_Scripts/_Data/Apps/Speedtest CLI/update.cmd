@@ -11,7 +11,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Speedtest CLI" ^
     -Page "https://www.speedtest.net/apps/cli" ^
     -Link "https://install\.speedtest\.net/app/cli/ookla-speedtest-[\d.]+-win64\.zip" ^
-    -Extract -Clean
+    -Extract -Into "x64" -Clean
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

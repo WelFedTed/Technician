@@ -10,7 +10,7 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "Microsoft Activation Scripts (MAS)" ^
     -Url "https://github.com/massgravel/Microsoft-Activation-Scripts/archive/refs/heads/master.zip" ^
-    -Extract -Clean
+    -Extract -Into "x86" -Clean
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

@@ -10,7 +10,7 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "Rkill" ^
     -Url "https://download.bleepingcomputer.com/grinler/rkill.exe" ^
-    -SaveAs "rkill.exe"
+    -SaveAs "rkill.exe" -Into "x86"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

@@ -10,7 +10,7 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "Window Centering Helper" ^
     -Url "https://kamilszymborski.github.io/WindowCenteringHelper-PE.exe" ^
-    -SaveAs "WindowCenteringHelper-PE.exe"
+    -SaveAs "WindowCenteringHelper-PE.exe" -Into "x86"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

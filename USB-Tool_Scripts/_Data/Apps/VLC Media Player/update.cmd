@@ -10,8 +10,11 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "VLC Media Player" ^
     -Page "https://download.videolan.org/pub/videolan/vlc/last/win64/" ^
-    -Link "vlc-[\d.]+-win64\.zip" ^
-    -Extract -Flatten -Clean -Keep "portable"
+    -Link "vlc-([\d.]+)-win64\.zip" ^
+    -UrlFormat "https://download.videolan.org/pub/videolan/vlc/last/win64/vlc-{0}-win64.zip" ^
+    -UrlFormat86 "https://download.videolan.org/pub/videolan/vlc/last/win32/vlc-{0}-win32.zip" ^
+    -Extract -Flatten -Into "x64" -Into86 "x86" ^
+    -Clean -Keep "portable"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

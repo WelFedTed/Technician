@@ -12,12 +12,16 @@
 #       [-UrlFormat <fmt>]            build the link from the regex's first group, eg. "https://x/app_{0}.zip"
 #   -GitHub <owner/repo> -Asset <regex>   an asset of the latest GitHub release
 #   -Manual [-Page <url>] [-Note <text>]  can't be downloaded automatically; prints where to get it
-# Optional 32-bit download from the same source: -Url86 / -Link86 / -Asset86
+# Optional 32-bit download from the same source: -Url86 / -Link86 / -Asset86,
+#   or -UrlFormat86 to build it from the same version -Link captured
 #
 # What to do with it:
 #   -SaveAs <name>, -SaveAs86 <name>  save a single file under this name (default: name from the link)
 #   -Extract                          unzip it (.zip or .7z)
-#   -Into <folder>, -Into86 <folder>  put it in a subfolder, eg. x64 and x86
+#   -Into <folder>, -Into86 <folder>  the subfolder for each build:
+#                                     x64 = only runs on 64-bit Windows, x86 = runs on 32-bit Windows
+#                                     (combined downloads, installers and scripts that run on both go in x86)
+#                                     Anything else left at the top of the app folder is moved into the -Into folder
 #   -Flatten                          if the archive has one top folder, use what's inside it
 #   -Clean                            delete the old version's files first (keeps update.cmd, *.url, run.cmd and -Keep)
 #   -Keep "a,b"                       extra file/folder names to keep when cleaning
@@ -30,7 +34,7 @@ param(
     [Parameter(Mandatory = $true)][string]$Name,
     [string]$AppDir = (Get-Location).Path,
     [string]$Url, [string]$Url86,
-    [string]$Page, [string]$Link, [string]$Link86, [string]$UrlFormat,
+    [string]$Page, [string]$Link, [string]$Link86, [string]$UrlFormat, [string]$UrlFormat86,
     [string]$GitHub, [string]$Asset, [string]$Asset86,
     [switch]$Manual, [string]$Note,
     [string]$SaveAs, [string]$SaveAs86,
@@ -92,6 +96,7 @@ function Select-Highest([string[]]$candidates) {
     return $best
 }
 
+$script:pageVersion = $null
 function Find-PageLink([string]$pattern) {
     $html = Get-Text $Page
     $found = [regex]::Matches($html, $pattern, 'IgnoreCase') | ForEach-Object {
@@ -99,6 +104,12 @@ function Find-PageLink([string]$pattern) {
     } | Select-Object -Unique
     if (-not $found) { throw "No link matching '$pattern' on $Page (the page may have changed)" }
     $best = Select-Highest @($found)
+    # remember the version the regex captured, for -UrlFormat86
+    if ($UrlFormat) {
+        $script:pageVersion = [regex]::Matches($html, $pattern, 'IgnoreCase') |
+            Where-Object { ($UrlFormat -f $_.Groups[1].Value) -eq $best } |
+            Select-Object -First 1 | ForEach-Object { $_.Groups[1].Value }
+    }
     return ([Uri]::new([Uri]$Page, $best)).AbsoluteUri
 }
 
@@ -341,6 +352,36 @@ function Write-Parity {
     finally { Pop-Location }
 }
 
+# moves everything at the top of the app folder (except update.cmd, *.url, run.cmd, version/checksum/parity
+# files and the x64/x86 folders) into $target; where $target already has the same item, the old copy is dropped
+function Move-RootFiles([string]$target) {
+    $keepAtRoot = $alwaysKeep + @('x64', 'x86')
+    $items = @(Get-ChildItem -LiteralPath $AppDir -Force | Where-Object {
+        $item = $_
+        -not ($keepAtRoot | Where-Object { $item.Name -like $_ })
+    })
+    if ($items.Count -eq 0) { return $false }
+    Say "Moving $($items.Count) item(s) from the app folder into its $(Split-Path -Leaf $target) folder..."
+    New-Item -ItemType Directory -Path $target -Force | Out-Null
+    foreach ($item in $items) { Merge-Item $item (Join-Path $target $item.Name) }
+    return $true
+}
+
+function Merge-Item($item, [string]$destination) {
+    if (-not (Test-Path -LiteralPath $destination)) {
+        Move-Item -LiteralPath $item.FullName -Destination $destination
+    }
+    elseif ($item.PSIsContainer) {
+        foreach ($child in Get-ChildItem -LiteralPath $item.FullName -Force) {
+            Merge-Item $child (Join-Path $destination $child.Name)
+        }
+        Remove-Item -LiteralPath $item.FullName -Recurse -Force
+    }
+    else {
+        Remove-Item -LiteralPath $item.FullName -Force
+    }
+}
+
 # older versions of this script named undated-version files vunknown_<date>.version;
 # rename them to v<date>.version and refresh the checksums that list the file name
 function Repair-OldVersionName($file) {
@@ -363,6 +404,7 @@ if ($Manual) {
     Say 'This app has to be updated by hand.'
     if ($Page) { Say "Download it from: $Page" }
     if ($Note) { Say $Note }
+    Say 'Put builds that only run on 64-bit Windows in the x64 folder, and anything that runs on 32-bit Windows in x86.'
     exit 2
 }
 
@@ -375,6 +417,11 @@ try {
     if (-not $link) { throw 'No download source given (use -Url, -Page/-Link or -GitHub/-Asset)' }
     $jobs += [pscustomobject]@{ Link = $link; SaveAs = $SaveAs; Into = $Into }
     $link86 = Resolve-Link $Url86 $Link86 $Asset86
+    if (-not $link86 -and $UrlFormat86 -and $script:pageVersion) { $link86 = $UrlFormat86 -f $script:pageVersion }
+
+    # files left at the top of the app folder (the old layout) belong in its x64/x86 folder
+    $movedRootFiles = $false
+    if ($Into) { $movedRootFiles = Move-RootFiles (Join-Path $AppDir $Into) }
     if ($link86) { $jobs += [pscustomobject]@{ Link = $link86; SaveAs = $SaveAs86; Into = $Into86 } }
 
     # links scraped from a page or GitHub contain the version, so an unchanged link means nothing new
@@ -382,6 +429,8 @@ try {
     $oldRecord = if ($versionFile) { Get-Content -LiteralPath $versionFile.FullName -Raw } else { '' }
     # version files without a built= line were dated by an older version of this script, so redo them once
     if ($oldRecord -notmatch '(?m)^built=') { $oldRecord = '' }
+    # after moving files the checksums are out of date, so do a full update
+    if ($movedRootFiles) { $oldRecord = '' }
     $oldKey = (($oldRecord -split "`r?`n") | Where-Object { $_ -and $_ -notlike 'built=*' }) -join "`r`n"
     if (-not $Url -and $oldRecord) {
         $unchanged = @($jobs | Where-Object { $oldRecord.Contains("link=$($_.Link)") }).Count -eq $jobs.Count

@@ -10,7 +10,7 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "iMazing" ^
     -Url "https://downloads.imazing.com/windows/iMazing/iMazing3forWindows.exe" ^
-    -SaveAs "iMazing3forWindows.exe"
+    -SaveAs "iMazing3forWindows.exe" -Into "x64"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

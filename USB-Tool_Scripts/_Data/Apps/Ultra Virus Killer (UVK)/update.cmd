@@ -10,7 +10,7 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "Ultra Virus Killer (UVK)" ^
     -Url "https://www.carifred.com/uvk/UVKPortable.exe" ^
-    -SaveAs "UVKPortable.exe"
+    -SaveAs "UVKPortable.exe" -Into "x86"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

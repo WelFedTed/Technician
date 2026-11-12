@@ -10,7 +10,8 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "PeaZip" ^
     -GitHub "peazip/PeaZip" ^
-    -Asset "^peazip_portable-[\d.]+\.WIN64\.zip$" ^
+    -Asset "^peazip_portable-[\d.]+\.WIN64\.zip$" -Into "x64" ^
+    -Asset86 "^peazip_portable-[\d.]+\.WINDOWS\.zip$" -Into86 "x86" ^
     -Extract -Flatten -Clean
 set "result=%errorlevel%"
 

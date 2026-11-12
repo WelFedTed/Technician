@@ -11,7 +11,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "HitmanPro" ^
     -Manual ^
     -Page "https://www.sophos.com/en-us/free-tools/hitmanpro" ^
-    -Note "Sophos now blocks scripted downloads. Save HitmanPro_x64.exe and HitmanPro.exe (32-bit) into this folder."
+    -Note "Sophos now blocks scripted downloads. Save HitmanPro_x64.exe in the x64 folder and HitmanPro.exe in x86."
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

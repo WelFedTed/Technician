@@ -10,7 +10,7 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "Angry IP Scanner" ^
     -GitHub "angryip/ipscan" ^
-    -Asset "^ipscan-[\d.]+-win\.exe$" ^
+    -Asset "^ipscan-[\d.]+-win\.exe$" -Into "x86" ^
     -Clean
 set "result=%errorlevel%"
 

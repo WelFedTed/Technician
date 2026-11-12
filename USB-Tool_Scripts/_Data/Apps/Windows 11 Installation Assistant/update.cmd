@@ -10,7 +10,7 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "Windows 11 Installation Assistant" ^
     -Url "https://go.microsoft.com/fwlink/?linkid=2171764" ^
-    -SaveAs "Windows11InstallationAssistant.exe"
+    -SaveAs "Windows11InstallationAssistant.exe" -Into "x86"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

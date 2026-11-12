@@ -10,7 +10,8 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "7-Zip" ^
     -GitHub "ip7z/7zip" ^
-    -Asset "^7z\d+-x64\.exe$" ^
+    -Asset "^7z\d+-x64\.exe$" -Into "x64" ^
+    -Asset86 "^7z\d+\.exe$" -Into86 "x86" ^
     -Clean
 set "result=%errorlevel%"
 

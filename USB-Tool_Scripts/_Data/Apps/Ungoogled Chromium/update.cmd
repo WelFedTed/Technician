@@ -11,7 +11,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Ungoogled Chromium (portapps)" ^
     -GitHub "portapps/ungoogled-chromium-portable" ^
     -Asset "^ungoogled-chromium-portable-win64-[\d.-]+\.7z$" ^
-    -Extract -Clean -Keep "data"
+    -Extract -Into "x64" -Clean -Keep "data"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

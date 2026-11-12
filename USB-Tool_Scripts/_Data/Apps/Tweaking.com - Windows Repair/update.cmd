@@ -10,7 +10,7 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "Tweaking.com - Windows Repair" ^
     -Url "https://www.tweaking.com/files/setups/tweaking.com_windows_repair_aio.zip" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Into "x86" -Clean
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause
