@@ -124,7 +124,7 @@ rem ----------------------------------------------------------------------------
 	exit /b
 
 	:find86
-	call :findIn "x86\%A%" "x86_x64\%N%_x86%E%" "x86_x64\%N%_x32%E%" "x86_x64\%A%" "x86_x64_ARM64\%N%_x86%E%" "x86_x64_ARM64\%N%_x32%E%" "x86_x64_ARM64\%A%"
+	call :findIn "x86\%A%" "x86_x64\%N%_x86%E%" "x86_x64\%N%_x32%E%" "x86_x64\%N%32%E%" "x86_x64\%A%" "x86_x64_ARM64\%N%_x86%E%" "x86_x64_ARM64\%N%_x32%E%" "x86_x64_ARM64\%N%32%E%" "x86_x64_ARM64\%A%"
 	exit /b
 
 	rem tries each path in turn; paths may contain wildcards (eg. MyApp-*.exe), so matching files are listed

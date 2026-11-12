@@ -18,6 +18,7 @@
 #   or -Page86 -Link86 [-UrlFormat86] when the build is listed on its own page
 #   (and -UrlArm / -LinkArm / -AssetArm / -UrlFormatArm / -PageArm for ARM64)
 # Extra files saved next to the main one, named as in their links: -Extra "url1,url2"
+#   or more assets from the same GitHub release: -ExtraAsset <regex>
 #
 # What to do with it:
 #   -SaveAs, -SaveAs86, -SaveAsArm    save a single file under this name (default: name from the link)
@@ -35,6 +36,8 @@
 #   -Keep "a,b"                       extra file/folder names to keep when cleaning
 #   -Referer <url>                    some sites only allow downloads from their own pages
 #   -Password <text>                  password for a protected .zip (extracted with 7-Zip's 7za.exe)
+#   -UserAgent <text>                 send this instead of a browser user agent (eg. "curl" for SourceForge)
+#   -Inner, -Inner86, -InnerArm       take this folder from inside the archive instead of all of it
 #   -VersionFrom <file>               read the version from this file instead of the link
 #   -VersionFromUrl                   read the version from the download link before the exe (for installers
 #                                     whose exe carries the installer's version, eg. Firefox)
@@ -53,13 +56,14 @@ param(
     [string]$SaveAs, [string]$SaveAs86, [string]$SaveAsArm,
     [switch]$Extract, [string]$Into, [string]$Into86, [string]$IntoArm,
     [switch]$Flatten, [switch]$Clean, [string]$Keep,
-    [string]$Referer, [string]$Password,
+    [string]$Referer, [string]$Password, [string]$UserAgent, [string]$ExtraAsset,
+    [string]$Inner, [string]$Inner86, [string]$InnerArm,
     [string]$VersionFrom, [switch]$VersionFromUrl
 )
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
-$userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'
+$userAgent = if ($UserAgent) { $UserAgent } else { 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36' }
 $curl = Join-Path $env:SystemRoot 'System32\curl.exe'
 $toolsDir = Join-Path $env:LOCALAPPDATA 'USB-Tool\tools'
 $AppDir = (Resolve-Path -LiteralPath $AppDir).Path
@@ -170,8 +174,9 @@ function Get-Download([string]$address, [string]$outFile) {
 function Get-DownloadName([string]$link, [string]$finalUrl, [string]$kind) {
     $fromLink = [Uri]::UnescapeDataString((Split-Path -Leaf ($link.Split('?')[0])))
     $fromFinal = Split-Path -Leaf $finalUrl
-    $name = if ($fromLink -match '\.[A-Za-z0-9]{2,4}$') { $fromLink } else { $fromFinal }
-    if ($name -notmatch '\.[A-Za-z0-9]{2,4}$' -and $kind -in @('exe', 'msi', 'zip', '7z')) { $name += ".$kind" }
+    # extensions can be long, eg. .msixbundle
+    $name = if ($fromLink -match '\.[A-Za-z0-9]{2,12}$') { $fromLink } else { $fromFinal }
+    if ($name -notmatch '\.[A-Za-z0-9]{2,12}$' -and $kind -in @('exe', 'msi', 'zip', '7z')) { $name += ".$kind" }
     foreach ($bad in [IO.Path]::GetInvalidFileNameChars()) { $name = $name.Replace([string]$bad, '_') }
     return $name
 }
@@ -196,7 +201,8 @@ function Get-FileKind([string]$path) {
     if ($bytes[0] -eq 0x37 -and $bytes[1] -eq 0x7A -and $bytes[2] -eq 0xBC) { return '7z' }
     if ($bytes[0] -eq 0xD0 -and $bytes[1] -eq 0xCF -and $bytes[2] -eq 0x11) { return 'msi' }
     $start = [Text.Encoding]::ASCII.GetString($bytes).TrimStart()
-    if ($start.StartsWith('<')) { return 'html' }
+    # an error or landing page, not a script that happens to start with < (eg. a PowerShell <# comment)
+    if ($start -match '^<(!|html|head|body)') { return 'html' }
     return 'other'
 }
 
@@ -283,7 +289,7 @@ function Copy-AllowedFiles([string]$source, [string]$destination) {
 }
 
 # extracts to a temp folder and returns the folder holding the app's files
-function Expand-ToStaging([string]$archive, [string]$kind, [string]$staging) {
+function Expand-ToStaging([string]$archive, [string]$kind, [string]$staging, [string]$inner) {
     New-Item -ItemType Directory -Path $staging | Out-Null
     if ($Password) {
         $sevenZipA = Get-SevenZipA
@@ -300,6 +306,12 @@ function Expand-ToStaging([string]$archive, [string]$kind, [string]$staging) {
     }
     $top =@(Get-ChildItem -LiteralPath $staging -Force)
     if ($top.Count -eq 0) { throw 'The downloaded archive is empty' }
+    if ($inner) {
+        # take one folder from inside the archive, eg. "AnyBurn(64-bit)"
+        $innerPath = Join-Path $staging $inner
+        if (-not (Test-Path -LiteralPath $innerPath)) { throw "No '$inner' folder in the download (the archive layout may have changed)" }
+        return $innerPath
+    }
     if ($Flatten -and $top.Count -eq 1 -and $top[0].PSIsContainer) { return $top[0].FullName }
     return $staging
 }
@@ -504,6 +516,20 @@ function Merge-Item($item, [string]$destination) {
     }
 }
 
+# true if every build folder this app uses is there and has files in it; if something deleted them
+# (eg. by hand), "already up to date" would otherwise leave the app missing
+function Test-AppFiles([object[]]$jobs, [switch]$Quiet) {
+    foreach ($job in $jobs) {
+        if (-not $job.Into) { continue }
+        $folder = Join-Path $AppDir $job.Into
+        if (-not (Get-ChildItem -LiteralPath $folder -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1)) {
+            if (-not $Quiet) { Say "The $($job.Into) folder is missing or empty, so downloading again..." }
+            return $false
+        }
+    }
+    return $true
+}
+
 # older versions of this script named undated-version files vunknown_<date>.version;
 # rename them to v<date>.version and refresh the checksums that list the file name
 function Repair-OldVersionName($file) {
@@ -537,14 +563,19 @@ try {
     $jobs = @()
     $link = Resolve-Link $Url $Link $Asset
     if (-not $link) { throw 'No download source given (use -Url, -Page/-Link or -GitHub/-Asset)' }
-    $jobs += [pscustomobject]@{ Link = $link; SaveAs = $SaveAs; Into = $Into }
+    $jobs += [pscustomobject]@{ Link = $link; SaveAs = $SaveAs; Into = $Into; Inner = $Inner }
     $link86 = Resolve-AltLink $Url86 $Link86 $Asset86 $Page86 $UrlFormat86
     $linkArm = Resolve-AltLink $UrlArm $LinkArm $AssetArm $PageArm $UrlFormatArm
     foreach ($extraLink in ($Extra -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ }) {
         $jobs += [pscustomobject]@{ Link = $extraLink; SaveAs = $null; Into = $Into }
     }
-    if ($link86) { $jobs += [pscustomobject]@{ Link = $link86; SaveAs = $SaveAs86; Into = $Into86 } }
-    if ($linkArm) { $jobs += [pscustomobject]@{ Link = $linkArm; SaveAs = $SaveAsArm; Into = $IntoArm } }
+    if ($GitHub -and $ExtraAsset) {
+        foreach ($extraFile in $script:release.assets | Where-Object { $_.name -match $ExtraAsset -and $_.browser_download_url -ne $link }) {
+            $jobs += [pscustomobject]@{ Link = $extraFile.browser_download_url; SaveAs = $null; Into = $Into }
+        }
+    }
+    if ($link86) { $jobs += [pscustomobject]@{ Link = $link86; SaveAs = $SaveAs86; Into = $Into86; Inner = $Inner86 } }
+    if ($linkArm) { $jobs += [pscustomobject]@{ Link = $linkArm; SaveAs = $SaveAsArm; Into = $IntoArm; Inner = $InnerArm } }
 
     # files at the top of the app folder, or in a build folder this app no longer uses (eg. x86 after it
     # became x86_x64), belong in its main build folder
@@ -563,7 +594,7 @@ try {
     $oldKey = (($oldRecord -split "`r?`n") | Where-Object { $_ -and $_ -notlike 'built=*' }) -join "`r`n"
     if (-not $Url -and $oldRecord) {
         $unchanged = @($jobs | Where-Object { $oldRecord.Contains("link=$($_.Link)") }).Count -eq $jobs.Count
-        if ($unchanged) {
+        if ($unchanged -and (Test-AppFiles $jobs)) {
             Repair-OldVersionName $versionFile
             Say "Already up to date"
             exit 0
@@ -574,7 +605,7 @@ try {
     foreach ($job in $jobs) { $job | Add-Member -NotePropertyName Stamp -NotePropertyValue $(if ($Url) { Get-RemoteStamp $job.Link } else { '' }) }
     if ($Url -and $oldRecord) {
         $unchanged = @($jobs | Where-Object { $_.Stamp -and $oldRecord.Contains("stamp=$($_.Stamp)") }).Count -eq $jobs.Count
-        if ($unchanged) {
+        if ($unchanged -and (Test-AppFiles $jobs)) {
             Repair-OldVersionName $versionFile
             Say "Already up to date"
             exit 0
@@ -607,7 +638,7 @@ try {
         if ($_.Stamp) { "stamp=$($_.Stamp)" }
     }) -join "`r`n"
     $installed = $jobs | Where-Object { $Extract -or (Test-Path -LiteralPath $_.Target) }
-    if ($versionFile -and $oldRecord -and @($installed).Count -eq $jobs.Count -and $oldKey -eq $record) {
+    if ($versionFile -and $oldRecord -and @($installed).Count -eq $jobs.Count -and $oldKey -eq $record -and (Test-AppFiles $jobs -Quiet)) {
         Repair-OldVersionName $versionFile
         Say "Already up to date"
         exit 0
@@ -619,7 +650,7 @@ try {
         foreach ($job in $jobs) {
             $staging = Join-Path $env:TEMP ("USB-Tool-extract-" + [Guid]::NewGuid().ToString('N'))
             $downloads += $staging
-            $job | Add-Member -NotePropertyName Source -NotePropertyValue (Expand-ToStaging $job.Temp $job.Kind $staging)
+            $job | Add-Member -NotePropertyName Source -NotePropertyValue (Expand-ToStaging $job.Temp $job.Kind $staging $job.Inner)
         }
     }
 
