@@ -8,7 +8,8 @@ rem ----------------------------------------------------------------------------
 	rem Run from the root of the USB tool (eg. Z:\Update-Tool.cmd)
 	rem   1. Scripts: downloads the latest USB-Tool_Scripts folder from GitHub and copies it over the drive
 	rem   2. Apps: tries every _Data\Apps\<App> folder, running its update.cmd from inside that folder
-	rem      (folders without an update.cmd are skipped)
+	rem      (folders without an update.cmd are skipped; folders starting with _ are notes, not apps)
+	rem      Each update.cmd uses the shared helper _Data\Apps\_Update-App.ps1
 	rem Usage: Update-Tool.cmd [/scripts ^| /apps]   (no argument = update both)
 	rem Files on the drive that aren't in the repo (eg. the apps themselves) are never deleted
 	rem Scripts on the drive are overwritten with the repo version, so make local changes in the repo
@@ -36,7 +37,8 @@ rem ----------------------------------------------------------------------------
 	set /a appTotal=0
 	set /a appCount=0
 	set /a appSkipped=0
-	set "appWarnings="
+	set "appFailed="
+	set "appManual="
 
 
 rem Checks
@@ -74,7 +76,7 @@ rem ----------------------------------------------------------------------------
 
 	rem TODO: update PortableApps (the PortableApps folder in the drive root, using portableapps.com releases)
 	rem TODO: update Linux + Windows ISOs
-	rem TODO: update Ventoy
+	rem TODO: upgrade Ventoy on this drive itself (the Ventoy app files are already updated in _Data\Apps\Ventoy)
 
 	goto end
 
@@ -123,14 +125,11 @@ rem ----------------------------------------------------------------------------
 :updateApps
 	call :header "Updating apps"
 
-	rem the update scripts need wget
-	where wget >nul 2>&1
-	if errorlevel 1 (
-		call :installWget
-		if errorlevel 1 exit /b 1
+	rem folders starting with _ are notes (eg. "_need a portable pdf reader"), not apps
+	for /d %%D in ("%root%_Data\Apps\*") do (
+		set "folderName=%%~nxD"
+		if not "!folderName:~0,1!" == "_" call :updateApp "%%~fD"
 	)
-
-	for /d %%D in ("%root%_Data\Apps\*") do call :updateApp "%%~fD"
 	exit /b 0
 
 :updateApp
@@ -145,43 +144,21 @@ rem ----------------------------------------------------------------------------
 		set /a appSkipped+=1
 		exit /b 0
 	)
-	set /a appCount+=1
 
 	pushd "%~1"
 	rem .\ is needed on PCs that don't search the current folder for commands
-	cmd /d /c .\update.cmd
+	cmd /d /c .\update.cmd /nopause
+	set "appResult=!errorlevel!"
 	popd
 	title USB Tool Updater
 
-	rem a failed download leaves a 0 byte file in place of the app
-	set "emptyFiles="
-	for %%F in ("%~1\*.exe" "%~1\*.msi" "%~1\*.zip") do (
-		if %%~zF == 0 set "emptyFiles=!emptyFiles! %%~nxF"
-	)
-	if defined emptyFiles (
-		echo:
-		echo WARNING: empty file^(s^) after update:!emptyFiles!
-		set "appWarnings=!appWarnings!;!appName!:!emptyFiles!"
-	)
-	exit /b 0
-
-:installWget
-	echo wget not found, installing it with winget...
-	where winget >nul 2>&1
-	if errorlevel 1 (
-		echo winget isn't installed. Install "App Installer" from the Microsoft Store, then run this again.
-		exit /b 1
-	)
-	winget install --id JernejSimoncic.Wget --exact --source winget
-
-	rem pick up the PATH changes winget just made, without opening a new window
-	set "PATH=%PATH%;%LOCALAPPDATA%\Microsoft\WinGet\Links"
-	for /f "tokens=2,*" %%A in ('reg query "HKCU\Environment" /v Path 2^>nul ^| find "REG_"') do call set "PATH=%%PATH%%;%%B"
-
-	where wget >nul 2>&1
-	if errorlevel 1 (
-		echo wget still can't be found. Close this window, open a new one and run Update-Tool.cmd again.
-		exit /b 1
+	rem update.cmd exit codes: 0 = updated or up to date, 2 = needs a manual update, anything else = failed
+	if "!appResult!" == "0" (
+		set /a appCount+=1
+	) else if "!appResult!" == "2" (
+		set "appManual=!appManual!;!appName!"
+	) else (
+		set "appFailed=!appFailed!;!appName!"
 	)
 	exit /b 0
 
@@ -203,11 +180,16 @@ rem ----------------------------------------------------------------------------
 :end
 	call :header "Summary"
 	echo Scripts: %scriptsResult%
-	if "%doApps%" == "1" ( echo Apps:    !appCount! updated, !appSkipped! skipped ^(no update.cmd^) ) else ( echo Apps:    skipped )
-	if defined appWarnings (
+	if "%doApps%" == "1" ( echo Apps:    !appCount! updated or already up to date, !appSkipped! skipped ^(no update.cmd^) ) else ( echo Apps:    skipped )
+	if defined appFailed (
 		echo:
-		echo These apps may not have updated properly ^(empty files left behind^):
-		for %%W in ("!appWarnings:;=" "!") do if not "%%~W" == "" echo   %%~W
+		echo These apps FAILED to update ^(scroll up for the reason^):
+		for %%W in ("!appFailed:;=" "!") do if not "%%~W" == "" echo   %%~W
+	)
+	if defined appManual (
+		echo:
+		echo These apps need updating by hand ^(scroll up for where to get them^):
+		for %%W in ("!appManual:;=" "!") do if not "%%~W" == "" echo   %%~W
 	)
 	echo:
 

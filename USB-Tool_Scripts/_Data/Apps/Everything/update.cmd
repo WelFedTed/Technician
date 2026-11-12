@@ -1,0 +1,20 @@
+@echo off
+
+title Updating Everything
+
+rem Updates this app with the shared helper _Data\Apps\_Update-App.ps1 (see that file for the options)
+rem Run it on its own, or let Update-Tool.cmd run it for every app
+
+rem clear PSModulePath so Windows PowerShell loads its own modules (it breaks if started from PowerShell 7)
+set "PSModulePath="
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
+    -Name "Everything" ^
+    -Page "https://www.voidtools.com/downloads/" ^
+    -Link "/Everything-[\d.]+\.x64\.zip" ^
+    -Link86 "/Everything-[\d.]+\.x86\.zip" ^
+    -Extract -Into "x64" -Into86 "x86" ^
+    -Clean -Keep "Everything.ini,*.db"
+set "result=%errorlevel%"
+
+if /i not "%~1" == "/nopause" pause
+exit /b %result%
