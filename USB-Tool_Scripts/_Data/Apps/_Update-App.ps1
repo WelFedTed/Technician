@@ -14,6 +14,7 @@
 #   -Manual [-Page <url>] [-Note <text>]  can't be downloaded automatically; prints where to get it
 # Optional 32-bit download from the same source: -Url86 / -Link86 / -Asset86,
 #   or -UrlFormat86 to build it from the same version -Link captured
+# Extra files saved next to the main one, named as in their links: -Extra "url1,url2"
 #
 # What to do with it:
 #   -SaveAs <name>, -SaveAs86 <name>  save a single file under this name (default: name from the link)
@@ -33,7 +34,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$Name,
     [string]$AppDir = (Get-Location).Path,
-    [string]$Url, [string]$Url86,
+    [string]$Url, [string]$Url86, [string]$Extra,
     [string]$Page, [string]$Link, [string]$Link86, [string]$UrlFormat, [string]$UrlFormat86,
     [string]$GitHub, [string]$Asset, [string]$Asset86,
     [switch]$Manual, [string]$Note,
@@ -418,6 +419,9 @@ try {
     $jobs += [pscustomobject]@{ Link = $link; SaveAs = $SaveAs; Into = $Into }
     $link86 = Resolve-Link $Url86 $Link86 $Asset86
     if (-not $link86 -and $UrlFormat86 -and $script:pageVersion) { $link86 = $UrlFormat86 -f $script:pageVersion }
+    foreach ($extraLink in ($Extra -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ }) {
+        $jobs += [pscustomobject]@{ Link = $extraLink; SaveAs = $null; Into = $Into }
+    }
 
     # files left at the top of the app folder (the old layout) belong in its x64/x86 folder
     $movedRootFiles = $false

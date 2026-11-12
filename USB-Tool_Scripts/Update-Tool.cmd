@@ -113,6 +113,8 @@ rem ----------------------------------------------------------------------------
 
 	rem folders renamed in the repo: move what's in the old folder on the drive into the new one
 	call :moveFolder "_Data\Apps\Microsoft Activiation Scripts (MAS)" "_Data\Apps\Microsoft Activation Scripts (MAS)"
+	rem folders whose name only changed case: Windows sees them as the same folder, so just rename
+	call :renameCase "_Data\Apps" "RKill"
 
 	rem Update-Tool.cmd is replaced at the very end
 	fc /b "%src%\Update-Tool.cmd" "%~f0" >nul 2>&1
@@ -168,6 +170,18 @@ rem ----------------------------------------------------------------------------
 
 rem Helpers
 rem ----------------------------------------------------------------------------------------------------
+rem fixes the capitalisation of a folder's name, eg. Rkill to RKill (no-op if it's already right)
+:renameCase
+	if not exist "%root%%~1\%~2\" exit /b 0
+	rem list with a wildcard so Windows returns the name as it's actually written on the drive
+	set "currentName="
+	for /d %%D in ("%root%%~1\*") do if /i "%%~nxD" == "%~2" set "currentName=%%~nxD"
+	if "!currentName!" == "%~2" exit /b 0
+	echo:
+	echo Renaming !currentName! to %~2...
+	ren "%root%%~1\!currentName!" "%~2"
+	exit /b 0
+
 rem moves an old folder's contents into its renamed folder (keeping the repo's update.cmd), then deletes it
 :moveFolder
 	if not exist "%root%%~1\" exit /b 0
