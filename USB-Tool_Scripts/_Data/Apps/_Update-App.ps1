@@ -341,6 +341,17 @@ function Write-Parity {
     finally { Pop-Location }
 }
 
+# older versions of this script named undated-version files vunknown_<date>.version;
+# rename them to v<date>.version and refresh the checksums that list the file name
+function Repair-OldVersionName($file) {
+    if ($file.Name -notlike 'vunknown_*') { return }
+    $newName = $file.Name -replace '^vunknown_', 'v'
+    Rename-Item -LiteralPath $file.FullName -NewName $newName
+    Say "Renamed $($file.Name) to $newName"
+    Write-Checksums
+    Write-Parity
+}
+
 # ---------------------------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------------------------
@@ -375,7 +386,8 @@ try {
     if (-not $Url -and $oldRecord) {
         $unchanged = @($jobs | Where-Object { $oldRecord.Contains("link=$($_.Link)") }).Count -eq $jobs.Count
         if ($unchanged) {
-            Say "Already up to date ($($versionFile.BaseName))"
+            Repair-OldVersionName $versionFile
+            Say "Already up to date"
             exit 0
         }
     }
@@ -404,7 +416,8 @@ try {
     $record = ($jobs | ForEach-Object { "link=$($_.Link)"; "url=$($_.FinalUrl)"; "sha256=$($_.Hash)" }) -join "`r`n"
     $installed = $jobs | Where-Object { $Extract -or (Test-Path -LiteralPath $_.Target) }
     if ($versionFile -and $oldRecord -and @($installed).Count -eq $jobs.Count -and $oldKey -eq $record) {
-        Say "Already up to date ($($versionFile.BaseName))"
+        Repair-OldVersionName $versionFile
+        Say "Already up to date"
         exit 0
     }
 
@@ -437,7 +450,10 @@ try {
     Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File | Remove-Item -Force
     $version = Get-Version $jobs
     $buildDate = Get-BuildDate $jobs
-    $versionPath = Join-Path $AppDir ("v{0}_{1}.version" -f $version, $buildDate.ToString('yyyy-MM-dd'))
+    # without a version number the file is just dated, eg. v2026-11-11.version
+    $versionName = if ($version -eq 'unknown') { 'v{0}.version' -f $buildDate.ToString('yyyy-MM-dd') }
+        else { 'v{0}_{1}.version' -f $version, $buildDate.ToString('yyyy-MM-dd') }
+    $versionPath = Join-Path $AppDir $versionName
     [IO.File]::WriteAllText($versionPath, $record + "`r`nbuilt=" + $buildDate.ToString('yyyy-MM-dd'))
     Say "Version: $version (built $($buildDate.ToString('yyyy-MM-dd')))"
 

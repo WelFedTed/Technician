@@ -31,7 +31,7 @@ Edit Bitmap Images                  Photopea (website) / Adobe Photoshop
 Edit Vector Images                  Adobe Illustrator
 3D Modelling                        Blender
 Test Network Bandwidth/Throughput   iPerf3 (Command Line Tool)
-Crack Windows / Office              MAS (Microsoft Activiation Scripts)
+Crack Windows / Office              MAS (Microsoft Activation Scripts)
 Remove Program Remnants (Windows)   Revo Uninstaller Pro
 Fix Windows Update                  WUReset (Reset Windows Update Tool)
 Video Player                        VLC Media Player

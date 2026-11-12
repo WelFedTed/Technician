@@ -111,6 +111,9 @@ rem ----------------------------------------------------------------------------
 		exit /b 1
 	)
 
+	rem folders renamed in the repo: move what's in the old folder on the drive into the new one
+	call :moveFolder "_Data\Apps\Microsoft Activiation Scripts (MAS)" "_Data\Apps\Microsoft Activation Scripts (MAS)"
+
 	rem Update-Tool.cmd is replaced at the very end
 	fc /b "%src%\Update-Tool.cmd" "%~f0" >nul 2>&1
 	if errorlevel 1 set "selfUpdate=1"
@@ -165,6 +168,19 @@ rem ----------------------------------------------------------------------------
 
 rem Helpers
 rem ----------------------------------------------------------------------------------------------------
+rem moves an old folder's contents into its renamed folder (keeping the repo's update.cmd), then deletes it
+:moveFolder
+	if not exist "%root%%~1\" exit /b 0
+	echo:
+	echo Moving %~1 to its new name...
+	robocopy "%root%%~1" "%root%%~2" /E /MOVE /XF update.cmd /R:1 /W:1 /NJH /NJS /NDL /NFL /NP >nul
+	if errorlevel 8 (
+		echo Couldn't move everything, so "%~1" was left in place.
+		exit /b 0
+	)
+	rmdir /s /q "%root%%~1"
+	exit /b 0
+
 :header
 	echo:
 	echo ----------------------------------------------------------------------------------------------------
