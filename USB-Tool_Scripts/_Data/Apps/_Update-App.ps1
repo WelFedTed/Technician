@@ -3,6 +3,8 @@
 # Each app's update.cmd calls this with the app's download details.
 # It downloads the latest version, checks the download is real (not an error page or empty file)
 # before touching the old version, then rewrites the .version file, checksums.sfv and parity data.
+# The version file is named v<version>_<build date>.version, where the build date comes from the
+# GitHub release, the files inside the archive, the server's Last-Modified date or the exe itself.
 #
 # Where to get the app (pick one):
 #   -Url <url>                        a fixed download link
@@ -122,7 +124,8 @@ function Resolve-Link([string]$direct, [string]$pageLink, [string]$asset) {
 # ---------------------------------------------------------------------------------------------
 
 function Get-Download([string]$address, [string]$outFile) {
-    $curlArgs = @('-L', '--fail', '--retry', '2', '--connect-timeout', '20', '--progress-bar', '-A', $userAgent, '-o', $outFile, '-w', '%{url_effective}')
+    # -R keeps the server's Last-Modified date on the file, used for the build date
+    $curlArgs = @('-L', '-R', '--fail', '--retry', '2', '--connect-timeout', '20', '--progress-bar', '-A', $userAgent, '-o', $outFile, '-w', '%{url_effective}')
     if ($Referer) { $curlArgs += @('-e', $Referer) }
     $finalUrl = & $curl @curlArgs $address
     if ($LASTEXITCODE -ne 0) { throw "Download failed (curl exit code $LASTEXITCODE): $address" }
@@ -260,6 +263,51 @@ function Get-Version([object[]]$jobs) {
     return 'unknown'
 }
 
+# the date the build was made, read from the exe's PE header (link time)
+function Get-PeDate([string]$path) {
+    try {
+        $stream = [IO.File]::OpenRead($path)
+        try {
+            $reader = [IO.BinaryReader]::new($stream)
+            if ($reader.ReadUInt16() -ne 0x5A4D) { return $null }
+            $stream.Position = 0x3C
+            $stream.Position = $reader.ReadInt32() + 8
+            $seconds = $reader.ReadUInt32()
+        }
+        finally { $stream.Close() }
+        $date = [DateTimeOffset]::FromUnixTimeSeconds($seconds).LocalDateTime
+        # some compilers write a hash here instead of a time, so only trust sensible dates
+        if ($date -gt [datetime]'2000-01-01' -and $date -lt (Get-Date).AddDays(1)) { return $date }
+    }
+    catch { }
+    return $null
+}
+
+# the downloaded version's build/release date, falling back to today if nothing better is known
+function Get-BuildDate([object[]]$jobs) {
+    # 1. GitHub release date
+    if ($script:release -and $script:release.published_at) {
+        return ([datetime]$script:release.published_at).ToLocalTime()
+    }
+    $job = $jobs[0]
+    # 2. archives: the newest file inside (zip/7z entries keep their build timestamps)
+    if ($Extract -and $job.Source) {
+        $newest = Get-ChildItem -LiteralPath $job.Source -Recurse -File -Force |
+            Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(1) } |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if ($newest) { return $newest.LastWriteTime }
+    }
+    # 3. single files: the server's Last-Modified date
+    if ($job.ServerDate) { return $job.ServerDate }
+    # 4. the exe's own build timestamp
+    if (-not $Extract -and $job.Target -and (Test-Path -LiteralPath $job.Target)) {
+        $peDate = Get-PeDate $job.Target
+        if ($peDate) { return $peDate }
+    }
+    Say 'WARNING: no build date found for this download, so the version file uses today''s date.'
+    return Get-Date
+}
+
 function Write-Checksums {
     $sfv = Join-Path $AppDir 'checksums.sfv'
     $files = Get-ChildItem -LiteralPath $AppDir -Recurse -File -Force |
@@ -310,6 +358,9 @@ try {
     # links scraped from a page or GitHub contain the version, so an unchanged link means nothing new
     $versionFile = Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File | Select-Object -First 1
     $oldRecord = if ($versionFile) { Get-Content -LiteralPath $versionFile.FullName -Raw } else { '' }
+    # version files without a built= line were dated by an older version of this script, so redo them once
+    if ($oldRecord -notmatch '(?m)^built=') { $oldRecord = '' }
+    $oldKey = (($oldRecord -split "`r?`n") | Where-Object { $_ -and $_ -notlike 'built=*' }) -join "`r`n"
     if (-not $Url -and $oldRecord) {
         $unchanged = @($jobs | Where-Object { $oldRecord.Contains("link=$($_.Link)") }).Count -eq $jobs.Count
         if ($unchanged) {
@@ -330,13 +381,18 @@ try {
             Temp = $temp; Kind = $kind; FinalUrl = $finalUrl; Folder = $folder
             Target = (Join-Path $folder $fileName)
             Hash = Get-Sha256 $temp
+            # without a Last-Modified header curl leaves the file dated now, which isn't a build date
+            ServerDate = $(
+                $stamp = (Get-Item -LiteralPath $temp).LastWriteTime
+                if ($stamp -lt (Get-Date).AddMinutes(-10)) { $stamp } else { $null }
+            )
         }
     }
 
     # skip everything if the downloads match what was installed last time
     $record = ($jobs | ForEach-Object { "link=$($_.Link)"; "url=$($_.FinalUrl)"; "sha256=$($_.Hash)" }) -join "`r`n"
     $installed = $jobs | Where-Object { $Extract -or (Test-Path -LiteralPath $_.Target) }
-    if ($versionFile -and @($installed).Count -eq $jobs.Count -and $oldRecord -eq $record) {
+    if ($versionFile -and $oldRecord -and @($installed).Count -eq $jobs.Count -and $oldKey -eq $record) {
         Say "Already up to date ($($versionFile.BaseName))"
         exit 0
     }
@@ -369,9 +425,10 @@ try {
     Say 'Updating version file...'
     Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File | Remove-Item -Force
     $version = Get-Version $jobs
-    $versionPath = Join-Path $AppDir ("v{0}_{1}.version" -f $version, (Get-Date -Format 'yyyy-MM-dd'))
-    [IO.File]::WriteAllText($versionPath, $record)
-    Say "Version: $version"
+    $buildDate = Get-BuildDate $jobs
+    $versionPath = Join-Path $AppDir ("v{0}_{1}.version" -f $version, $buildDate.ToString('yyyy-MM-dd'))
+    [IO.File]::WriteAllText($versionPath, $record + "`r`nbuilt=" + $buildDate.ToString('yyyy-MM-dd'))
+    Say "Version: $version (built $($buildDate.ToString('yyyy-MM-dd')))"
 
     Say 'Updating checksums...'
     Write-Checksums
