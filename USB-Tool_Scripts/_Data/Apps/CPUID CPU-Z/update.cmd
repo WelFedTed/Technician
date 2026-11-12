@@ -12,7 +12,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.cpuid.com/softwares/cpu-z.html" ^
     -Link "cpu-z_([\d.]+)-en\.zip" ^
     -UrlFormat "https://download.cpuid.com/cpu-z/cpu-z_{0}-en.zip" ^
-    -Extract -Into "x86" -Clean
+    -Extract -Into "x86_x64" -Clean
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

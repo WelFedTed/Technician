@@ -9,8 +9,9 @@ rem clear PSModulePath so Windows PowerShell loads its own modules (it breaks if
 set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "Why Did I Reboot" ^
-    -Manual ^
-    -Note "TODO: no download source set up yet for Why Did I Reboot (WhyDidIReboot.exe)."
+    -GitHub "WelFedTed/why-did-i-reboot" ^
+    -Asset "^WhyDidIReboot\.exe$" -Into "x64" ^
+    -Clean
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

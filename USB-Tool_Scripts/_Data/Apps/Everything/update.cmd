@@ -12,7 +12,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.voidtools.com/downloads/" ^
     -Link "/Everything-[\d.]+\.x64\.zip" ^
     -Link86 "/Everything-[\d.]+\.x86\.zip" ^
-    -Extract -Into "x64" -Into86 "x86" ^
+    -LinkArm "/Everything-[\d.]+\.ARM64\.zip" ^
+    -Extract -Into "x64" -Into86 "x86" -IntoArm "ARM64" ^
     -Clean -Keep "Everything.ini,*.db"
 set "result=%errorlevel%"
 

@@ -12,38 +12,49 @@
 #       [-UrlFormat <fmt>]            build the link from the regex's first group, eg. "https://x/app_{0}.zip"
 #   -GitHub <owner/repo> -Asset <regex>   an asset of the latest GitHub release
 #   -Manual [-Page <url>] [-Note <text>]  can't be downloaded automatically; prints where to get it
-# Optional 32-bit download from the same source: -Url86 / -Link86 / -Asset86,
+# Optional 32-bit and ARM64 downloads (the same options with 86 or Arm on the end):
+#   -Url86 / -Link86 / -Asset86 from the same source,
 #   or -UrlFormat86 to build it from the same version -Link captured,
-#   or -Page86 -Link86 [-UrlFormat86] when the 32-bit build is listed on its own page
+#   or -Page86 -Link86 [-UrlFormat86] when the build is listed on its own page
+#   (and -UrlArm / -LinkArm / -AssetArm / -UrlFormatArm / -PageArm for ARM64)
 # Extra files saved next to the main one, named as in their links: -Extra "url1,url2"
 #
 # What to do with it:
-#   -SaveAs <name>, -SaveAs86 <name>  save a single file under this name (default: name from the link)
+#   -SaveAs, -SaveAs86, -SaveAsArm    save a single file under this name (default: name from the link)
 #   -Extract                          unzip it (.zip or .7z)
-#   -Into <folder>, -Into86 <folder>  the subfolder for each build:
-#                                     x64 = only runs on 64-bit Windows, x86 = runs on 32-bit Windows
-#                                     (combined downloads, installers and scripts that run on both go in x86)
-#                                     Anything else left at the top of the app folder is moved into the -Into folder
+#   -Into, -Into86, -IntoArm          the build folder for each download:
+#                                     x64   = only runs on 64-bit Windows
+#                                     x86   = runs on 32-bit Windows (also installers and scripts)
+#                                     ARM64 = ARM64 Windows build
+#                                     x86_x64 / x86_x64_ARM64 = one download holding several builds that
+#                                     share files (eg. CPU-Z's cpuz_x32.exe + cpuz_x64.exe + cpuz.ini)
+#                                     Anything else at the top of the app folder, and any build folder the
+#                                     app no longer uses, is moved into the -Into folder
 #   -Flatten                          if the archive has one top folder, use what's inside it
 #   -Clean                            delete the old version's files first (keeps update.cmd, *.url, run.cmd and -Keep)
 #   -Keep "a,b"                       extra file/folder names to keep when cleaning
 #   -Referer <url>                    some sites only allow downloads from their own pages
+#   -Password <text>                  password for a protected .zip (extracted with 7-Zip's 7za.exe)
 #   -VersionFrom <file>               read the version from this file instead of the link
+#   -VersionFromUrl                   read the version from the download link before the exe (for installers
+#                                     whose exe carries the installer's version, eg. Firefox)
 #
-# Exit codes: 0 = updated or already up to date, 1 = failed, 2 = needs a manual update
+# Exit codes: 0 = updated or already up to date, 1 = failed, 2 = needs a manual update,
+#             3 = updated, but Windows Defender blocked some files
 
 param(
     [Parameter(Mandatory = $true)][string]$Name,
     [string]$AppDir = (Get-Location).Path,
-    [string]$Url, [string]$Url86, [string]$Extra,
-    [string]$Page, [string]$Link, [string]$Link86, [string]$UrlFormat, [string]$UrlFormat86, [string]$Page86,
-    [string]$GitHub, [string]$Asset, [string]$Asset86,
+    [string]$Url, [string]$Url86, [string]$UrlArm, [string]$Extra,
+    [string]$Page, [string]$Link, [string]$Link86, [string]$LinkArm,
+    [string]$UrlFormat, [string]$UrlFormat86, [string]$UrlFormatArm, [string]$Page86, [string]$PageArm,
+    [string]$GitHub, [string]$Asset, [string]$Asset86, [string]$AssetArm,
     [switch]$Manual, [string]$Note,
-    [string]$SaveAs, [string]$SaveAs86,
-    [switch]$Extract, [string]$Into, [string]$Into86,
+    [string]$SaveAs, [string]$SaveAs86, [string]$SaveAsArm,
+    [switch]$Extract, [string]$Into, [string]$Into86, [string]$IntoArm,
     [switch]$Flatten, [switch]$Clean, [string]$Keep,
-    [string]$Referer,
-    [string]$VersionFrom
+    [string]$Referer, [string]$Password,
+    [string]$VersionFrom, [switch]$VersionFromUrl
 )
 
 $ErrorActionPreference = 'Stop'
@@ -123,6 +134,15 @@ function Find-GitHubAsset([string]$pattern) {
     $match = $script:release.assets | Where-Object { $_.name -match $pattern } | Select-Object -First 1
     if (-not $match) { throw "No asset matching '$pattern' in the latest $GitHub release ($($script:release.tag_name))" }
     return $match.browser_download_url
+}
+
+# the link for a 32-bit or ARM64 build: its own page, the same page/release as the main build,
+# or the main link's version dropped into a format string
+function Resolve-AltLink([string]$direct, [string]$pageLink, [string]$asset, [string]$altPage, [string]$format) {
+    if ($altPage -and $pageLink) { return Find-PageLink $pageLink $altPage $format }
+    $found = Resolve-Link $direct $pageLink $asset
+    if (-not $found -and $format -and $script:pageVersion) { $found = $format -f $script:pageVersion }
+    return $found
 }
 
 function Resolve-Link([string]$direct, [string]$pageLink, [string]$asset) {
@@ -225,10 +245,52 @@ function Clear-OldVersion([string]$folder) {
     } | Remove-Item -Recurse -Force
 }
 
+# 7-Zip's full command-line tool (handles password-protected zips); comes in "7-Zip Extra", which is a .7z,
+# so 7zr.exe unpacks it once and 7za.exe is cached with the other tools
+function Get-SevenZipA {
+    $exe = Join-Path $toolsDir '7za.exe'
+    if (Test-Path -LiteralPath $exe) { return $exe }
+    $sevenZip = Get-Tool '7zr.exe' 'https://www.7-zip.org/a/7zr.exe'
+    Say "Downloading 7za.exe (one-off, cached in $toolsDir)..."
+    $release = Get-Text 'https://api.github.com/repos/ip7z/7zip/releases/latest' | ConvertFrom-Json
+    $extra = $release.assets | Where-Object { $_.name -match '^7z\d+-extra\.7z$' } | Select-Object -First 1
+    if (-not $extra) { throw "Couldn't find 7-Zip Extra in the latest 7-Zip release" }
+    $archive = Join-Path $toolsDir '7z-extra.7z'
+    $unpacked = Join-Path $toolsDir ([Guid]::NewGuid().ToString('N'))
+    & $curl -sSL --fail -A $userAgent -o $archive $extra.browser_download_url
+    if ($LASTEXITCODE -ne 0) { throw "Couldn't download 7-Zip Extra" }
+    & $sevenZip x $archive "-o$unpacked" -y | Out-Null
+    # the 32-bit 7za.exe at the top of the archive runs everywhere
+    Move-Item -LiteralPath (Join-Path $unpacked '7za.exe') -Destination $exe -Force
+    Remove-Item -LiteralPath $archive, $unpacked -Recurse -Force
+    return $exe
+}
+
+# copies a folder tree; files Windows Defender blocks are skipped and listed (eg. NirSoft password tools),
+# so one flagged tool doesn't stop a whole package like NirLauncher from updating
+$script:blocked = @()
+function Copy-AllowedFiles([string]$source, [string]$destination) {
+    New-Item -ItemType Directory -Path $destination -Force | Out-Null
+    foreach ($item in Get-ChildItem -LiteralPath $source -Force) {
+        $target = Join-Path $destination $item.Name
+        if ($item.PSIsContainer) { Copy-AllowedFiles $item.FullName $target; continue }
+        try { Copy-Item -LiteralPath $item.FullName -Destination $target -Force }
+        catch {
+            if ($_.Exception.Message -notmatch 'virus or potentially unwanted software') { throw }
+            $script:blocked += $item.Name
+        }
+    }
+}
+
 # extracts to a temp folder and returns the folder holding the app's files
 function Expand-ToStaging([string]$archive, [string]$kind, [string]$staging) {
     New-Item -ItemType Directory -Path $staging | Out-Null
-    if ($kind -eq '7z') {
+    if ($Password) {
+        $sevenZipA = Get-SevenZipA
+        & $sevenZipA x $archive "-p$Password" "-o$staging" -y | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "Couldn't extract the password-protected download (7za exit code $LASTEXITCODE)" }
+    }
+    elseif ($kind -eq '7z') {
         $sevenZip = Get-Tool '7zr.exe' 'https://www.7-zip.org/a/7zr.exe'
         & $sevenZip x $archive "-o$staging" -y | Out-Null
         if ($LASTEXITCODE -ne 0) { throw "Couldn't extract the download (7zr exit code $LASTEXITCODE)" }
@@ -297,6 +359,11 @@ function Get-Version([object[]]$jobs) {
         }
     }
     if ($script:release) { return ($script:release.tag_name -replace '^v', '') }
+    # some installers carry their own (installer) version, not the app's, so read the link instead
+    if ($VersionFromUrl) {
+        $m = [regex]::Match((Split-Path -Leaf $jobs[0].FinalUrl), '\d+(?:[._]\d+)+')
+        if ($m.Success) { return ($m.Value -replace '_', '.') }
+    }
     foreach ($job in $jobs) {
         if (-not $Extract -and $job.Target -like '*.msi') {
             $v = Get-MsiVersion $job.Target
@@ -369,7 +436,16 @@ function Write-Checksums {
     $files = Get-ChildItem -LiteralPath $AppDir -Recurse -File -Force |
         Where-Object { $_.Name -ne 'checksums.sfv' -and $_.Extension -ne '.par2' } |
         Sort-Object FullName
-    $rows = foreach ($f in $files) { [pscustomobject]@{ Path = $f.FullName.Substring($AppDir.Length).TrimStart('\'); Crc = [UsbToolCrc32]::OfFile($f.FullName) } }
+    $rows = foreach ($f in $files) {
+        try { $crc = [UsbToolCrc32]::OfFile($f.FullName) }
+        catch {
+            # Defender can block reading a file even after it was copied; leave it out of the checksums
+            if ($_.Exception.Message -notmatch 'virus or potentially unwanted software') { throw }
+            if ($script:blocked -notcontains $f.Name) { $script:blocked += $f.Name }
+            continue
+        }
+        [pscustomobject]@{ Path = $f.FullName.Substring($AppDir.Length).TrimStart('\'); Crc = $crc }
+    }
     $width = ($rows | ForEach-Object { $_.Path.Length } | Measure-Object -Maximum).Maximum
     $lines = $rows | ForEach-Object { $_.Path.PadRight($width + 1) + $_.Crc }
     [IO.File]::WriteAllLines($sfv, [string[]]$lines)
@@ -386,18 +462,30 @@ function Write-Parity {
     finally { Pop-Location }
 }
 
-# moves everything at the top of the app folder (except update.cmd, *.url, run.cmd, version/checksum/parity
-# files and the x64/x86 folders) into $target; where $target already has the same item, the old copy is dropped
-function Move-RootFiles([string]$target) {
-    $keepAtRoot = $alwaysKeep + @('x64', 'x86')
+# build folder names; an app uses one or more of these
+$archFolders = @('x86', 'x64', 'ARM64', 'x86_x64', 'x86_x64_ARM64')
+
+# moves everything at the top of the app folder (except update.cmd, *.url, run.cmd and version/checksum/parity
+# files) into $target, and merges build folders the app no longer uses (not in $used) into it too;
+# where $target already has the same item, the old copy is dropped
+function Move-RootFiles([string]$target, [string[]]$used) {
+    $used = @($used | Where-Object { $_ })
     $items = @(Get-ChildItem -LiteralPath $AppDir -Force | Where-Object {
         $item = $_
-        -not ($keepAtRoot | Where-Object { $item.Name -like $_ })
+        if ($item.PSIsContainer -and $used -contains $item.Name) { return $false }
+        -not ($alwaysKeep | Where-Object { $item.Name -like $_ })
     })
     if ($items.Count -eq 0) { return $false }
-    Say "Moving $($items.Count) item(s) from the app folder into its $(Split-Path -Leaf $target) folder..."
+    Say "Moving $($items.Count) item(s) into this app's $(Split-Path -Leaf $target) folder..."
     New-Item -ItemType Directory -Path $target -Force | Out-Null
-    foreach ($item in $items) { Merge-Item $item (Join-Path $target $item.Name) }
+    foreach ($item in $items) {
+        if ($item.PSIsContainer -and $archFolders -contains $item.Name) {
+            # an old build folder: merge what's inside it, not the folder itself
+            foreach ($child in Get-ChildItem -LiteralPath $item.FullName -Force) { Merge-Item $child (Join-Path $target $child.Name) }
+            Remove-Item -LiteralPath $item.FullName -Recurse -Force
+        }
+        else { Merge-Item $item (Join-Path $target $item.Name) }
+    }
     return $true
 }
 
@@ -450,28 +538,26 @@ try {
     $link = Resolve-Link $Url $Link $Asset
     if (-not $link) { throw 'No download source given (use -Url, -Page/-Link or -GitHub/-Asset)' }
     $jobs += [pscustomobject]@{ Link = $link; SaveAs = $SaveAs; Into = $Into }
-    if ($Page86 -and $Link86) {
-        # the 32-bit build is listed on its own page, with its own version
-        $link86 = Find-PageLink $Link86 $Page86 $UrlFormat86
-    }
-    else {
-        $link86 = Resolve-Link $Url86 $Link86 $Asset86
-        if (-not $link86 -and $UrlFormat86 -and $script:pageVersion) { $link86 = $UrlFormat86 -f $script:pageVersion }
-    }
+    $link86 = Resolve-AltLink $Url86 $Link86 $Asset86 $Page86 $UrlFormat86
+    $linkArm = Resolve-AltLink $UrlArm $LinkArm $AssetArm $PageArm $UrlFormatArm
     foreach ($extraLink in ($Extra -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ }) {
         $jobs += [pscustomobject]@{ Link = $extraLink; SaveAs = $null; Into = $Into }
     }
-
-    # files left at the top of the app folder (the old layout) belong in its x64/x86 folder
-    $movedRootFiles = $false
-    if ($Into) { $movedRootFiles = Move-RootFiles (Join-Path $AppDir $Into) }
     if ($link86) { $jobs += [pscustomobject]@{ Link = $link86; SaveAs = $SaveAs86; Into = $Into86 } }
+    if ($linkArm) { $jobs += [pscustomobject]@{ Link = $linkArm; SaveAs = $SaveAsArm; Into = $IntoArm } }
+
+    # files at the top of the app folder, or in a build folder this app no longer uses (eg. x86 after it
+    # became x86_x64), belong in its main build folder
+    $movedRootFiles = $false
+    if ($Into) { $movedRootFiles = Move-RootFiles (Join-Path $AppDir $Into) @($Into, $Into86, $IntoArm) }
 
     # links scraped from a page or GitHub contain the version, so an unchanged link means nothing new
     $versionFile = Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File | Select-Object -First 1
     $oldRecord = if ($versionFile) { Get-Content -LiteralPath $versionFile.FullName -Raw } else { '' }
     # version files without a built= line were dated by an older version of this script, so redo them once
     if ($oldRecord -notmatch '(?m)^built=') { $oldRecord = '' }
+    # Defender blocked files last time, so try again
+    if ($oldRecord -match '(?m)^blocked=') { $oldRecord = '' }
     # after moving files the checksums are out of date, so do a full update
     if ($movedRootFiles) { $oldRecord = '' }
     $oldKey = (($oldRecord -split "`r?`n") | Where-Object { $_ -and $_ -notlike 'built=*' }) -join "`r`n"
@@ -543,8 +629,7 @@ try {
     foreach ($job in $jobs) {
         if ($Clean -and -not $cleaned[$job.Folder]) { Clear-OldVersion $job.Folder; $cleaned[$job.Folder] = $true }
         if ($Extract) {
-            New-Item -ItemType Directory -Path $job.Folder -Force | Out-Null
-            Get-ChildItem -LiteralPath $job.Source -Force | Copy-Item -Destination $job.Folder -Recurse -Force
+            Copy-AllowedFiles $job.Source $job.Folder
         }
         else {
             New-Item -ItemType Directory -Path $job.Folder -Force | Out-Null
@@ -560,14 +645,30 @@ try {
     $versionName = if ($version -eq 'unknown') { 'v{0}.version' -f $buildDate.ToString('yyyy-MM-dd') }
         else { 'v{0}_{1}.version' -f $version, $buildDate.ToString('yyyy-MM-dd') }
     $versionPath = Join-Path $AppDir $versionName
-    [IO.File]::WriteAllText($versionPath, $record + "`r`nbuilt=" + $buildDate.ToString('yyyy-MM-dd'))
+    $versionText = $record + "`r`nbuilt=" + $buildDate.ToString('yyyy-MM-dd')
+    # files Defender blocked are noted so the next run tries again (eg. after adding an exclusion)
+    if ($script:blocked.Count -gt 0) { $versionText += "`r`nblocked=" + ($script:blocked -join ',') }
+    [IO.File]::WriteAllText($versionPath, $versionText)
     Say "Version: $version (built $($buildDate.ToString('yyyy-MM-dd')))"
 
     Say 'Updating checksums...'
+    $blockedBefore = $script:blocked.Count
     Write-Checksums
+    if ($script:blocked.Count -gt $blockedBefore) {
+        # more files turned out to be blocked; record them so the next run retries, then redo the checksums
+        $versionText = $record + "`r`nbuilt=" + $buildDate.ToString('yyyy-MM-dd') + "`r`nblocked=" + ($script:blocked -join ',')
+        [IO.File]::WriteAllText($versionPath, $versionText)
+        Write-Checksums
+    }
     Say 'Updating parity data...'
     Write-Parity
 
+    if ($script:blocked.Count -gt 0) {
+        Say "WARNING: Windows Defender blocked $($script:blocked.Count) file(s), so they weren't copied: $($script:blocked -join ', ')"
+        Say 'To keep them, add a Defender exclusion for this app folder and %TEMP%, then run the update again.'
+        Say 'Done (with blocked files)'
+        exit 3
+    }
     Say 'Done'
     exit 0
 }

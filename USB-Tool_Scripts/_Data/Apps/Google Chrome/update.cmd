@@ -10,7 +10,8 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "Google Chrome" ^
     -Url "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise64.msi" -Into "x64" ^
-    -Url86 "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise.msi" -Into86 "x86"
+    -Url86 "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise.msi" -Into86 "x86" ^
+    -UrlArm "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise_arm64.msi" -IntoArm "ARM64"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

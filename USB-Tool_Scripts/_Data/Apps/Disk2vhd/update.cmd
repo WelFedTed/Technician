@@ -10,8 +10,8 @@ set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "Disk2vhd" ^
     -Url "https://download.sysinternals.com/files/Disk2vhd.zip" ^
-    -Extract -Into "x86" -Clean ^
-    -VersionFrom "x86\disk2vhd64.exe"
+    -Extract -Into "x86_x64_ARM64" -Clean ^
+    -VersionFrom "x86_x64_ARM64\disk2vhd64.exe"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

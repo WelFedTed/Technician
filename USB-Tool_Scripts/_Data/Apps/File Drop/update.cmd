@@ -9,8 +9,10 @@ rem clear PSModulePath so Windows PowerShell loads its own modules (it breaks if
 set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "File Drop" ^
-    -Manual ^
-    -Note "TODO: no download source set up yet for File Drop (file-drop.exe)."
+    -GitHub "WelFedTed/file-drop" ^
+    -Asset "^file-drop\.exe$" -Into "x64" ^
+    -Extra "https://github.com/WelFedTed/file-drop/releases/latest/download/file-drop-win7.exe" ^
+    -Clean
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

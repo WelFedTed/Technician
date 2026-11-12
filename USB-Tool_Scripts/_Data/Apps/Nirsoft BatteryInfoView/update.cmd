@@ -9,10 +9,9 @@ rem clear PSModulePath so Windows PowerShell loads its own modules (it breaks if
 set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "NirSoft BatteryInfoView" ^
-    -Url "https://www.nirsoft.net/utils/batteryinfoview-x64.zip" ^
-    -Url86 "https://www.nirsoft.net/utils/batteryinfoview.zip" ^
-    -Extract -Into "x64" -Into86 "x86" ^
-    -Clean -Keep "*.cfg"
+    -Url "https://www.nirsoft.net/utils/batteryinfoview-x64.zip" -Into "x64" ^
+    -Url86 "https://www.nirsoft.net/utils/batteryinfoview.zip" -Into86 "x86" ^
+    -Extract -Clean -Keep "*.cfg"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

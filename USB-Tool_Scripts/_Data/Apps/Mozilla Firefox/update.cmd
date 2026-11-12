@@ -12,7 +12,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Url "https://download.mozilla.org/?product=firefox-latest-ssl&os=win64&lang=en-US" ^
     -SaveAs "Firefox Setup.exe" -Into "x64" ^
     -Url86 "https://download.mozilla.org/?product=firefox-latest-ssl&os=win&lang=en-US" ^
-    -SaveAs86 "Firefox Setup.exe" -Into86 "x86"
+    -SaveAs86 "Firefox Setup.exe" -Into86 "x86" ^
+    -UrlArm "https://download.mozilla.org/?product=firefox-latest-ssl&os=win64-aarch64&lang=en-US" ^
+    -SaveAsArm "Firefox Setup.exe" -IntoArm "ARM64" ^
+    -VersionFromUrl
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

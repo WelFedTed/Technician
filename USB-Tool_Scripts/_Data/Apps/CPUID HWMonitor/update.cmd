@@ -12,7 +12,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.cpuid.com/softwares/hwmonitor.html" ^
     -Link "hwmonitor_([\d.]+)\.zip" ^
     -UrlFormat "https://download.cpuid.com/hwmonitor/hwmonitor_{0}.zip" ^
-    -Extract -Into "x86" -Clean
+    -Extract -Into "x86_x64" -Clean
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

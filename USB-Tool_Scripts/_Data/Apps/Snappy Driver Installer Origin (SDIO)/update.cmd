@@ -11,7 +11,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Snappy Driver Installer Origin" ^
     -Page "https://www.glenn.delahoy.com/snappy-driver-installer-origin/" ^
     -Link "/downloads/sdio/SDIO_[\d.]+\.zip" ^
-    -Extract -Into "x86"
+    -Extract -Into "x86_x64"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

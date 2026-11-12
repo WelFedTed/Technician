@@ -39,6 +39,7 @@ rem ----------------------------------------------------------------------------
 	set /a appSkipped=0
 	set "appFailed="
 	set "appManual="
+	set "appBlocked="
 
 
 rem Checks
@@ -113,6 +114,8 @@ rem ----------------------------------------------------------------------------
 
 	rem folders renamed in the repo: move what's in the old folder on the drive into the new one
 	call :moveFolder "_Data\Apps\Microsoft Activiation Scripts (MAS)" "_Data\Apps\Microsoft Activation Scripts (MAS)"
+	call :moveFolder "_Data\Apps\7zip" "_Data\Apps\7-Zip"
+	call :moveFolder "_Data\Apps\7zip CLI" "_Data\Apps\7-Zip CLI"
 	rem folders whose name only changed case: Windows sees them as the same folder, so just rename
 	call :renameCase "_Data\Apps" "RKill"
 
@@ -157,9 +160,13 @@ rem ----------------------------------------------------------------------------
 	popd
 	title USB Tool Updater
 
-	rem update.cmd exit codes: 0 = updated or up to date, 2 = needs a manual update, anything else = failed
+	rem update.cmd exit codes: 0 = updated or up to date, 2 = needs a manual update,
+	rem 3 = updated but Windows Defender blocked some files, anything else = failed
 	if "!appResult!" == "0" (
 		set /a appCount+=1
+	) else if "!appResult!" == "3" (
+		set /a appCount+=1
+		set "appBlocked=!appBlocked!;!appName!"
 	) else if "!appResult!" == "2" (
 		set "appManual=!appManual!;!appName!"
 	) else (
@@ -192,7 +199,8 @@ rem moves an old folder's contents into its renamed folder (keeping the repo's u
 		echo Couldn't move everything, so "%~1" was left in place.
 		exit /b 0
 	)
-	rmdir /s /q "%root%%~1"
+	rem robocopy /MOVE usually removes the old folder itself; this catches anything it skipped
+	if exist "%root%%~1\" rmdir /s /q "%root%%~1"
 	exit /b 0
 
 :header
@@ -215,6 +223,11 @@ rem ----------------------------------------------------------------------------
 		echo:
 		echo These apps FAILED to update ^(scroll up for the reason^):
 		for %%W in ("!appFailed:;=" "!") do if not "%%~W" == "" echo   %%~W
+	)
+	if defined appBlocked (
+		echo:
+		echo These apps updated, but Windows Defender blocked some of their files ^(scroll up for which^):
+		for %%W in ("!appBlocked:;=" "!") do if not "%%~W" == "" echo   %%~W
 	)
 	if defined appManual (
 		echo:

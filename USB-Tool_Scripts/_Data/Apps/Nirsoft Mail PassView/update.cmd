@@ -9,9 +9,9 @@ rem clear PSModulePath so Windows PowerShell loads its own modules (it breaks if
 set "PSModulePath="
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0." ^
     -Name "NirSoft Mail PassView" ^
-    -Url "https://www.nirsoft.net/toolsdownload/mailpv.zip" ^
+    -Url "https://www.nirsoft.net/toolsdownload/mailpv.zip" -Into "x86" ^
     -Referer "https://www.nirsoft.net/utils/mailpv.html" ^
-    -Extract -Into "x86" -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg"
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause
