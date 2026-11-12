@@ -132,6 +132,17 @@ function Get-Download([string]$address, [string]$outFile) {
     return [Uri]::UnescapeDataString(($finalUrl | Select-Object -Last 1).Split('?')[0])
 }
 
+# file name for a download without -SaveAs: GitHub redirects to a link ending in a random ID,
+# so prefer the name in the original link, then the redirected link's, and make sure it has an extension
+function Get-DownloadName([string]$link, [string]$finalUrl, [string]$kind) {
+    $fromLink = [Uri]::UnescapeDataString((Split-Path -Leaf ($link.Split('?')[0])))
+    $fromFinal = Split-Path -Leaf $finalUrl
+    $name = if ($fromLink -match '\.[A-Za-z0-9]{2,4}$') { $fromLink } else { $fromFinal }
+    if ($name -notmatch '\.[A-Za-z0-9]{2,4}$' -and $kind -in @('exe', 'msi', 'zip', '7z')) { $name += ".$kind" }
+    foreach ($bad in [IO.Path]::GetInvalidFileNameChars()) { $name = $name.Replace([string]$bad, '_') }
+    return $name
+}
+
 function Get-FileKind([string]$path) {
     $bytes = [byte[]]::new(8)
     $stream = [IO.File]::OpenRead($path)
@@ -376,7 +387,7 @@ try {
         $finalUrl = Get-Download $job.Link $temp
         $kind = Test-Download $temp $job.Link
         $folder = if ($job.Into) { Join-Path $AppDir $job.Into } else { $AppDir }
-        $fileName = if ($job.SaveAs) { $job.SaveAs } else { Split-Path -Leaf $finalUrl }
+        $fileName = if ($job.SaveAs) { $job.SaveAs } else { Get-DownloadName $job.Link $finalUrl $kind }
         $job | Add-Member -NotePropertyMembers @{
             Temp = $temp; Kind = $kind; FinalUrl = $finalUrl; Folder = $folder
             Target = (Join-Path $folder $fileName)
