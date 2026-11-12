@@ -13,7 +13,8 @@
 #   -GitHub <owner/repo> -Asset <regex>   an asset of the latest GitHub release
 #   -Manual [-Page <url>] [-Note <text>]  can't be downloaded automatically; prints where to get it
 # Optional 32-bit download from the same source: -Url86 / -Link86 / -Asset86,
-#   or -UrlFormat86 to build it from the same version -Link captured
+#   or -UrlFormat86 to build it from the same version -Link captured,
+#   or -Page86 -Link86 [-UrlFormat86] when the 32-bit build is listed on its own page
 # Extra files saved next to the main one, named as in their links: -Extra "url1,url2"
 #
 # What to do with it:
@@ -35,7 +36,7 @@ param(
     [Parameter(Mandatory = $true)][string]$Name,
     [string]$AppDir = (Get-Location).Path,
     [string]$Url, [string]$Url86, [string]$Extra,
-    [string]$Page, [string]$Link, [string]$Link86, [string]$UrlFormat, [string]$UrlFormat86,
+    [string]$Page, [string]$Link, [string]$Link86, [string]$UrlFormat, [string]$UrlFormat86, [string]$Page86,
     [string]$GitHub, [string]$Asset, [string]$Asset86,
     [switch]$Manual, [string]$Note,
     [string]$SaveAs, [string]$SaveAs86,
@@ -98,20 +99,20 @@ function Select-Highest([string[]]$candidates) {
 }
 
 $script:pageVersion = $null
-function Find-PageLink([string]$pattern) {
-    $html = Get-Text $Page
+function Find-PageLink([string]$pattern, [string]$pageUrl = $Page, [string]$format = $UrlFormat) {
+    $html = Get-Text $pageUrl
     $found = [regex]::Matches($html, $pattern, 'IgnoreCase') | ForEach-Object {
-        if ($UrlFormat) { $UrlFormat -f $_.Groups[1].Value } else { $_.Value }
+        if ($format) { $format -f $_.Groups[1].Value } else { $_.Value }
     } | Select-Object -Unique
-    if (-not $found) { throw "No link matching '$pattern' on $Page (the page may have changed)" }
+    if (-not $found) { throw "No link matching '$pattern' on $pageUrl (the page may have changed)" }
     $best = Select-Highest @($found)
-    # remember the version the regex captured, for -UrlFormat86
-    if ($UrlFormat) {
+    # remember the version the main link's regex captured, for -UrlFormat86
+    if ($format -and $pageUrl -eq $Page -and $format -eq $UrlFormat) {
         $script:pageVersion = [regex]::Matches($html, $pattern, 'IgnoreCase') |
-            Where-Object { ($UrlFormat -f $_.Groups[1].Value) -eq $best } |
+            Where-Object { ($format -f $_.Groups[1].Value) -eq $best } |
             Select-Object -First 1 | ForEach-Object { $_.Groups[1].Value }
     }
-    return ([Uri]::new([Uri]$Page, $best)).AbsoluteUri
+    return ([Uri]::new([Uri]$pageUrl, $best)).AbsoluteUri
 }
 
 $script:release = $null
@@ -153,6 +154,17 @@ function Get-DownloadName([string]$link, [string]$finalUrl, [string]$kind) {
     if ($name -notmatch '\.[A-Za-z0-9]{2,4}$' -and $kind -in @('exe', 'msi', 'zip', '7z')) { $name += ".$kind" }
     foreach ($bad in [IO.Path]::GetInvalidFileNameChars()) { $name = $name.Replace([string]$bad, '_') }
     return $name
+}
+
+# the server's ETag / Last-Modified / size for a link, from a header-only request ('' if the server won't say)
+function Get-RemoteStamp([string]$address) {
+    $curlArgs = @('-sIL', '--fail', '--connect-timeout', '20', '-A', $userAgent, '-o', 'NUL', '-w', '%header{etag}|%header{last-modified}|%header{content-length}')
+    if ($Referer) { $curlArgs += @('-e', $Referer) }
+    $out = & $curl @curlArgs $address 2>$null
+    if ($LASTEXITCODE -ne 0) { return '' }
+    $stamp = ($out | Out-String).Trim()
+    if (($stamp -replace '\|', '').Trim()) { return $stamp }
+    return ''
 }
 
 function Get-FileKind([string]$path) {
@@ -259,6 +271,23 @@ public static class UsbToolCrc32 {
 }
 '@
 
+# ProductVersion from an .msi installer's property table
+function Get-MsiVersion([string]$path) {
+    try {
+        $installer = New-Object -ComObject WindowsInstaller.Installer
+        $db = $installer.GetType().InvokeMember('OpenDatabase', 'InvokeMethod', $null, $installer, @($path, 0))
+        $view = $db.GetType().InvokeMember('OpenView', 'InvokeMethod', $null, $db, @("SELECT Value FROM Property WHERE Property = 'ProductVersion'"))
+        [void]$view.GetType().InvokeMember('Execute', 'InvokeMethod', $null, $view, $null)
+        $row = $view.GetType().InvokeMember('Fetch', 'InvokeMethod', $null, $view, $null)
+        $value = if ($row) { $row.GetType().InvokeMember('StringData', 'GetProperty', $null, $row, 1) } else { $null }
+        [void]$view.GetType().InvokeMember('Close', 'InvokeMethod', $null, $view, $null)
+        [void][Runtime.InteropServices.Marshal]::ReleaseComObject($view)
+        [void][Runtime.InteropServices.Marshal]::ReleaseComObject($db)
+        return $value
+    }
+    catch { return $null }
+}
+
 function Get-Version([object[]]$jobs) {
     if ($VersionFrom) {
         $file = Join-Path $AppDir $VersionFrom
@@ -269,6 +298,10 @@ function Get-Version([object[]]$jobs) {
     }
     if ($script:release) { return ($script:release.tag_name -replace '^v', '') }
     foreach ($job in $jobs) {
+        if (-not $Extract -and $job.Target -like '*.msi') {
+            $v = Get-MsiVersion $job.Target
+            if ($v) { return $v }
+        }
         if (-not $Extract -and $job.Target -like '*.exe') {
             $v = (Get-Item -LiteralPath $job.Target).VersionInfo.FileVersionRaw
             if ($v -and $v.ToString() -ne '0.0.0.0') { return $v.ToString() }
@@ -417,8 +450,14 @@ try {
     $link = Resolve-Link $Url $Link $Asset
     if (-not $link) { throw 'No download source given (use -Url, -Page/-Link or -GitHub/-Asset)' }
     $jobs += [pscustomobject]@{ Link = $link; SaveAs = $SaveAs; Into = $Into }
-    $link86 = Resolve-Link $Url86 $Link86 $Asset86
-    if (-not $link86 -and $UrlFormat86 -and $script:pageVersion) { $link86 = $UrlFormat86 -f $script:pageVersion }
+    if ($Page86 -and $Link86) {
+        # the 32-bit build is listed on its own page, with its own version
+        $link86 = Find-PageLink $Link86 $Page86 $UrlFormat86
+    }
+    else {
+        $link86 = Resolve-Link $Url86 $Link86 $Asset86
+        if (-not $link86 -and $UrlFormat86 -and $script:pageVersion) { $link86 = $UrlFormat86 -f $script:pageVersion }
+    }
     foreach ($extraLink in ($Extra -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ }) {
         $jobs += [pscustomobject]@{ Link = $extraLink; SaveAs = $null; Into = $Into }
     }
@@ -438,6 +477,17 @@ try {
     $oldKey = (($oldRecord -split "`r?`n") | Where-Object { $_ -and $_ -notlike 'built=*' }) -join "`r`n"
     if (-not $Url -and $oldRecord) {
         $unchanged = @($jobs | Where-Object { $oldRecord.Contains("link=$($_.Link)") }).Count -eq $jobs.Count
+        if ($unchanged) {
+            Repair-OldVersionName $versionFile
+            Say "Already up to date"
+            exit 0
+        }
+    }
+
+    # fixed links don't show the version, so compare the server's file date/size/ETag instead of downloading
+    foreach ($job in $jobs) { $job | Add-Member -NotePropertyName Stamp -NotePropertyValue $(if ($Url) { Get-RemoteStamp $job.Link } else { '' }) }
+    if ($Url -and $oldRecord) {
+        $unchanged = @($jobs | Where-Object { $_.Stamp -and $oldRecord.Contains("stamp=$($_.Stamp)") }).Count -eq $jobs.Count
         if ($unchanged) {
             Repair-OldVersionName $versionFile
             Say "Already up to date"
@@ -466,7 +516,10 @@ try {
     }
 
     # skip everything if the downloads match what was installed last time
-    $record = ($jobs | ForEach-Object { "link=$($_.Link)"; "url=$($_.FinalUrl)"; "sha256=$($_.Hash)" }) -join "`r`n"
+    $record = ($jobs | ForEach-Object {
+        "link=$($_.Link)"; "url=$($_.FinalUrl)"; "sha256=$($_.Hash)"
+        if ($_.Stamp) { "stamp=$($_.Stamp)" }
+    }) -join "`r`n"
     $installed = $jobs | Where-Object { $Extract -or (Test-Path -LiteralPath $_.Target) }
     if ($versionFile -and $oldRecord -and @($installed).Count -eq $jobs.Count -and $oldKey -eq $record) {
         Repair-OldVersionName $versionFile
