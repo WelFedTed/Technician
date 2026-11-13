@@ -23,6 +23,10 @@
 # What to do with it:
 #   -SaveAs, -SaveAs86, -SaveAsArm    save a single file under this name (default: name from the link)
 #   -Extract                          unzip it (.zip or .7z)
+#   -Paf                              a PortableApps.com installer (.paf.exe): unpack the ready-to-run app
+#                                     straight into the build folder (eg. x86_x64\7-ZipPortable.exe + App\)
+#                                     and delete the installer; the app's Data folder (its settings) is
+#                                     kept when updating
 #   -Into, -Into86, -IntoArm          the build folder for each download:
 #                                     x64   = only runs on 64-bit Windows
 #                                     x86   = runs on 32-bit Windows (also installers and scripts)
@@ -54,7 +58,7 @@ param(
     [string]$GitHub, [string]$Asset, [string]$Asset86, [string]$AssetArm,
     [switch]$Manual, [string]$Note,
     [string]$SaveAs, [string]$SaveAs86, [string]$SaveAsArm,
-    [switch]$Extract, [string]$Into, [string]$Into86, [string]$IntoArm,
+    [switch]$Extract, [switch]$Paf, [string]$Into, [string]$Into86, [string]$IntoArm,
     [switch]$Flatten, [switch]$Clean, [string]$Keep,
     [string]$Referer, [string]$Password, [string]$UserAgent, [string]$ExtraAsset,
     [string]$Inner, [string]$Inner86, [string]$InnerArm,
@@ -242,9 +246,9 @@ function Get-Tool([string]$exeName, [string]$address, [switch]$Zipped) {
     return $exe
 }
 
-function Clear-OldVersion([string]$folder) {
+function Clear-OldVersion([string]$folder, [string[]]$alsoKeep) {
     if (-not (Test-Path -LiteralPath $folder)) { return }
-    $keepList = $alwaysKeep + @(($Keep -split '[,;]') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    $keepList = $alwaysKeep + @(($Keep -split '[,;]') | ForEach-Object { $_.Trim() } | Where-Object { $_ }) + @($alsoKeep | Where-Object { $_ })
     Get-ChildItem -LiteralPath $folder -Force | Where-Object {
         $item = $_
         -not ($keepList | Where-Object { $item.Name -like $_ })
@@ -253,6 +257,51 @@ function Clear-OldVersion([string]$folder) {
 
 # 7-Zip's full command-line tool (handles password-protected zips); comes in "7-Zip Extra", which is a .7z,
 # so 7zr.exe unpacks it once and 7za.exe is cached with the other tools
+# full 7-Zip (7z.exe + 7z.dll), which can unpack NSIS installers such as PortableApps .paf.exe files;
+# the 7-Zip installer is itself a 7z archive, so 7zr.exe unpacks it once and it's cached with the other tools
+function Get-SevenZipFull {
+    $folder = Join-Path $toolsDir '7z'
+    $exe = Join-Path $folder '7z.exe'
+    if ((Test-Path -LiteralPath $exe) -and (Test-Path -LiteralPath (Join-Path $folder '7z.dll'))) { return $exe }
+    $sevenZip = Get-Tool '7zr.exe' 'https://www.7-zip.org/a/7zr.exe'
+    Say "Downloading 7-Zip (one-off, cached in $folder)..."
+    $release = Get-Text 'https://api.github.com/repos/ip7z/7zip/releases/latest' | ConvertFrom-Json
+    # the 32-bit build runs everywhere
+    $installer = $release.assets | Where-Object { $_.name -match '^7z\d+\.exe$' } | Select-Object -First 1
+    if (-not $installer) { throw "Couldn't find the 7-Zip installer in the latest 7-Zip release" }
+    $download = Join-Path $toolsDir '7z-installer.exe'
+    & $curl -sSL --fail -A $userAgent -o $download $installer.browser_download_url
+    if ($LASTEXITCODE -ne 0) { throw "Couldn't download 7-Zip" }
+    if (Test-Path -LiteralPath $folder) { Remove-Item -LiteralPath $folder -Recurse -Force }
+    & $sevenZip x $download "-o$folder" -y | Out-Null
+    Remove-Item -LiteralPath $download -Force
+    if (-not (Test-Path -LiteralPath $exe)) { throw "Couldn't unpack 7-Zip" }
+    return $exe
+}
+
+# unpacks a PortableApps .paf.exe into $staging (the ready-to-run app: launcher, App\, Other\) and returns
+# the app's version from its appinfo.ini
+function Expand-Paf([string]$installer, [string]$staging) {
+    $sevenZip = Get-SevenZipFull
+    New-Item -ItemType Directory -Path $staging | Out-Null
+    & $sevenZip x $installer "-o$staging" -y | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "Couldn't unpack the PortableApps installer (7z exit code $LASTEXITCODE)" }
+    # the installer's own files, not part of the app
+    Get-ChildItem -LiteralPath $staging -Force | Where-Object { $_.Name -like '$*' -or $_.Name -like '`[NSIS`]*' } | Remove-Item -Recurse -Force
+    if (-not (Get-ChildItem -LiteralPath $staging -Filter '*.exe' -File | Select-Object -First 1)) {
+        throw 'No launcher (.exe) at the top of the PortableApps installer'
+    }
+    $appInfo = Join-Path $staging 'App\AppInfo\appinfo.ini'
+    if (Test-Path -LiteralPath $appInfo) {
+        $text = [IO.File]::ReadAllText($appInfo)
+        foreach ($key in 'DisplayVersion', 'PackageVersion') {
+            $m = [regex]::Match($text, "(?im)^\s*$key\s*=\s*(.+?)\s*$")
+            if ($m.Success) { return $m.Groups[1].Value }
+        }
+    }
+    return $null
+}
+
 function Get-SevenZipA {
     $exe = Join-Path $toolsDir '7za.exe'
     if (Test-Path -LiteralPath $exe) { return $exe }
@@ -371,6 +420,8 @@ function Get-Version([object[]]$jobs) {
         }
     }
     if ($script:release) { return ($script:release.tag_name -replace '^v', '') }
+    # PortableApps apps say their version in appinfo.ini (the installer itself is deleted)
+    if ($Paf -and $jobs[0].PafVersion) { return $jobs[0].PafVersion }
     # some installers carry their own (installer) version, not the app's, so read the link instead
     if ($VersionFromUrl) {
         $m = [regex]::Match((Split-Path -Leaf $jobs[0].FinalUrl), '\d+(?:[._]\d+)+')
@@ -526,6 +577,11 @@ function Test-AppFiles([object[]]$jobs, [switch]$Quiet) {
             if (-not $Quiet) { Say "The $($job.Into) folder is missing or empty, so downloading again..." }
             return $false
         }
+        # PortableApps apps are unpacked (older versions of this script kept just the .paf.exe installer)
+        if ($Paf -and -not (Test-Path -LiteralPath (Join-Path $folder 'App'))) {
+            if (-not $Quiet) { Say "The PortableApps app in $($job.Into) hasn't been unpacked yet, so updating..." }
+            return $false
+        }
     }
     return $true
 }
@@ -637,11 +693,22 @@ try {
         "link=$($_.Link)"; "url=$($_.FinalUrl)"; "sha256=$($_.Hash)"
         if ($_.Stamp) { "stamp=$($_.Stamp)" }
     }) -join "`r`n"
-    $installed = $jobs | Where-Object { $Extract -or (Test-Path -LiteralPath $_.Target) }
+    $installed = $jobs | Where-Object { $Extract -or $Paf -or (Test-Path -LiteralPath $_.Target) }
     if ($versionFile -and $oldRecord -and @($installed).Count -eq $jobs.Count -and $oldKey -eq $record -and (Test-AppFiles $jobs -Quiet)) {
         Repair-OldVersionName $versionFile
         Say "Already up to date"
         exit 0
+    }
+
+    # PortableApps installers: unpack each one now (before touching the old version) so it's ready to run
+    if ($Paf) {
+        Say 'Unpacking the PortableApps installer...'
+        foreach ($job in $jobs) {
+            $staging = Join-Path $env:TEMP ("USB-Tool-paf-" + [Guid]::NewGuid().ToString('N'))
+            $downloads += $staging
+            $pafVersion = Expand-Paf $job.Temp $staging
+            $job | Add-Member -NotePropertyMembers @{ Source = $staging; PafVersion = $pafVersion }
+        }
     }
 
     # unpack everything before touching the old version
@@ -658,8 +725,14 @@ try {
     $script:applying = $true
     $cleaned = @{}
     foreach ($job in $jobs) {
-        if ($Clean -and -not $cleaned[$job.Folder]) { Clear-OldVersion $job.Folder; $cleaned[$job.Folder] = $true }
-        if ($Extract) {
+        if ($Clean -and -not $cleaned[$job.Folder]) {
+            # a PortableApps app keeps its settings in Data, next to its launcher
+            Clear-OldVersion $job.Folder @(if ($Paf) { 'Data' })
+            $cleaned[$job.Folder] = $true
+        }
+        if ($Extract -or $Paf) {
+            # (a PortableApps installer is unpacked straight into the build folder and then deleted with the
+            # other downloads, so the app is ready to run)
             Copy-AllowedFiles $job.Source $job.Folder
         }
         else {

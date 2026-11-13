@@ -12,7 +12,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://portableapps.com/apps/internet/qbittorrent_portable" ^
     -Link "f=(qBittorrentPortable_[\d.]+\.paf\.exe)" ^
     -UrlFormat "https://download2.portableapps.com/portableapps/qBittorrentPortable/{0}" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -Paf
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

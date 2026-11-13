@@ -11,8 +11,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "FileZilla Portable" ^
     -Page "https://portableapps.com/apps/internet/filezilla_portable" ^
     -Link "f=(FileZillaPortable_[\d.]+\.paf\.exe)" ^
-    -UrlFormat "https://download2.portableapps.com/portableapps/FileZillaPortable/{0}" -Into "x86" ^
-    -Clean
+    -UrlFormat "https://download2.portableapps.com/portableapps/FileZillaPortable/{0}" -Into "x86_x64" ^
+    -Clean ^
+    -Paf
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

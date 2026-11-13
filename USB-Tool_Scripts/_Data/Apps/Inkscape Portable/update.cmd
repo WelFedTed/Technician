@@ -11,8 +11,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Inkscape Portable" ^
     -Page "https://portableapps.com/apps/graphics_pictures/inkscape_portable" ^
     -Link "f=(InkscapePortable_[\d.]+\.paf\.exe)" ^
-    -UrlFormat "https://download2.portableapps.com/portableapps/InkscapePortable/{0}" -Into "x86" ^
-    -Clean
+    -UrlFormat "https://download2.portableapps.com/portableapps/InkscapePortable/{0}" -Into "x64" ^
+    -Page86 "https://portableapps.com/apps/graphics_pictures/inkscape_portable" ^
+    -Link86 "f=(InkscapePortableLegacy32bit_[\d.]+\.paf\.exe)" ^
+    -UrlFormat86 "https://download2.portableapps.com/portableapps/InkscapePortableLegacy32bit/{0}" -Into86 "x86" ^
+    -Clean ^
+    -Paf
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

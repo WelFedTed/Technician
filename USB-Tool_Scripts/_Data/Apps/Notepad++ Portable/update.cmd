@@ -11,8 +11,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Notepad++ Portable" ^
     -Page "https://portableapps.com/apps/development/notepadpp_portable" ^
     -Link "f=(NotepadPlusPlusPortable_[\d.]+\.paf\.exe)" ^
-    -UrlFormat "https://download2.portableapps.com/portableapps/Notepad++Portable/{0}" -Into "x86" ^
-    -Clean
+    -UrlFormat "https://download2.portableapps.com/portableapps/Notepad++Portable/{0}" -Into "x86_x64" ^
+    -Clean ^
+    -Paf
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

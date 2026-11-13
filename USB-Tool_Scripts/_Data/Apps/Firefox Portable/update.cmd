@@ -11,8 +11,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Firefox Portable" ^
     -Page "https://portableapps.com/apps/internet/firefox_portable" ^
     -Link "f=(FirefoxPortable_[\d.]+_English\.paf\.exe)" ^
-    -UrlFormat "https://download2.portableapps.com/portableapps/FirefoxPortable/{0}" -Into "x86" ^
-    -Clean
+    -UrlFormat "https://download2.portableapps.com/portableapps/FirefoxPortable/{0}" -Into "x86_x64" ^
+    -Clean ^
+    -Paf
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

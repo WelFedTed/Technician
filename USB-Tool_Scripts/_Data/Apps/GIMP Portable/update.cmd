@@ -15,7 +15,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page86 "https://portableapps.com/apps/graphics_pictures/gimp_portable" ^
     -Link86 "f=(GIMPPortableLegacy32bit_[\w.]+\.paf\.exe)" ^
     -UrlFormat86 "https://download2.portableapps.com/portableapps/GIMPPortableLegacy32bit/{0}" -Into86 "x86" ^
-    -Clean
+    -Clean ^
+    -Paf
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

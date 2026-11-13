@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title LibreOffice Portable
 
-set "application=LibreOfficePortable*.paf.exe"
+set "application=LibreOfficePortable.exe;LibreOfficePortablePrevious.exe"
 set "arguments="
 
 set "elevate=0"
@@ -17,7 +17,8 @@ rem ----------------------------------------------------------------------------
 	rem the app for this PC. The launchers in the root of the USB tool just call these run.cmd files.
 	rem Settings:
 		rem application: the file to run, eg. MyApp.exe; can include a subfolder (eg. "bin\MyApp.exe")
-			rem and wildcards for files whose names include the version (eg. "MyApp-*.exe")
+			rem and wildcards for files whose names include the version (eg. "MyApp-*.exe");
+			rem list several names with ; to try each in turn (eg. "MyAppPortable\MyAppPortable.exe;MyAppPortableLegacy32bit\MyAppPortableLegacy32bit.exe")
 		rem arguments: anything to pass to the application (eg. "-c 10.0.0.1")
 		rem elevate: 1 to run as admin, else 0
 		rem runHere: 1 to run in this window and pause afterwards (console tools and scripts), else 0
@@ -55,9 +56,6 @@ rem Find Application
 rem ----------------------------------------------------------------------------------------------------
 	set "base=%~dp0"
 	set "base=%base:~0,-1%"
-	set "A=%application%"
-	set "N=%application:~0,-4%"
-	set "E=%application:~-4%"
 
 	rem this PC's architecture (also when this window is a 32-bit or emulated one)
 	set "arch=x86"
@@ -69,13 +67,27 @@ rem ----------------------------------------------------------------------------
 
 	rem look in the best places first: ARM64 Windows also runs x64 and x86 builds, and x64 Windows runs x86;
 	rem the app folder itself is last so the old layout still works
+	rem application can list several names separated by ; (eg. when the 32-bit build's launcher has
+	rem another name); each is tried in turn. for /f splits them without expanding wildcards.
 	set "found="
+	set "names=%application%"
+	:nextName
+	if defined found goto doneSearching
+	if not defined names goto doneSearching
+	for /f "tokens=1* delims=;" %%a in ("!names!") do (
+		set "A=%%a"
+		set "names=%%b"
+	)
+	set "N=!A:~0,-4!"
+	set "E=!A:~-4!"
 	if "%arch%" == "ARM64" call :findArm64
 	if "%arch%" == "ARM64" call :find64
 	if "%arch%" == "x64" call :find64
 	call :find86
 	if not "%arch%" == "x86" call :findIn "%N%_x64%E%" "%N%64%E%"
 	call :findIn "%N%_x86%E%" "%N%_x32%E%" "%A%"
+	goto nextName
+	:doneSearching
 
 	if not defined found if "%arch%" == "x86" if exist "%base%\x64\" (
 		echo "%application%" only has a 64-bit build, so it can't run on this 32-bit PC.

@@ -11,8 +11,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "7-Zip Portable" ^
     -Page "https://portableapps.com/apps/utilities/7-zip_portable" ^
     -Link "f=(7-ZipPortable_[\d.]+\.paf\.exe)" ^
-    -UrlFormat "https://download2.portableapps.com/portableapps/7-ZipPortable/{0}" -Into "x86" ^
-    -Clean
+    -UrlFormat "https://download2.portableapps.com/portableapps/7-ZipPortable/{0}" -Into "x86_x64_ARM64" ^
+    -Clean ^
+    -Paf
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

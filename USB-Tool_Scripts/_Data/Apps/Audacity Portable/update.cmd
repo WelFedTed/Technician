@@ -11,8 +11,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Audacity Portable" ^
     -Page "https://portableapps.com/apps/music_video/audacity_portable" ^
     -Link "f=(AudacityPortable_[\d.]+\.paf\.exe)" ^
-    -UrlFormat "https://download2.portableapps.com/portableapps/AudacityPortable/{0}" -Into "x86" ^
-    -Clean
+    -UrlFormat "https://download2.portableapps.com/portableapps/AudacityPortable/{0}" -Into "x86_x64" ^
+    -Clean ^
+    -Paf
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause

@@ -15,7 +15,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page86 "https://portableapps.com/apps/office/libreoffice-portable-still" ^
     -Link86 "LibreOfficePortablePrevious_([\d.]+)_MultilingualStandard\.paf\.exe" ^
     -UrlFormat86 "https://download.documentfoundation.org/libreoffice/portable/{0}/LibreOfficePortablePrevious_{0}_MultilingualStandard.paf.exe" -Into86 "x86" ^
-    -Clean
+    -Clean ^
+    -Paf
 set "result=%errorlevel%"
 
 if /i not "%~1" == "/nopause" pause
