@@ -13,6 +13,8 @@ rem ----------------------------------------------------------------------------
 	rem      in its own folder (Installer, Portable, CLI); apps saved in the old layout (build folders straight
 	rem      in the app folder, or folders such as "7-Zip Portable") are moved into these on their next update
 	rem      (folders that were merged or renamed, eg. "7-Zip Portable", may show as skipped once afterwards)
+	rem   3. Drive: replaces v<date>.version in the drive's root with today's date (eg. v2026-11-14.version),
+	rem      a record of when the drive was last updated (skipped if the scripts couldn't be updated)
 	rem Usage: Update-Tool.cmd [/scripts ^| /apps]   (no argument = update both)
 	rem Files on the drive that aren't in the repo (eg. the apps themselves) are never deleted
 	rem Scripts on the drive are overwritten with the repo version, so make local changes in the repo
@@ -109,7 +111,8 @@ rem ----------------------------------------------------------------------------
 
 	echo Copying changed files to the drive...
 	echo:
-	robocopy "%src%" "%root%." /E /XF placeholder.file Update-Tool.cmd /R:1 /W:1 /NJH /NJS /NDL /NP
+	rem (v.version is the repo's stand-in for the drive's dated "last updated" file, written at the end)
+	robocopy "%src%" "%root%." /E /XF placeholder.file Update-Tool.cmd v.version /R:1 /W:1 /NJH /NJS /NDL /NP
 	if errorlevel 8 (
 		echo Copy failed, robocopy exit code !errorlevel!.
 		exit /b 1
@@ -206,6 +209,21 @@ rem moves an old folder's contents into its renamed folder (keeping the repo's u
 	if exist "%root%%~1\" rmdir /s /q "%root%%~1"
 	exit /b 0
 
+rem replaces the drive's v<date>.version file (in its root) with one for today, eg. v2026-11-14.version,
+rem as a record of when the drive was last updated
+:stampDrive
+	set "today="
+	rem (.NET's date rather than %date%, whose format depends on the PC's region settings)
+	for /f %%D in ('powershell -NoProfile -Command "[DateTime]::Now.ToString('yyyy-MM-dd')"') do set "today=%%D"
+	if not defined today (
+		echo Couldn't get today's date, so the drive's version file wasn't updated.
+		exit /b 0
+	)
+	del /q "%root%v*.version" 2>nul
+	type nul > "%root%v%today%.version"
+	set "stampName=v%today%.version"
+	exit /b 0
+
 :header
 	echo:
 	echo ----------------------------------------------------------------------------------------------------
@@ -219,7 +237,12 @@ rem moves an old folder's contents into its renamed folder (keeping the repo's u
 rem Summary
 rem ----------------------------------------------------------------------------------------------------
 :end
+	rem the drive's "last updated" file (eg. v2026-11-14.version), unless the script update failed
+	set "stampName="
+	if not "%scriptsResult%" == "FAILED" call :stampDrive
+
 	call :header "Summary"
+	if defined stampName echo Drive:   last updated !stampName:~1,10! ^(!stampName!^)
 	echo Scripts: %scriptsResult%
 	if "%doApps%" == "1" ( echo Apps:    !appCount! updated or already up to date, !appSkipped! skipped ^(no update.cmd^) ) else ( echo Apps:    skipped )
 	if defined appFailed (
