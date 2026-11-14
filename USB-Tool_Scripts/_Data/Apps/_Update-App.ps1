@@ -607,7 +607,7 @@ function Move-OldLayout([string]$from) {
     $from = (Resolve-Path -LiteralPath $from).Path.TrimEnd('\')
     $appFolder = Split-Path -Parent $AppDir
     $isAppFolder = $from -eq $appFolder
-    $scripts = @('update.cmd', 'run.cmd', 'install.cmd', 'cli.cmd', 'placeholder.file', 'desktop.ini')
+    $scripts = @('update.cmd', 'run.cmd', 'install.cmd', 'cli.cmd', '.gitkeep', 'placeholder.file', 'desktop.ini')
     $items = @(Get-ChildItem -LiteralPath $from -Force | Where-Object {
         $item = $_
         if ($scripts -contains $item.Name) { return $false }

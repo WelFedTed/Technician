@@ -18,7 +18,7 @@ rem ----------------------------------------------------------------------------
 	rem Usage: Update-Tool.cmd [/scripts ^| /apps]   (no argument = update both)
 	rem Files on the drive that aren't in the repo (eg. the apps themselves) are never deleted
 	rem Scripts on the drive are overwritten with the repo version, so make local changes in the repo
-	rem placeholder.file files are not copied to the drive
+	rem .gitkeep files (which only make git keep otherwise-empty folders) are not copied to the drive
 	rem Update-Tool.cmd updates itself last, because a running batch file can't safely be overwritten
 
 
@@ -112,7 +112,7 @@ rem ----------------------------------------------------------------------------
 	echo Copying changed files to the drive...
 	echo:
 	rem (v.version is the repo's stand-in for the drive's dated "last updated" file, written at the end)
-	robocopy "%src%" "%root%." /E /XF placeholder.file Update-Tool.cmd v.version /R:1 /W:1 /NJH /NJS /NDL /NP
+	robocopy "%src%" "%root%." /E /XF .gitkeep Update-Tool.cmd v.version /R:1 /W:1 /NJH /NJS /NDL /NP
 	if errorlevel 8 (
 		echo Copy failed, robocopy exit code !errorlevel!.
 		exit /b 1
