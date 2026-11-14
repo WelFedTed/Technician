@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-title Install iMazing
+title Install iMazing 3
 
 set "application=iMazing3forWindows.exe"
 set "arguments="

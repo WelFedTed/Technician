@@ -1,6 +1,6 @@
 @echo off
 
-title Updating iMazing
+title Updating iMazing 3
 
 rem Updates this app with the shared helper _Data\Apps\_Update-App.ps1 (see that file for the options)
 rem Run it on its own, or let Update-Tool.cmd run it for every app
@@ -12,8 +12,8 @@ set "result=0"
 set "resultRank=0"
 
 rem Installer
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" -MoveFrom "%~dp0." ^
-    -Name "iMazing" ^
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" -MoveFrom "%~dp0..\iMazing" ^
+    -Name "iMazing 3" ^
     -Url "https://downloads.imazing.com/windows/iMazing/iMazing3forWindows.exe" ^
     -SaveAs "iMazing3forWindows.exe" -Into "x64"
 call :result
