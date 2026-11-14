@@ -1,6 +1,6 @@
 @echo off
 
-title Updating Nvida App
+title Updating NVIDIA App
 
 rem Updates this app with the shared helper _Data\Apps\_Update-App.ps1 (see that file for the options)
 rem Run it on its own, or let Update-Tool.cmd run it for every app
@@ -12,7 +12,7 @@ set "result=0"
 set "resultRank=0"
 
 rem Installer
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" -MoveFrom "%~dp0." ^
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" -MoveFrom "%~dp0..\Nvida App" ^
     -Name "NVIDIA App" ^
     -Page "https://www.nvidia.com/en-us/software/nvidia-app/" ^
     -Link "https://us\.download\.nvidia\.com/nvapp/client/[\d.]+/x64/NVIDIA_app_v[\d.]+_x64\.exe" ^

@@ -613,14 +613,23 @@ function Move-OldLayout([string]$from) {
     $appFolder = Split-Path -Parent $AppDir
     $isAppFolder = $from -eq $appFolder
     $scripts = @('update.cmd', 'run.cmd', 'install.cmd', 'cli.cmd', '.gitkeep', 'placeholder.file', 'desktop.ini')
-    $items = @(Get-ChildItem -LiteralPath $from -Force | Where-Object {
-        $item = $_
-        if ($scripts -contains $item.Name) { return $false }
-        # links to the app's web pages stay with the app folder's scripts
-        if ($item.Name -like '*.url') { return $false }
-        if ($isAppFolder -and $item.PSIsContainer -and $typeFolders -contains $item.Name) { return $false }
-        $true
-    })
+    $oldType = Join-Path $from (Split-Path -Leaf $AppDir)
+    if (-not $isAppFolder -and (Test-Path -LiteralPath $oldType -PathType Container)) {
+        # a renamed app folder that already has Installer / Portable / CLI folders (eg. "Nvida App"): take what's
+        # in this type's folder
+        $items = @(Get-ChildItem -LiteralPath $oldType -Force)
+    }
+    else {
+        $items = @(Get-ChildItem -LiteralPath $from -Force | Where-Object {
+            $item = $_
+            if ($scripts -contains $item.Name) { return $false }
+            # links to the app's web pages stay with the app folder's scripts
+            if ($item.Name -like '*.url') { return $false }
+            # (other kinds of download are moved by their own part of update.cmd)
+            if ($item.PSIsContainer -and $typeFolders -contains $item.Name) { return $false }
+            $true
+        })
+    }
     if ($items.Count -gt 0) {
         Say "Moving $($items.Count) item(s) from the old layout ($(Split-Path -Leaf $from)) into $(Split-Path -Leaf $appFolder)\$(Split-Path -Leaf $AppDir)..."
         # if this type folder already has a version, the old version/checksum files are out of date
@@ -634,14 +643,17 @@ function Move-OldLayout([string]$from) {
         }
     }
     if (-not $isAppFolder) {
+        if ((Test-Path -LiteralPath $oldType) -and -not (Get-ChildItem -LiteralPath $oldType -Force)) { Remove-Item -LiteralPath $oldType -Force }
         # an old app folder of its own: keep its web links, then remove it once only its scripts are left
         foreach ($link in Get-ChildItem -LiteralPath $from -Filter '*.url' -File) { Merge-Item $link (Join-Path $appFolder $link.Name) }
         $left = @(Get-ChildItem -LiteralPath $from -Force | Where-Object { $scripts -notcontains $_.Name })
+        $pending = @($left | Where-Object { $_.PSIsContainer -and $typeFolders -contains $_.Name })
         if ($left.Count -eq 0) {
             Remove-Item -LiteralPath $from -Recurse -Force
             Say "Removed the old $(Split-Path -Leaf $from) folder"
         }
-        else { Say "WARNING: couldn't move everything out of $from, so it was left in place" }
+        # (another type folder still there is moved by its own part of update.cmd, which then removes the folder)
+        elseif ($pending.Count -lt $left.Count) { Say "WARNING: couldn't move everything out of $from, so it was left in place" }
     }
 }
 

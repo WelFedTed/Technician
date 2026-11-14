@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-title Install Nvida App
+title Install NVIDIA App
 
 set "application=NVIDIA_app_v*.exe"
 set "arguments="
