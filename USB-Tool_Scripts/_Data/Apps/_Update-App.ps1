@@ -15,6 +15,9 @@
 #   -Url <url>                        a fixed download link
 #   -Page <url> -Link <regex>         scrape the link from a web page; the highest version number wins
 #       [-UrlFormat <fmt>]            build the link from the regex's first group, eg. "https://x/app_{0}.zip"
+#       [-PageIndex <url> -PageIndexLink <regex>]   when each release has its own page (eg. Blender's
+#                                     release/Blender5.3/), the highest first group of the regex on the
+#                                     index page fills {0} in -Page (and -Page86 / -PageArm)
 #   -GitHub <owner/repo> -Asset <regex>   an asset of the latest GitHub release
 #   -Manual [-Page <url>] [-Note <text>]  can't be downloaded automatically; prints where to get it
 # Optional 32-bit and ARM64 downloads (the same options with 86 or Arm on the end):
@@ -76,7 +79,8 @@ param(
     [string]$Inner, [string]$Inner86, [string]$InnerArm,
     [string]$VersionFrom, [switch]$VersionFromUrl,
     [string]$MoveFrom,
-    [switch]$CheckOnly
+    [switch]$CheckOnly,
+    [string]$PageIndex, [string]$PageIndexLink
 )
 
 $ErrorActionPreference = 'Stop'
@@ -695,6 +699,15 @@ $downloads = @()
 $script:applying = $false
 try {
     Say 'Finding the latest version...'
+    if ($PageIndex) {
+        $indexHtml = Get-Text $PageIndex
+        $releases = @([regex]::Matches($indexHtml, $PageIndexLink, 'IgnoreCase') | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique)
+        if (-not $releases) { throw "No release matching '$PageIndexLink' on $PageIndex (the page may have changed)" }
+        $release = Select-Highest $releases
+        $Page = $Page -f $release
+        if ($Page86) { $Page86 = $Page86 -f $release }
+        if ($PageArm) { $PageArm = $PageArm -f $release }
+    }
     $jobs = @()
     $link = Resolve-Link $Url $Link $Asset
     if (-not $link) { throw 'No download source given (use -Url, -Page/-Link or -GitHub/-Asset)' }
