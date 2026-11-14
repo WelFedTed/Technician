@@ -8,7 +8,7 @@ rem Uses _Data\Scripts\eject-drive.ps1: it's copied to %TEMP% and run from there
 rem Windows won't eject a drive while this window (or a script on the drive) is still using it
 
 set "drive=%~d0"
-set "script=%~d0\_Data\Scripts\eject-drive.ps1"
+set "script=%~dp0_Data\Scripts\eject-drive.ps1"
 set "copy=%TEMP%\USB-Tool-eject-drive.ps1"
 
 if not exist "%script%" (
