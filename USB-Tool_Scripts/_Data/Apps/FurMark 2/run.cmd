@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title FurMark 2
 
-set "application=*.exe"
+set "application=FurMark_GUI.exe;FurMark_win64\FurMark_GUI.exe"
 set "arguments="
 set "folder=Portable"
 
