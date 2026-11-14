@@ -1,6 +1,11 @@
 # Update-App - shared updater for the apps in _Data\Apps
 # --------------------------------------------------
-# Each app's update.cmd calls this with the app's download details.
+# Each app's update.cmd calls this with the app's download details, once for each kind of download the app
+# has, each kept in its own folder in the app folder (-AppDir):
+#   Installer  installers (the app's install.cmd starts them)
+#   Portable   apps that run without installing (run.cmd)
+#   CLI        command-line tools (cli.cmd opens a command prompt with them on the PATH)
+# Each of these holds its own build folders (x86, x64, ...), version file, checksums and parity data.
 # It downloads the latest version, checks the download is real (not an error page or empty file)
 # before touching the old version, then rewrites the .version file, checksums.sfv and parity data.
 # The version file is named v<version>_<build date>.version, where the build date comes from the
@@ -38,6 +43,10 @@
 #   -Flatten                          if the archive has one top folder, use what's inside it
 #   -Clean                            delete the old version's files first (keeps update.cmd, *.url, run.cmd and -Keep)
 #   -Keep "a,b"                       extra file/folder names to keep when cleaning
+#   -MoveFrom <folder>                where this download used to be kept on the USB (the app folder itself, from
+#                                     before the Installer / Portable / CLI folders, or an old folder of its own
+#                                     such as "7-Zip Portable"); what's there is moved into -AppDir first, and
+#                                     an old folder of its own is then removed
 #   -DataFolder <name>                create this folder next to the app in each build folder and keep it when
 #                                     cleaning; apps such as VS Code (data) and Sublime Text (Data) only run in
 #                                     portable mode, with their settings on the USB, when it exists
@@ -65,7 +74,8 @@ param(
     [switch]$Flatten, [switch]$Clean, [string]$Keep, [string]$DataFolder,
     [string]$Referer, [string]$Password, [string]$UserAgent, [string]$ExtraAsset,
     [string]$Inner, [string]$Inner86, [string]$InnerArm,
-    [string]$VersionFrom, [switch]$VersionFromUrl
+    [string]$VersionFrom, [switch]$VersionFromUrl,
+    [string]$MoveFrom
 )
 
 $ErrorActionPreference = 'Stop'
@@ -73,8 +83,12 @@ $ProgressPreference = 'SilentlyContinue'
 $userAgent = if ($UserAgent) { $UserAgent } else { 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36' }
 $curl = Join-Path $env:SystemRoot 'System32\curl.exe'
 $toolsDir = Join-Path $env:LOCALAPPDATA 'USB-Tool\tools'
+# the type folder (Installer, Portable or CLI) may not exist yet on the USB
+New-Item -ItemType Directory -Path $AppDir -Force | Out-Null
 $AppDir = (Resolve-Path -LiteralPath $AppDir).Path
-$alwaysKeep = @('update.cmd', '*.url', 'run.cmd', '*.version', 'checksums.sfv', '*.par2')
+$alwaysKeep = @('update.cmd', '*.url', 'run.cmd', 'install.cmd', 'cli.cmd', '*.version', 'checksums.sfv', '*.par2')
+# each app folder holds up to three of these, each with its own build folders, version file and checksums
+$typeFolders = @('Installer', 'Portable', 'CLI')
 
 # .NET is used for hashing and unzipping instead of Get-FileHash / Expand-Archive,
 # because those cmdlets go missing when PowerShell's module path is broken (eg. launched from PowerShell 7)
@@ -213,12 +227,13 @@ function Get-FileKind([string]$path) {
     return 'other'
 }
 
-function Test-Download([string]$path, [string]$address) {
+function Test-Download([string]$path, [string]$address, [switch]$AllowPlain) {
     $size = (Get-Item -LiteralPath $path).Length
     if ($size -lt 10KB) { throw "Download is only $size bytes, probably an error page: $address" }
     $kind = Get-FileKind $path
     if ($kind -eq 'html') { throw "Download is a web page, not the app (the link may have changed): $address" }
-    if ($Extract -and $kind -notin @('zip', '7z')) { throw "Expected a .zip or .7z but got a $kind file: $address" }
+    # (-Extra files may be plain files next to the unzipped app, eg. 7zr.exe next to 7-Zip Extra)
+    if ($Extract -and -not $AllowPlain -and $kind -notin @('zip', '7z')) { throw "Expected a .zip or .7z but got a $kind file: $address" }
     return $kind
 }
 
@@ -584,6 +599,47 @@ function Merge-Item($item, [string]$destination) {
     }
 }
 
+# -MoveFrom: app folders used to hold their build folders directly (eg. 7-Zip\x64), and some apps had
+# folders of their own (eg. "7-Zip Portable", "Notepad++ Portable"); move what's there into this type
+# folder (eg. 7-Zip\Installer\x64, 7-Zip\Portable\x86_x64_ARM64) so nothing is downloaded again
+function Move-OldLayout([string]$from) {
+    if (-not (Test-Path -LiteralPath $from)) { return }
+    $from = (Resolve-Path -LiteralPath $from).Path.TrimEnd('\')
+    $appFolder = Split-Path -Parent $AppDir
+    $isAppFolder = $from -eq $appFolder
+    $scripts = @('update.cmd', 'run.cmd', 'install.cmd', 'cli.cmd', 'placeholder.file', 'desktop.ini')
+    $items = @(Get-ChildItem -LiteralPath $from -Force | Where-Object {
+        $item = $_
+        if ($scripts -contains $item.Name) { return $false }
+        # links to the app's web pages stay with the app folder's scripts
+        if ($item.Name -like '*.url') { return $false }
+        if ($isAppFolder -and $item.PSIsContainer -and $typeFolders -contains $item.Name) { return $false }
+        $true
+    })
+    if ($items.Count -gt 0) {
+        Say "Moving $($items.Count) item(s) from the old layout ($(Split-Path -Leaf $from)) into $(Split-Path -Leaf $appFolder)\$(Split-Path -Leaf $AppDir)..."
+        # if this type folder already has a version, the old version/checksum files are out of date
+        $hasVersion = [bool](Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File)
+        foreach ($item in $items) {
+            if ($hasVersion -and -not $item.PSIsContainer -and ($item.Name -like '*.version' -or $item.Name -eq 'checksums.sfv' -or $item.Name -like '*.par2')) {
+                Remove-Item -LiteralPath $item.FullName -Force
+                continue
+            }
+            Merge-Item $item (Join-Path $AppDir $item.Name)
+        }
+    }
+    if (-not $isAppFolder) {
+        # an old app folder of its own: keep its web links, then remove it once only its scripts are left
+        foreach ($link in Get-ChildItem -LiteralPath $from -Filter '*.url' -File) { Merge-Item $link (Join-Path $appFolder $link.Name) }
+        $left = @(Get-ChildItem -LiteralPath $from -Force | Where-Object { $scripts -notcontains $_.Name })
+        if ($left.Count -eq 0) {
+            Remove-Item -LiteralPath $from -Recurse -Force
+            Say "Removed the old $(Split-Path -Leaf $from) folder"
+        }
+        else { Say "WARNING: couldn't move everything out of $from, so it was left in place" }
+    }
+}
+
 # true if every build folder this app uses is there and has files in it; if something deleted them
 # (eg. by hand), "already up to date" would otherwise leave the app missing
 function Test-AppFiles([object[]]$jobs, [switch]$Quiet) {
@@ -621,11 +677,16 @@ function Repair-OldVersionName($file) {
 Say $Name
 Say ('-' * 100)
 
+if ($MoveFrom) {
+    try { Move-OldLayout $MoveFrom }
+    catch { Say "WARNING: couldn't move the old layout from ${MoveFrom}: $($_.Exception.Message)" }
+}
+
 if ($Manual) {
     Say 'This app has to be updated by hand.'
     if ($Page) { Say "Download it from: $Page" }
     if ($Note) { Say $Note }
-    Say 'Put builds that only run on 64-bit Windows in the x64 folder, and anything that runs on 32-bit Windows in x86.'
+    Say "Put builds that only run on 64-bit Windows in $AppDir\x64, and anything that runs on 32-bit Windows in $AppDir\x86."
     exit 2
 }
 
@@ -640,11 +701,11 @@ try {
     $link86 = Resolve-AltLink $Url86 $Link86 $Asset86 $Page86 $UrlFormat86
     $linkArm = Resolve-AltLink $UrlArm $LinkArm $AssetArm $PageArm $UrlFormatArm
     foreach ($extraLink in ($Extra -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ }) {
-        $jobs += [pscustomobject]@{ Link = $extraLink; SaveAs = $null; Into = $Into }
+        $jobs += [pscustomobject]@{ Link = $extraLink; SaveAs = $null; Into = $Into; IsExtra = $true }
     }
     if ($GitHub -and $ExtraAsset) {
         foreach ($extraFile in $script:release.assets | Where-Object { $_.name -match $ExtraAsset -and $_.browser_download_url -ne $link }) {
-            $jobs += [pscustomobject]@{ Link = $extraFile.browser_download_url; SaveAs = $null; Into = $Into }
+            $jobs += [pscustomobject]@{ Link = $extraFile.browser_download_url; SaveAs = $null; Into = $Into; IsExtra = $true }
         }
     }
     if ($link86) { $jobs += [pscustomobject]@{ Link = $link86; SaveAs = $SaveAs86; Into = $Into86; Inner = $Inner86 } }
@@ -692,7 +753,7 @@ try {
         $temp = Join-Path $env:TEMP ("USB-Tool-download-" + [Guid]::NewGuid().ToString('N'))
         $downloads += $temp
         $finalUrl = Get-Download $job.Link $temp
-        $kind = Test-Download $temp $job.Link
+        $kind = Test-Download $temp $job.Link -AllowPlain:([bool]$job.IsExtra)
         $folder = if ($job.Into) { Join-Path $AppDir $job.Into } else { $AppDir }
         $fileName = if ($job.SaveAs) { $job.SaveAs } else { Get-DownloadName $job.Link $finalUrl $kind }
         $job | Add-Member -NotePropertyMembers @{
@@ -737,6 +798,13 @@ try {
         foreach ($job in $jobs) {
             $staging = Join-Path $env:TEMP ("USB-Tool-extract-" + [Guid]::NewGuid().ToString('N'))
             $downloads += $staging
+            if ($job.Kind -notin @('zip', '7z')) {
+                # a plain -Extra file: staged as-is, so it's copied next to the unzipped app
+                New-Item -ItemType Directory -Path $staging | Out-Null
+                Copy-Item -LiteralPath $job.Temp -Destination (Join-Path $staging (Split-Path -Leaf $job.Target))
+                $job | Add-Member -NotePropertyName Source -NotePropertyValue $staging
+                continue
+            }
             $job | Add-Member -NotePropertyName Source -NotePropertyValue (Expand-ToStaging $job.Temp $job.Kind $staging $job.Inner)
         }
     }

@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-set "SOURCE_DIR=%~dp0x64"
+set "SOURCE_DIR=%~dp0Portable\x64"
 set "DEST_DIR=%TEMP%\Stellar Converter for OST"
 
 if exist "%DEST_DIR%" rmdir /s /q "%DEST_DIR%"

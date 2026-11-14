@@ -9,7 +9,10 @@ rem ----------------------------------------------------------------------------
 	rem   1. Scripts: downloads the latest USB-Tool_Scripts folder from GitHub and copies it over the drive
 	rem   2. Apps: tries every _Data\Apps\<App> folder, running its update.cmd from inside that folder
 	rem      (folders without an update.cmd are skipped; folders starting with _ are notes, not apps)
-	rem      Each update.cmd uses the shared helper _Data\Apps\_Update-App.ps1
+	rem      Each update.cmd uses the shared helper _Data\Apps\_Update-App.ps1, keeping each kind of download
+	rem      in its own folder (Installer, Portable, CLI); apps saved in the old layout (build folders straight
+	rem      in the app folder, or folders such as "7-Zip Portable") are moved into these on their next update
+	rem      (folders that were merged or renamed, eg. "7-Zip Portable", may show as skipped once afterwards)
 	rem Usage: Update-Tool.cmd [/scripts ^| /apps]   (no argument = update both)
 	rem Files on the drive that aren't in the repo (eg. the apps themselves) are never deleted
 	rem Scripts on the drive are overwritten with the repo version, so make local changes in the repo
