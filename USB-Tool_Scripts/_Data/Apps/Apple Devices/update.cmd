@@ -13,10 +13,9 @@ set "resultRank=0"
 
 rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
-    -Name "Apple Devices" ^
-    -Manual ^
-    -Page "https://apps.microsoft.com/detail/9np83lwlpz9k" ^
-    -Note "Apple Devices only comes from the Microsoft Store, so install it from there (on Windows 10, iTunes from apple.com does the same job)."
+    -Name "Apple Devices (Microsoft Store installer)" ^
+    -Url "https://get.microsoft.com/installer/download/9NP83LWLPZ9K" ^
+    -SaveAs "Apple Devices Installer.exe" -Into "x86"
 call :result
 
 if /i not "%~1" == "/nopause" pause

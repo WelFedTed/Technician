@@ -19,6 +19,9 @@
 #                                     release/Blender5.3/), the highest first group of the regex on the
 #                                     index page fills {0} in -Page (and -Page86 / -PageArm)
 #   -GitHub <owner/repo> -Asset <regex>   an asset of the latest GitHub release
+#       [-PreRelease]                 also use pre-releases (for apps whose current version is only published as
+#                                     one, eg. DevToys 2): the newest release, whether or not it's marked as a
+#                                     pre-release
 #   -Manual [-Page <url>] [-Note <text>]  can't be downloaded automatically; prints where to get it
 # Optional 32-bit and ARM64 downloads (the same options with 86 or Arm on the end):
 #   -Url86 / -Link86 / -Asset86 from the same source,
@@ -80,7 +83,8 @@ param(
     [string]$VersionFrom, [switch]$VersionFromUrl,
     [string]$MoveFrom,
     [switch]$CheckOnly,
-    [string]$PageIndex, [string]$PageIndexLink
+    [string]$PageIndex, [string]$PageIndexLink,
+    [switch]$PreRelease
 )
 
 $ErrorActionPreference = 'Stop'
@@ -159,7 +163,14 @@ function Find-PageLink([string]$pattern, [string]$pageUrl = $Page, [string]$form
 $script:release = $null
 function Find-GitHubAsset([string]$pattern) {
     if (-not $script:release) {
-        $script:release = Get-Text "https://api.github.com/repos/$GitHub/releases/latest" | ConvertFrom-Json
+        $script:release = if ($PreRelease) {
+            # releases come newest first; skip unpublished drafts (Windows PowerShell passes a JSON array on as one
+            # object, so it's unrolled first)
+            $releases = @(Get-Text "https://api.github.com/repos/$GitHub/releases?per_page=10" | ConvertFrom-Json)
+            $releases | ForEach-Object { $_ } | Where-Object { -not $_.draft } | Select-Object -First 1
+        }
+        else { Get-Text "https://api.github.com/repos/$GitHub/releases/latest" | ConvertFrom-Json }
+        if (-not $script:release) { throw "No releases found for $GitHub" }
     }
     $match = $script:release.assets | Where-Object { $_.name -match $pattern } | Select-Object -First 1
     if (-not $match) { throw "No asset matching '$pattern' in the latest $GitHub release ($($script:release.tag_name))" }

@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title Install Apple Devices
 
-set "application=*.exe"
+set "application=Apple Devices Installer.exe"
 set "arguments="
 set "folder=Installer"
 
