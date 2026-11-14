@@ -1,22 +1,67 @@
 @echo off
 
-echo Maintenance Script
-echo --------------------------------------------------------------------------------
+title Maintenance Script
+
+rem check if already elevated
+NET FILE 1>NUL 2>NUL
+if '%errorlevel%' == '0' ( goto gotPrivileges ) else ( goto getPrivileges )
+
+:getPrivileges
+rem not elevated, relaunch as admin
+rem (the path is quoted, so this works when the USB tool is in a folder with spaces in its name)
+powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+exit /b
+
+:gotPrivileges
+rem is elevated, continue script
+echo Running as Administrator
+echo:
 
 
+echo Performing system maintenance tasks...
+echo:
+
+echo Updating system packages...
+topgrade --yes --no-ask-retry --disable system bin
+echo:
+title Maintenance Script
+
+echo Updating package sources...
 winget source update
+echo:
+
+echo Upgrading all packages...
 winget upgrade --all --silent
+echo:
 
-cleanmgr /sagerun:10
-
+echo Running system file checker (1st round)...
 sfc /scannow
+echo:
+
+echo Running DISM cleanup...
 dism /online /cleanup-image /startcomponentcleanup /resetbase
+echo:
+
+echo Running DISM restore health...
 dism /online /cleanup-image /restorehealth
+echo:
+
+echo Running system file checker (2nd round)...
 sfc /scannow
-defrag /c /o
+
+echo Running disk cleanup...
+cleanmgr /sagerun:10
+echo:
+
+echo Running disk defragmentation (all disks)...
+defrag /c /o /h /u /v
+echo:
+
+echo Running disk check (C: drive only)...
 chkdsk c: /r /scan /perf
+echo:
 
 echo:
-echo End of script
-rem pause
+echo Maintenance completed.
+pause
 exit /b

@@ -7,7 +7,8 @@ if '%errorlevel%' == '0' ( goto gotPrivileges ) else ( goto getPrivileges )
 
 :getPrivileges
 rem not elevated, relaunch as admin
-powershell -command start-process -file %~f0 -verb runas
+rem (the path is quoted, so this works when the USB tool is in a folder with spaces in its name)
+powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
 exit /b
 
 :gotPrivileges
