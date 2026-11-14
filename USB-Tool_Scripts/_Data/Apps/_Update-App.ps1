@@ -75,7 +75,8 @@ param(
     [string]$Referer, [string]$Password, [string]$UserAgent, [string]$ExtraAsset,
     [string]$Inner, [string]$Inner86, [string]$InnerArm,
     [string]$VersionFrom, [switch]$VersionFromUrl,
-    [string]$MoveFrom
+    [string]$MoveFrom,
+    [switch]$CheckOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -711,6 +712,26 @@ try {
     if ($link86) { $jobs += [pscustomobject]@{ Link = $link86; SaveAs = $SaveAs86; Into = $Into86; Inner = $Inner86 } }
     if ($linkArm) { $jobs += [pscustomobject]@{ Link = $linkArm; SaveAs = $SaveAsArm; Into = $IntoArm; Inner = $InnerArm } }
 
+    # -CheckOnly: show where each link leads and what it is (from its first 1 KB), without changing anything
+    if ($CheckOnly) {
+        $bad = 0
+        foreach ($job in $jobs) {
+            $sample = Join-Path $env:TEMP ("USB-Tool-check-" + [Guid]::NewGuid().ToString('N'))
+            $curlArgs = @('-sSL', '--fail', '--connect-timeout', '20', '--max-time', '60', '-r', '0-1023', '-A', $userAgent, '-o', $sample, '-D', '-', '-w', '%{url_effective}')
+            if ($Referer) { $curlArgs += @('-e', $Referer) }
+            $out = @(& $curl @curlArgs $job.Link 2>&1 | ForEach-Object { "$_" })
+            $ok = $LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $sample)
+            $kind = if ($ok) { Get-FileKind $sample } else { 'failed' }
+            $size = ($out | Where-Object { $_ -match '^content-range: bytes \d+-\d+/(\d+)' } | Select-Object -Last 1) -replace '^content-range: bytes \d+-\d+/(\d+).*$', '$1'
+            if (-not $size) { $size = ($out | Where-Object { $_ -match '^content-length: (\d+)' } | Select-Object -Last 1) -replace '^content-length: (\d+).*$', '$1' }
+            $sizeText = if ($size -match '^\d+$') { '{0:N1} MB' -f ([double]$size / 1MB) } else { '? MB' }
+            if ($kind -notin @('exe', 'msi', 'zip', '7z', 'other')) { $bad++ }
+            Say ("CHECK {0,-6} {1,-9} {2,-6} {3}" -f $kind, $sizeText, $(if ($job.Into) { $job.Into } else { '.' }), ($out | Select-Object -Last 1))
+            Remove-Item -LiteralPath $sample -Force -ErrorAction SilentlyContinue
+        }
+        exit $(if ($bad) { 1 } else { 0 })
+    }
+
     # files at the top of the app folder, or in a build folder this app no longer uses (eg. x86 after it
     # became x86_x64), belong in its main build folder
     $movedRootFiles = $false
@@ -774,7 +795,11 @@ try {
         if ($_.Stamp) { "stamp=$($_.Stamp)" }
     }) -join "`r`n"
     $installed = $jobs | Where-Object { $Extract -or $Paf -or (Test-Path -LiteralPath $_.Target) }
-    if ($versionFile -and $oldRecord -and @($installed).Count -eq $jobs.Count -and $oldKey -eq $record -and (Test-AppFiles $jobs -Quiet)) {
+    # some links change on every visit (eg. ReNamer's carry a new key each time), so the same files as last
+    # time also count as up to date
+    $oldHashes = @(($oldRecord -split "`r?`n") | Where-Object { $_ -like 'sha256=*' })
+    $sameFiles = $oldHashes.Count -eq $jobs.Count -and (($jobs | ForEach-Object { "sha256=$($_.Hash)" }) -join '|') -eq ($oldHashes -join '|')
+    if ($versionFile -and $oldRecord -and @($installed).Count -eq $jobs.Count -and ($oldKey -eq $record -or $sameFiles) -and (Test-AppFiles $jobs -Quiet)) {
         Add-DataFolder $jobs
         Repair-OldVersionName $versionFile
         Say "Already up to date"

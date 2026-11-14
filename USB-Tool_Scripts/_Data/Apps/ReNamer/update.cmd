@@ -11,6 +11,15 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "ReNamer (installer)" ^
+    -Page "https://www.den4b.com/download/renamer/installer" ^
+    -Link "installer\?key=([0-9a-f]+)" ^
+    -UrlFormat "https://www.den4b.com/download/renamer/installer?key={0}" ^
+    -SaveAs "ReNamer_Setup.exe" -Into "x86"
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "ReNamer (portable)" ^

@@ -11,6 +11,14 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "Angry IP Scanner (installer)" ^
+    -GitHub "angryip/ipscan" ^
+    -Asset "^ipscan-[\d.]+-setup\.exe$" -Into "x86" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Angry IP Scanner" ^

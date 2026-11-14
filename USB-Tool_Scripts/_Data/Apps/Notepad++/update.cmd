@@ -11,6 +11,16 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "Notepad++ (installer)" ^
+    -GitHub "notepad-plus-plus/notepad-plus-plus" ^
+    -Asset "^npp\.[\d.]+\.Installer\.x64\.exe$" -Into "x64" ^
+    -Asset86 "^npp\.[\d.]+\.Installer\.exe$" -Into86 "x86" ^
+    -AssetArm "^npp\.[\d.]+\.Installer\.arm64\.exe$" -IntoArm "ARM64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0..\Notepad++ Portable" ^
     -Name "Notepad++ Portable" ^

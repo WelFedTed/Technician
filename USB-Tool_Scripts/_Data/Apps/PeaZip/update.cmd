@@ -11,6 +11,15 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "PeaZip (installer)" ^
+    -GitHub "peazip/PeaZip" ^
+    -Asset "^peazip-[\d.]+\.WIN64\.exe$" -Into "x64" ^
+    -Asset86 "^peazip-[\d.]+\.WINDOWS\.exe$" -Into86 "x86" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "PeaZip" ^

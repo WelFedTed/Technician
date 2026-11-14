@@ -11,6 +11,14 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "HWiNFO (installer)" ^
+    -Page "https://www.hwinfo.com/download/" ^
+    -Link "https://www\.hwinfo\.com/files/hwi64_\d+\.exe" -Into "x64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0..\HWiNFO Portable" ^
     -Name "HWiNFO Portable" ^

@@ -11,6 +11,15 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "Audacity (installer)" ^
+    -GitHub "audacity/audacity" ^
+    -Asset "^audacity-win-[\d.]+-x86_64\.msi$" -Into "x64" ^
+    -AssetArm "^audacity-win-[\d.]+-arm64\.msi$" -IntoArm "ARM64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0..\Audacity Portable" ^
     -Name "Audacity Portable" ^

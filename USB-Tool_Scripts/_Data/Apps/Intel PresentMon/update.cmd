@@ -16,7 +16,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Intel PresentMon" ^
     -GitHub "GameTechDev/PresentMon" ^
     -Asset "^PresentMon-[\d.]+\.msi$" -Into "x64" ^
-    -ExtraAsset "^PresentMon-[\d.]+-x64\.exe$" ^
+    -Clean
+call :result
+
+rem CLI
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0CLI" ^
+    -Name "PresentMon command line" ^
+    -GitHub "GameTechDev/PresentMon" ^
+    -Asset "^PresentMon-[\d.]+-x64\.exe$" -Into "x64" ^
     -Clean
 call :result
 

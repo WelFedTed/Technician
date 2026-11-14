@@ -11,6 +11,14 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "WizFile (installer)" ^
+    -Page "https://antibody-software.com/wizfile/download" ^
+    -Link "/files/wizfile_[\d_]+_setup\.exe" -Into "x86" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "WizFile" ^

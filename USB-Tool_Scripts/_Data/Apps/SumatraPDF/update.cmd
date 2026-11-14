@@ -11,6 +11,16 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "SumatraPDF (installer)" ^
+    -Page "https://www.sumatrapdfreader.org/download-free-pdf-viewer" ^
+    -Link "/dl/rel/[\d.]+/SumatraPDF-[\d.]+-64-install\.exe" -Into "x64" ^
+    -Link86 "/dl/rel/[\d.]+/SumatraPDF-[\d.]+-install\.exe" -Into86 "x86" ^
+    -LinkArm "/dl/rel/[\d.]+/SumatraPDF-[\d.]+-arm64-install\.exe" -IntoArm "ARM64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0..\SumatraPDF Portable" ^
     -Name "SumatraPDF Portable" ^

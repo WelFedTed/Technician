@@ -11,6 +11,15 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "Sublime Text (installer)" ^
+    -Page "https://www.sublimetext.com/download" ^
+    -Link "Build (\d{4})" ^
+    -UrlFormat "https://download.sublimetext.com/sublime_text_build_{0}_x64_setup.exe" -Into "x64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Sublime Text" ^

@@ -11,6 +11,14 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "Fan Control (installer)" ^
+    -GitHub "Rem0o/FanControl.Releases" ^
+    -Asset "^FanControl_\d+_net_10_0_Installer\.exe$" -Into "x64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Fan Control" ^

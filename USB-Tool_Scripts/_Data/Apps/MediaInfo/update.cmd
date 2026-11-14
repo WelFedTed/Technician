@@ -11,6 +11,16 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "MediaInfo (installer)" ^
+    -Page "https://mediaarea.net/en/MediaInfo/Download/Windows" ^
+    -Link "//mediaarea\.net/download/binary/mediainfo-gui/[\d.]+/MediaInfo_GUI_[\d.]+_Windows_x64\.exe" -Into "x64" ^
+    -Link86 "//mediaarea\.net/download/binary/mediainfo-gui/[\d.]+/MediaInfo_GUI_[\d.]+_Windows_i386\.exe" -Into86 "x86" ^
+    -LinkArm "//mediaarea\.net/download/binary/mediainfo-gui/[\d.]+/MediaInfo_GUI_[\d.]+_Windows_ARM64\.exe" -IntoArm "ARM64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "MediaInfo" ^
@@ -19,6 +29,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Link86 "//mediaarea\.net/download/binary/mediainfo-gui/[\d.]+/MediaInfo_GUI_[\d.]+_Windows_i386_WithoutInstaller\.7z" ^
     -LinkArm "//mediaarea\.net/download/binary/mediainfo-gui/[\d.]+/MediaInfo_GUI_[\d.]+_Windows_ARM64_WithoutInstaller\.7z" ^
     -Extract -Into "x64" -Into86 "x86" -IntoArm "ARM64" -Clean
+call :result
+
+rem CLI
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0CLI" ^
+    -Name "MediaInfo command line" ^
+    -Page "https://mediaarea.net/en/MediaInfo/Download/Windows" ^
+    -Link "//mediaarea\.net/download/binary/mediainfo/[\d.]+/MediaInfo_CLI_[\d.]+_Windows_x64\.zip" -Into "x64" ^
+    -Link86 "//mediaarea\.net/download/binary/mediainfo/[\d.]+/MediaInfo_CLI_[\d.]+_Windows_i386\.zip" -Into86 "x86" ^
+    -LinkArm "//mediaarea\.net/download/binary/mediainfo/[\d.]+/MediaInfo_CLI_[\d.]+_Windows_ARM64\.zip" -IntoArm "ARM64" ^
+    -Extract -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause

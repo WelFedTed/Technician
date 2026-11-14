@@ -11,6 +11,15 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "HWMonitor (installer)" ^
+    -Page "https://www.cpuid.com/softwares/hwmonitor.html" ^
+    -Link "hwmonitor_([\d.]+)\.exe" ^
+    -UrlFormat "https://download.cpuid.com/hwmonitor/hwmonitor_{0}.exe" -Into "x86" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "HWMonitor" ^

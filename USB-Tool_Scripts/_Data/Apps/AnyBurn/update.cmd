@@ -11,6 +11,14 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "AnyBurn (installer)" ^
+    -Url "https://www.anyburn.com/anyburn_setup.exe" -Into "x86" ^
+    -UrlArm "https://www.anyburn.com/anyburn_setup_arm64.exe" -IntoArm "ARM64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0..\AnyBurn Portable" ^
     -Name "AnyBurn Portable" ^

@@ -11,6 +11,15 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "Visual Studio Code (installer)" ^
+    -Url "https://update.code.visualstudio.com/latest/win32-x64/stable" -Into "x64" ^
+    -UrlArm "https://update.code.visualstudio.com/latest/win32-arm64/stable" -IntoArm "ARM64" ^
+    -Clean ^
+    -VersionFromUrl
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0..\Visual Studio Code (VSCode) Portable" ^
     -Name "Visual Studio Code (portable zip)" ^
@@ -18,6 +27,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -UrlArm "https://update.code.visualstudio.com/latest/win32-arm64-archive/stable" -IntoArm "ARM64" ^
     -Extract -Clean -DataFolder "data" ^
     -VersionFromUrl
+call :result
+
+rem CLI
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0CLI" ^
+    -Name "Visual Studio Code command line (code tunnel)" ^
+    -Url "https://update.code.visualstudio.com/latest/cli-win32-x64/stable" -Into "x64" ^
+    -UrlArm "https://update.code.visualstudio.com/latest/cli-win32-arm64/stable" -IntoArm "ARM64" ^
+    -Extract -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause

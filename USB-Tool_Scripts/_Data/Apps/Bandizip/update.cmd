@@ -18,8 +18,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -SaveAs "BANDIZIP-SETUP-STD-ALL.EXE" -Into "x86"
 call :result
 
-rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)
-if exist "%~dp0run.cmd" del "%~dp0run.cmd"
+rem Portable
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
+    -Name "Bandizip Portable" ^
+    -Url "https://www.bandisoft.com/bandizip/dl.php?portable" ^
+    -SaveAs "BANDIZIP-PORTABLE.ZIP" ^
+    -Extract -Into "x86_x64" -Clean -Keep "config.ini"
+call :result
 
 if /i not "%~1" == "/nopause" pause
 exit /b %result%

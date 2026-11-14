@@ -11,6 +11,17 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "LibreOffice (installer)" ^
+    -Page "https://download.documentfoundation.org/libreoffice/stable/" ^
+    -Link "href=\"(\d+\.\d+\.\d+)/\"" ^
+    -UrlFormat "https://download.documentfoundation.org/libreoffice/stable/{0}/win/x86_64/LibreOffice_{0}_Win_x86-64.msi" -Into "x64" ^
+    -UrlFormat86 "https://download.documentfoundation.org/libreoffice/stable/{0}/win/x86/LibreOffice_{0}_Win_x86.msi" -Into86 "x86" ^
+    -UrlFormatArm "https://download.documentfoundation.org/libreoffice/stable/{0}/win/aarch64/LibreOffice_{0}_Win_aarch64.msi" -IntoArm "ARM64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0..\LibreOffice Portable" ^
     -Name "LibreOffice Portable" ^

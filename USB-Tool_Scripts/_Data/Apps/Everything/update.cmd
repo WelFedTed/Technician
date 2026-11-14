@@ -11,6 +11,15 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "Everything (installer)" ^
+    -Page "https://www.voidtools.com/downloads/" ^
+    -Link "/Everything-[\d.]+\.x64-Setup\.exe" -Into "x64" ^
+    -Link86 "/Everything-[\d.]+\.x86-Setup\.exe" -Into86 "x86" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Everything" ^
@@ -20,6 +29,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -LinkArm "/Everything-[\d.]+\.ARM64\.zip" ^
     -Extract -Into "x64" -Into86 "x86" -IntoArm "ARM64" ^
     -Clean -Keep "Everything.ini,*.db"
+call :result
+
+rem CLI
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0CLI" ^
+    -Name "Everything command line (ES)" ^
+    -Page "https://www.voidtools.com/downloads/" ^
+    -Link "/ES-[\d.]+\.x64\.zip" -Into "x64" ^
+    -Link86 "/ES-[\d.]+\.x86\.zip" -Into86 "x86" ^
+    -LinkArm "/ES-[\d.]+\.ARM64\.zip" -IntoArm "ARM64" ^
+    -Extract -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause

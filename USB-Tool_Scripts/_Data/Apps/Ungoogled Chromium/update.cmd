@@ -11,6 +11,16 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "Ungoogled Chromium (installer)" ^
+    -GitHub "ungoogled-software/ungoogled-chromium-windows" ^
+    -Asset "^ungoogled-chromium_[\d.-]+_installer_x64\.exe$" -Into "x64" ^
+    -Asset86 "^ungoogled-chromium_[\d.-]+_installer_x86\.exe$" -Into86 "x86" ^
+    -AssetArm "^ungoogled-chromium_[\d.-]+_installer_arm64\.exe$" -IntoArm "ARM64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Ungoogled Chromium (portapps)" ^

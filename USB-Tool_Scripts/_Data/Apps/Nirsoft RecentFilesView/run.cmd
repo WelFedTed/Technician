@@ -39,7 +39,7 @@ rem ----------------------------------------------------------------------------
 	rem Build folders, inside the Installer / Portable / CLI folder:
 		rem x64 / x86 / ARM64: one build each; x86 also holds installers and scripts that run anywhere
 		rem x86_x64 / x86_x64_ARM64: one download holding several builds that share files, named eg.
-			rem myApp.exe + myApp64.exe, or myApp_x32.exe + myApp_x64.exe + myApp_arm64.exe,
+			rem myApp.exe + myApp64.exe, myApp.x86.exe + myApp.x64.exe, or myApp_x32.exe + myApp_x64.exe + myApp_arm64.exe,
 			rem or with each build in an x64 / ARM64 subfolder (eg. 7-Zip Extra's x64\7za.exe)
 			rem so set application to the plain name (myApp.exe) and the right build is picked automatically
 	rem Delayed Expansion is used to enable setting variables within if statements
@@ -179,11 +179,11 @@ rem ----------------------------------------------------------------------------
 	exit /b
 
 	:find64
-	call :findIn "x64\%A%" "x64\%N%_x64%E%" "x64\%N%64%E%" "x86_x64_ARM64\%N%_x64%E%" "x86_x64_ARM64\%N%64%E%" "x86_x64_ARM64\x64\%A%" "x86_x64\%N%_x64%E%" "x86_x64\%N%64%E%" "x86_x64\x64\%A%"
+	call :findIn "x64\%A%" "x64\%N%_x64%E%" "x64\%N%64%E%" "x86_x64_ARM64\%N%_x64%E%" "x86_x64_ARM64\%N%64%E%" "x86_x64_ARM64\x64\%A%" "x86_x64\%N%_x64%E%" "x86_x64\%N%64%E%" "x86_x64\%N%.x64%E%" "x86_x64\x64\%A%"
 	exit /b
 
 	:find86
-	call :findIn "x86\%A%" "x86_x64\%N%_x86%E%" "x86_x64\%N%_x32%E%" "x86_x64\%N%32%E%" "x86_x64\%A%" "x86_x64_ARM64\%N%_x86%E%" "x86_x64_ARM64\%N%_x32%E%" "x86_x64_ARM64\%N%32%E%" "x86_x64_ARM64\%A%"
+	call :findIn "x86\%A%" "x86_x64\%N%_x86%E%" "x86_x64\%N%_x32%E%" "x86_x64\%N%32%E%" "x86_x64\%N%.x86%E%" "x86_x64\%A%" "x86_x64_ARM64\%N%_x86%E%" "x86_x64_ARM64\%N%_x32%E%" "x86_x64_ARM64\%N%32%E%" "x86_x64_ARM64\%A%"
 	exit /b
 
 	rem tries each path in turn; paths may contain wildcards (eg. MyApp-*.exe), so matching files are listed

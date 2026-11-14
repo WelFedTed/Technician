@@ -20,6 +20,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Into "x64" -IntoArm "ARM64" -Clean
 call :result
 
+rem CLI
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0CLI" ^
+    -Name "Node.js command line (zip)" ^
+    -Page "https://nodejs.org/dist/latest/" ^
+    -Link "node-v[\d.]+-win-x64\.zip" -Into "x64" ^
+    -LinkArm "node-v[\d.]+-win-arm64\.zip" -IntoArm "ARM64" ^
+    -Extract -Flatten -Clean
+call :result
+
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)
 if exist "%~dp0run.cmd" del "%~dp0run.cmd"
 

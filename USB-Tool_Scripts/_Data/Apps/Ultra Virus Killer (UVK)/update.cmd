@@ -11,6 +11,13 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "Ultra Virus Killer (installer)" ^
+    -Url "https://www.carifred.com/uvk/UVKInstaller.exe" ^
+    -SaveAs "UVKInstaller.exe" -Into "x86"
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Ultra Virus Killer (UVK)" ^

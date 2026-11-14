@@ -11,6 +11,15 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "qBittorrent (installer)" ^
+    -Page "https://www.qbittorrent.org/download" ^
+    -Link "https://sourceforge\.net/projects/qbittorrent/files/qbittorrent-win32/qbittorrent-[\d.]+/qbittorrent_[\d.]+_x64_setup\.exe/download" ^
+    -UserAgent "curl/8.0" -Into "x64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0..\qBittorrent Portable" ^
     -Name "qBittorrent Portable" ^

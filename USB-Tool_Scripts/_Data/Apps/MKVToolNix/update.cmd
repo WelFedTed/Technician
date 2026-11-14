@@ -11,6 +11,15 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "MKVToolNix (installer)" ^
+    -Page "https://mkvtoolnix.download/downloads.html" ^
+    -Link "windows/releases/[\d.]+/mkvtoolnix-64-bit-[\d.]+-setup\.exe" -Into "x64" ^
+    -Link86 "windows/releases/[\d.]+/mkvtoolnix-32-bit-[\d.]+-setup\.exe" -Into86 "x86" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "MKVToolNix" ^

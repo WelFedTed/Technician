@@ -1,14 +1,10 @@
 TODO
 --------------------------------------------------------------------------------------
 
-- all scripts should check if x86 or x64 system and run appropriate .exe or give a message saying wrong architecture?
 - Create G:\Eject.cmd to force eject the drive?
 - Create a script to configure a system + install a fresh loadout of apps + runtimes (also enable System Restore etc..)
 	-> Service.cmd?
 - Create a Scripts\Bypass-Windows-11-Upgrade-Requirements.ps1
-- Create a G:\WinDirStat.cmd
-- Create a G:\RKill.cmd
-- Create a G:\Debloat.cmd for Windows 10 + Windows 11?
 - Download different versions of Windows installers for offline DISM repairs?
 - Download old Windows Service Packs (XP, Vista, 7, 8?)
 

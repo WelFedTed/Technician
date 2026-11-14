@@ -11,6 +11,15 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "CPU-Z (installer)" ^
+    -Page "https://www.cpuid.com/softwares/cpu-z.html" ^
+    -Link "cpu-z_([\d.]+)-en\.exe" ^
+    -UrlFormat "https://download.cpuid.com/cpu-z/cpu-z_{0}-en.exe" -Into "x86" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "CPU-Z" ^

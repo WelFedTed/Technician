@@ -11,6 +11,17 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "VLC Media Player (installer)" ^
+    -Page "https://download.videolan.org/pub/videolan/vlc/last/win64/" ^
+    -Link "vlc-([\d.]+)-win64\.exe" ^
+    -UrlFormat "https://download.videolan.org/pub/videolan/vlc/last/win64/vlc-{0}-win64.exe" -Into "x64" ^
+    -UrlFormat86 "https://download.videolan.org/pub/videolan/vlc/last/win32/vlc-{0}-win32.exe" -Into86 "x86" ^
+    -UrlFormatArm "https://download.videolan.org/pub/videolan/vlc/last/winarm64/vlc-{0}-winarm64.exe" -IntoArm "ARM64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "VLC Media Player" ^
