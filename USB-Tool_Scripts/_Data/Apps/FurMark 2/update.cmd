@@ -11,12 +11,23 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "FurMark 2 (installer)" ^
+    -Page "https://geeks3d.com/furmark/downloads/" ^
+    -Link "dl/show/(\d+)[^>]*>v2[^<]*win64[^<]*\((installer|setup)\)" ^
+    -UrlFormat "https://geeks3d.com/dl/get/{0}" -Into "x64" ^
+    -Clean
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0..\FurMark 2 Portable" ^
     -Name "FurMark 2" ^
-    -Manual ^
-    -Page "https://www.geeks3d.com/furmark/downloads/" ^
-    -Note "Geeks3D has no fixed download link. Get the Windows 64-bit zip and put it in the Portable\x64 folder."
+    -Page "https://geeks3d.com/furmark/downloads/" ^
+    -Link "dl/show/(\d+)[^>]*>v2[^<]*win64[^<]*\(zip\)" ^
+    -UrlFormat "https://geeks3d.com/dl/get/{0}" -Into "x64" ^
+    -Link86 "dl/show/(\d+)[^>]*>v2[^<]*win32[^<]*\(zip\)" -Into86 "x86" ^
+    -Extract -Flatten -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause

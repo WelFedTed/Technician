@@ -1,11 +1,11 @@
 @echo off
 setlocal enabledelayedexpansion
 
-title FurMark 1
+title Install FurMark 2
 
-set "application=FurMark.exe"
+set "application=FurMark_*_Setup.exe"
 set "arguments="
-set "folder=Portable"
+set "folder=Installer"
 
 set "elevate=0"
 set "runHere=0"

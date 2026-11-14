@@ -11,13 +11,17 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
-rem Portable
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
-    -Name "FurMark 1" ^
-    -Manual ^
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "FurMark 1 (installer)" ^
     -Page "https://geeks3d.com/furmark/downloads/" ^
-    -Note "Geeks3D has no fixed download link. Get the latest FurMark 1.x zip and put what's in it in the Portable\x86 folder."
+    -Link "dl/show/(\d+)[^>]*>v?1\.\d+\.\d+" ^
+    -UrlFormat "https://geeks3d.com/dl/get/{0}" -Into "x86" ^
+    -Clean
 call :result
+
+rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)
+if exist "%~dp0run.cmd" del "%~dp0run.cmd"
 
 if /i not "%~1" == "/nopause" pause
 exit /b %result%
