@@ -11,7 +11,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Visual Studio Code (portable zip)" ^
     -Url "https://update.code.visualstudio.com/latest/win32-x64-archive/stable" -Into "x64" ^
     -UrlArm "https://update.code.visualstudio.com/latest/win32-arm64-archive/stable" -IntoArm "ARM64" ^
-    -Extract -Clean -Keep "data" ^
+    -Extract -Clean -DataFolder "data" ^
     -VersionFromUrl
 set "result=%errorlevel%"
 

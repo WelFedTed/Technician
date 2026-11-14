@@ -38,6 +38,9 @@
 #   -Flatten                          if the archive has one top folder, use what's inside it
 #   -Clean                            delete the old version's files first (keeps update.cmd, *.url, run.cmd and -Keep)
 #   -Keep "a,b"                       extra file/folder names to keep when cleaning
+#   -DataFolder <name>                create this folder next to the app in each build folder and keep it when
+#                                     cleaning; apps such as VS Code (data) and Sublime Text (Data) only run in
+#                                     portable mode, with their settings on the USB, when it exists
 #   -Referer <url>                    some sites only allow downloads from their own pages
 #   -Password <text>                  password for a protected .zip (extracted with 7-Zip's 7za.exe)
 #   -UserAgent <text>                 send this instead of a browser user agent (eg. "curl" for SourceForge)
@@ -59,7 +62,7 @@ param(
     [switch]$Manual, [string]$Note,
     [string]$SaveAs, [string]$SaveAs86, [string]$SaveAsArm,
     [switch]$Extract, [switch]$Paf, [string]$Into, [string]$Into86, [string]$IntoArm,
-    [switch]$Flatten, [switch]$Clean, [string]$Keep,
+    [switch]$Flatten, [switch]$Clean, [string]$Keep, [string]$DataFolder,
     [string]$Referer, [string]$Password, [string]$UserAgent, [string]$ExtraAsset,
     [string]$Inner, [string]$Inner86, [string]$InnerArm,
     [string]$VersionFrom, [switch]$VersionFromUrl
@@ -248,11 +251,25 @@ function Get-Tool([string]$exeName, [string]$address, [switch]$Zipped) {
 
 function Clear-OldVersion([string]$folder, [string[]]$alsoKeep) {
     if (-not (Test-Path -LiteralPath $folder)) { return }
-    $keepList = $alwaysKeep + @(($Keep -split '[,;]') | ForEach-Object { $_.Trim() } | Where-Object { $_ }) + @($alsoKeep | Where-Object { $_ })
+    $keepList = $alwaysKeep + @(($Keep -split '[,;]') | ForEach-Object { $_.Trim() } | Where-Object { $_ }) + @($alsoKeep | Where-Object { $_ }) + @($DataFolder | Where-Object { $_ })
     Get-ChildItem -LiteralPath $folder -Force | Where-Object {
         $item = $_
         -not ($keepList | Where-Object { $item.Name -like $_ })
     } | Remove-Item -Recurse -Force
+}
+
+# -DataFolder: make the folder that puts the app in portable mode, in each build folder that has the app
+# (also on installs that are already up to date, so existing copies on the USB get it too)
+function Add-DataFolder([object[]]$jobs) {
+    if (-not $DataFolder) { return }
+    foreach ($job in $jobs) {
+        $folder = if ($job.Into) { Join-Path $AppDir $job.Into } else { $AppDir }
+        if (-not (Test-Path -LiteralPath $folder)) { continue }
+        $data = Join-Path $folder $DataFolder
+        if (Test-Path -LiteralPath $data) { continue }
+        New-Item -ItemType Directory -Path $data | Out-Null
+        Say "Created $(if ($job.Into) { "$($job.Into)\" })$DataFolder (portable mode: settings are kept on the USB)"
+    }
 }
 
 # 7-Zip's full command-line tool (handles password-protected zips); comes in "7-Zip Extra", which is a .7z,
@@ -651,6 +668,7 @@ try {
     if (-not $Url -and $oldRecord) {
         $unchanged = @($jobs | Where-Object { $oldRecord.Contains("link=$($_.Link)") }).Count -eq $jobs.Count
         if ($unchanged -and (Test-AppFiles $jobs)) {
+            Add-DataFolder $jobs
             Repair-OldVersionName $versionFile
             Say "Already up to date"
             exit 0
@@ -662,6 +680,7 @@ try {
     if ($Url -and $oldRecord) {
         $unchanged = @($jobs | Where-Object { $_.Stamp -and $oldRecord.Contains("stamp=$($_.Stamp)") }).Count -eq $jobs.Count
         if ($unchanged -and (Test-AppFiles $jobs)) {
+            Add-DataFolder $jobs
             Repair-OldVersionName $versionFile
             Say "Already up to date"
             exit 0
@@ -695,6 +714,7 @@ try {
     }) -join "`r`n"
     $installed = $jobs | Where-Object { $Extract -or $Paf -or (Test-Path -LiteralPath $_.Target) }
     if ($versionFile -and $oldRecord -and @($installed).Count -eq $jobs.Count -and $oldKey -eq $record -and (Test-AppFiles $jobs -Quiet)) {
+        Add-DataFolder $jobs
         Repair-OldVersionName $versionFile
         Say "Already up to date"
         exit 0
@@ -740,6 +760,7 @@ try {
             Move-Item -LiteralPath $job.Temp -Destination $job.Target -Force
         }
     }
+    Add-DataFolder $jobs
 
     Say 'Updating version file...'
     Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File | Remove-Item -Force
