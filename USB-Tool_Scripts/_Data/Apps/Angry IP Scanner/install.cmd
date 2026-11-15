@@ -175,7 +175,7 @@ rem Search Helpers
 rem ----------------------------------------------------------------------------------------------------
 	rem names of each build, as different downloads name them
 	:findArm64
-	call :findIn "ARM64\%A%" "ARM64\%N%ARM64%E%" "ARM64\%N%_arm64%E%" "x86_x64_ARM64\%N%_arm64%E%" "x86_x64_ARM64\%N%ARM64%E%" "x86_x64_ARM64\%N%64a%E%" "x86_x64_ARM64\ARM64\%A%"
+	call :findIn "ARM64\%A%" "ARM64\%N%ARM64%E%" "ARM64\%N%_arm64%E%" "x86_x64_ARM64\%N%_arm64%E%" "x86_x64_ARM64\%N%ARM64%E%" "x86_x64_ARM64\%N%64a%E%" "x86_x64_ARM64\%N%A64%E%" "x86_x64_ARM64\ARM64\%A%"
 	exit /b
 
 	:find64

@@ -20,8 +20,9 @@
 #                                     index page fills {0} in -Page (and -Page86 / -PageArm)
 #   -GitHub <owner/repo> -Asset <regex>   an asset of the latest GitHub release
 #       [-PreRelease]                 also use pre-releases (for apps whose current version is only published as
-#                                     one, eg. DevToys 2): the newest release, whether or not it's marked as a
-#                                     pre-release
+#                                     one, eg. DevToys 2): the newest release that has the asset, whether or not
+#                                     it's marked as a pre-release (also for repos that publish other platforms'
+#                                     releases in between, eg. Mole's -windows releases)
 #   -Manual [-Page <url>] [-Note <text>]  can't be downloaded automatically; prints where to get it
 # Optional 32-bit and ARM64 downloads (the same options with 86 or Arm on the end):
 #   -Url86 / -Link86 / -Asset86 from the same source,
@@ -160,16 +161,70 @@ function Find-PageLink([string]$pattern, [string]$pageUrl = $Page, [string]$form
     return ([Uri]::new([Uri]$pageUrl, $best)).AbsoluteUri
 }
 
+# GitHub releases. The API allows only 60 requests an hour without signing in, which a full Update-Tool run
+# goes past, so when it refuses, the same details are read from GitHub's release web pages instead.
+function Get-GitHubReleaseFromPage([string]$repo, [string]$tag) {
+    $html = Get-Text "https://github.com/$repo/releases/expanded_assets/$tag"
+    $assets = @([regex]::Matches($html, 'href="(/[^"/]+/[^"/]+/releases/download/[^"]+)"') | ForEach-Object {
+        $url = 'https://github.com' + $_.Groups[1].Value
+        [pscustomobject]@{ name = [Uri]::UnescapeDataString(($url -split '/')[-1]); browser_download_url = $url }
+    } | Group-Object name | ForEach-Object { $_.Group[0] })
+    $date = [regex]::Match($html, 'datetime="([^"]+)"')
+    return [pscustomobject]@{
+        tag_name = [Uri]::UnescapeDataString($tag); draft = $false; assets = $assets
+        published_at = $(if ($date.Success) { $date.Groups[1].Value } else { $null })
+    }
+}
+
+function Get-GitHubRelease([string]$repo) {
+    try { return (Get-Text "https://api.github.com/repos/$repo/releases/latest" | ConvertFrom-Json) }
+    catch {
+        Say "GitHub's API didn't answer ($($_.Exception.Message)), so reading the release page instead..."
+        # /releases/latest redirects to /releases/tag/<tag>
+        $final = & $curl -sSIL --fail --retry 2 --connect-timeout 20 -A $userAgent -o NUL -w '%{url_effective}' "https://github.com/$repo/releases/latest"
+        if ($LASTEXITCODE -ne 0 -or "$final" -notmatch '/releases/tag/(.+)$') { throw "Couldn't find the latest release of $repo" }
+        return Get-GitHubReleaseFromPage $repo $Matches[1]
+    }
+}
+
+# the newest releases, newest first, without unpublished drafts
+function Get-GitHubReleases([string]$repo) {
+    try {
+        # (Windows PowerShell passes a JSON array on as one object, so it's unrolled)
+        $all = @(Get-Text "https://api.github.com/repos/$repo/releases?per_page=30" | ConvertFrom-Json)
+        return @($all | ForEach-Object { $_ } | Where-Object { -not $_.draft })
+    }
+    catch {
+        Say "GitHub's API didn't answer ($($_.Exception.Message)), so reading the releases page instead..."
+        $html = Get-Text "https://github.com/$repo/releases"
+        $tags = @([regex]::Matches($html, 'href="/[^"/]+/[^"/]+/releases/tag/([^"?#]+)"') | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique)
+        # (each release's files are listed on a page of their own, so they're read when needed)
+        return @($tags | Select-Object -First 15 | ForEach-Object { [pscustomobject]@{ tag_name = $_; draft = $false; assets = $null; fromPage = $true } })
+    }
+}
+
 $script:release = $null
 function Find-GitHubAsset([string]$pattern) {
-    if (-not $script:release) {
-        $script:release = if ($PreRelease) {
-            # releases come newest first; skip unpublished drafts (Windows PowerShell passes a JSON array on as one
-            # object, so it's unrolled first)
-            $releases = @(Get-Text "https://api.github.com/repos/$GitHub/releases?per_page=10" | ConvertFrom-Json)
-            $releases | ForEach-Object { $_ } | Where-Object { -not $_.draft } | Select-Object -First 1
+    if ($PreRelease) {
+        # releases come newest first. The newest release with a matching asset wins, so repos that also
+        # publish releases for other platforms in between (eg. Mole's Mac and Linux ones) work too.
+        if (-not $script:releases) {
+            $script:releases = @(Get-GitHubReleases $GitHub)
+            if (-not $script:releases) { throw "No releases found for $GitHub" }
         }
-        else { Get-Text "https://api.github.com/repos/$GitHub/releases/latest" | ConvertFrom-Json }
+        for ($i = 0; $i -lt $script:releases.Count; $i++) {
+            if ($script:releases[$i].fromPage) { $script:releases[$i] = Get-GitHubReleaseFromPage $GitHub $script:releases[$i].tag_name }
+            $candidate = $script:releases[$i]
+            $match = $candidate.assets | Where-Object { $_.name -match $pattern } | Select-Object -First 1
+            if ($match) {
+                $script:release = $candidate
+                return $match.browser_download_url
+            }
+        }
+        throw "No asset matching '$pattern' in the last $($script:releases.Count) $GitHub releases"
+    }
+    if (-not $script:release) {
+        $script:release = Get-GitHubRelease $GitHub
         if (-not $script:release) { throw "No releases found for $GitHub" }
     }
     $match = $script:release.assets | Where-Object { $_.name -match $pattern } | Select-Object -First 1
@@ -313,7 +368,7 @@ function Get-SevenZipFull {
     if ((Test-Path -LiteralPath $exe) -and (Test-Path -LiteralPath (Join-Path $folder '7z.dll'))) { return $exe }
     $sevenZip = Get-Tool '7zr.exe' 'https://www.7-zip.org/a/7zr.exe'
     Say "Downloading 7-Zip (one-off, cached in $folder)..."
-    $release = Get-Text 'https://api.github.com/repos/ip7z/7zip/releases/latest' | ConvertFrom-Json
+    $release = Get-GitHubRelease 'ip7z/7zip'
     # the 32-bit build runs everywhere
     $installer = $release.assets | Where-Object { $_.name -match '^7z\d+\.exe$' } | Select-Object -First 1
     if (-not $installer) { throw "Couldn't find the 7-Zip installer in the latest 7-Zip release" }
@@ -355,7 +410,7 @@ function Get-SevenZipA {
     if (Test-Path -LiteralPath $exe) { return $exe }
     $sevenZip = Get-Tool '7zr.exe' 'https://www.7-zip.org/a/7zr.exe'
     Say "Downloading 7za.exe (one-off, cached in $toolsDir)..."
-    $release = Get-Text 'https://api.github.com/repos/ip7z/7zip/releases/latest' | ConvertFrom-Json
+    $release = Get-GitHubRelease 'ip7z/7zip'
     $extra = $release.assets | Where-Object { $_.name -match '^7z\d+-extra\.7z$' } | Select-Object -First 1
     if (-not $extra) { throw "Couldn't find 7-Zip Extra in the latest 7-Zip release" }
     $archive = Join-Path $toolsDir '7z-extra.7z'
@@ -396,7 +451,13 @@ function Expand-ToStaging([string]$archive, [string]$kind, [string]$staging, [st
     elseif ($kind -eq '7z') {
         $sevenZip = Get-Tool '7zr.exe' 'https://www.7-zip.org/a/7zr.exe'
         & $sevenZip x $archive "-o$staging" -y | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw "Couldn't extract the download (7zr exit code $LASTEXITCODE)" }
+        if ($LASTEXITCODE -ne 0) {
+            # 7zr.exe only knows the basic 7z methods; the full 7-Zip unpacks the rest (eg. Bulk Crap Uninstaller's)
+            if (Test-Path -LiteralPath $staging) { Remove-Item -LiteralPath $staging -Recurse -Force }
+            $sevenZip = Get-SevenZipFull
+            & $sevenZip x $archive "-o$staging" -y | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw "Couldn't extract the download (7z exit code $LASTEXITCODE)" }
+        }
     }
     else {
         [IO.Compression.ZipFile]::ExtractToDirectory($archive, $staging)
@@ -467,7 +528,14 @@ function Get-Version([object[]]$jobs) {
             if ($v -and $v.ToString() -ne '0.0.0.0') { return $v.ToString() }
         }
     }
-    if ($script:release) { return ($script:release.tag_name -replace '^v', '') }
+    if ($script:release) {
+        # the version number in the release's tag (tags can be eg. "v1.2", "release/v2.9.3" or "V1.45.0-windows")
+        $m = [regex]::Match($script:release.tag_name, '\d+(?:\.\d+)+')
+        if ($m.Success) { return $m.Value }
+        $tag = $script:release.tag_name -replace '^v', ''
+        foreach ($bad in [IO.Path]::GetInvalidFileNameChars()) { $tag = $tag.Replace([string]$bad, '-') }
+        if ($tag) { return $tag }
+    }
     # PortableApps apps say their version in appinfo.ini (the installer itself is deleted)
     if ($Paf -and $jobs[0].PafVersion) { return $jobs[0].PafVersion }
     # some installers carry their own (installer) version, not the app's, so read the link instead
@@ -727,6 +795,8 @@ try {
         $releases = @([regex]::Matches($indexHtml, $PageIndexLink, 'IgnoreCase') | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique)
         if (-not $releases) { throw "No release matching '$PageIndexLink' on $PageIndex (the page may have changed)" }
         $release = Select-Highest $releases
+        # (also the version to use when the download itself doesn't say, eg. Winamp's installer)
+        $script:indexRelease = $release
         $Page = $Page -f $release
         if ($Page86) { $Page86 = $Page86 -f $release }
         if ($PageArm) { $PageArm = $PageArm -f $release }
@@ -894,6 +964,8 @@ try {
     Say 'Updating version file...'
     Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File | Remove-Item -Force
     $version = Get-Version $jobs
+    # no version in the download: the release found with -PageIndex, if any, or just the date
+    if (-not "$version".Trim() -or $version -eq 'unknown') { $version = if ($script:indexRelease) { $script:indexRelease } else { 'unknown' } }
     $buildDate = Get-BuildDate $jobs
     # without a version number the file is just dated, eg. v2026-11-11.version
     $versionName = if ($version -eq 'unknown') { 'v{0}.version' -f $buildDate.ToString('yyyy-MM-dd') }
