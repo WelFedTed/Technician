@@ -7,7 +7,7 @@ set "application=WhyDidIReboot.exe"
 set "arguments="
 set "folder=Portable"
 
-set "elevate=0"
+set "elevate=1"
 set "runHere=0"
 set "openAfter="
 set "openPrompt=0"
