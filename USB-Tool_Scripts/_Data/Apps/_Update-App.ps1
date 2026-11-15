@@ -491,7 +491,8 @@ function Test-Download([string]$path, [string]$address, [switch]$AllowPlain) {
 # Applying the update
 # ---------------------------------------------------------------------------------------------
 
-function Get-Tool([string]$exeName, [string]$address, [switch]$Zipped) {
+# (-InZip: the exe's name in the zip, when it's cached under another name)
+function Get-Tool([string]$exeName, [string]$address, [switch]$Zipped, [string]$InZip = $exeName) {
     $exe = Join-Path $toolsDir $exeName
     if (Test-Path -LiteralPath $exe) { return $exe }
     New-Item -ItemType Directory -Path $toolsDir -Force | Out-Null
@@ -502,8 +503,8 @@ function Get-Tool([string]$exeName, [string]$address, [switch]$Zipped) {
         if ($LASTEXITCODE -ne 0) { throw "Couldn't download $exeName" }
         $unzipped = Join-Path $toolsDir ([Guid]::NewGuid().ToString('N'))
         [IO.Compression.ZipFile]::ExtractToDirectory($zip, $unzipped)
-        $found = Get-ChildItem -LiteralPath $unzipped -Recurse -Filter $exeName | Select-Object -First 1
-        if (-not $found) { throw "$exeName wasn't in the download" }
+        $found = Get-ChildItem -LiteralPath $unzipped -Recurse -Filter $InZip | Select-Object -First 1
+        if (-not $found) { throw "$InZip wasn't in the download" }
         Move-Item -LiteralPath $found.FullName -Destination $exe -Force
         Remove-Item -LiteralPath $zip, $unzipped -Recurse -Force
     }
@@ -817,7 +818,10 @@ function Write-Checksums {
 
 function Write-Parity {
     Get-ChildItem -LiteralPath $AppDir -Filter '*.par2' -File | Remove-Item -Force
-    $par2 = Get-Tool 'par2.exe' 'https://github.com/Parchive/par2cmdline/releases/download/v1.0.0/par2cmdline-1.0.0-win-x64.zip' -Zipped
+    # par2cmdline-turbo: par2cmdline with much faster maths (about 11x here), making the same parity data
+    # (only the packet naming the program that made it differs), which any PAR2 tool can verify and repair with
+    # (cached as par2-turbo.exe, so PCs that cached the original par2cmdline's par2.exe get this one)
+    $par2 = Get-Tool 'par2-turbo.exe' 'https://github.com/animetosho/par2cmdline-turbo/releases/download/v1.5.0/par2cmdline-turbo-1.5.0-win-x64.zip' -Zipped -InZip 'par2.exe'
     Push-Location -LiteralPath $AppDir
     try {
         & $par2 c -q -b5000 -r5 -n1 -R parity.par2 * | Out-Null
