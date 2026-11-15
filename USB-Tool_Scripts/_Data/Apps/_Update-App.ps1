@@ -667,8 +667,9 @@ function Get-FileKind([string]$path) {
 
 function Test-Download([string]$path, [string]$address, [switch]$AllowPlain) {
     $size = (Get-Item -LiteralPath $path).Length
-    if ($size -lt 10KB) { throw "Download is only $size bytes, probably an error page: $address" }
     $kind = Get-FileKind $path
+    # (a small file is likely an error page, unless it's plainly a zip, exe or msi, eg. a browser extension's .xpi)
+    if ($size -lt 10KB -and $kind -notin @('zip', '7z', 'exe', 'msi')) { throw "Download is only $size bytes, probably an error page: $address" }
     if ($kind -eq 'html') { throw "Download is a web page, not the app (the link may have changed): $address" }
     # (-Extra files may be plain files next to the unzipped app, eg. 7zr.exe next to 7-Zip Extra)
     if ($Extract -and -not $AllowPlain -and $kind -notin @('zip', '7z')) { throw "Expected a .zip or .7z but got a $kind file: $address" }
