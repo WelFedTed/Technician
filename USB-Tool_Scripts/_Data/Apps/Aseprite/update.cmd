@@ -16,7 +16,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Aseprite" ^
     -Manual ^
     -Page "https://github.com/aseprite/aseprite/blob/main/INSTALL.md" ^
-    -Note "Aseprite is sold ready-built (aseprite.org, Steam), or can be built from source with Visual Studio, CMake, Ninja and Skia (see the page). Put the built aseprite.exe and its data folder in Portable\x64."
+    -Note "Aseprite is sold ready-built (aseprite.org, Steam). To build it from source instead, run build.cmd in this folder on a PC with Visual Studio 2022 and its C++ tools; it puts the build in Portable\x64."
 call :result
 
 if /i not "%~1" == "/nopause" pause
