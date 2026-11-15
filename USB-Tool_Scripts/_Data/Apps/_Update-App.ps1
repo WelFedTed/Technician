@@ -1215,8 +1215,12 @@ function Write-Report([string]$status, [hashtable]$more = @{}) {
         $before = Get-VersionFromName $script:oldVersionName
         # where to get it by hand: its page, its GitHub releases, or the download itself
         $source = if ($Page) { $Page } elseif ($GitHub) { "https://github.com/$GitHub/releases/latest" } elseif ($Winget) { "https://github.com/microsoft/winget-pkgs/tree/master/$(Get-WingetPath $Winget)" } elseif ($Site) { $Site } elseif ($Url) { $Url } else { '' }
+        # the app's folder from _Data\Apps (eg. "Nirsoft\ProduKey" for an app in a group folder), as Update-Tool names it
+        $appsRoot = [IO.Path]::GetFullPath((Split-Path -Parent $PSCommandPath)).TrimEnd('\') + '\'
+        $fullFolder = [IO.Path]::GetFullPath($appFolder).TrimEnd('\')
+        $appName = if ($fullFolder.StartsWith($appsRoot, [StringComparison]::OrdinalIgnoreCase)) { $fullFolder.Substring($appsRoot.Length) } else { Split-Path -Leaf $fullFolder }
         $record = [ordered]@{
-            app = Split-Path -Leaf $appFolder; appFolder = $appFolder; part = $Name; type = $type; status = $status
+            app = $appName; appFolder = $appFolder; part = $Name; type = $type; status = $status
             version = $now.Version; built = $now.Built; oldVersion = $before.Version; oldBuilt = $before.Built
             seconds = [Math]::Round(((Get-Date) - $script:startTime).TotalSeconds, 1); downloaded = $script:downloadedBytes
             source = $source; note = $Note; action = $Action; actionText = $ActionText; message = ''; blocked = @()

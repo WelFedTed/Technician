@@ -9,6 +9,9 @@ rem ----------------------------------------------------------------------------
 	rem   1. Scripts: downloads the latest USB-Tool_Scripts folder from GitHub and copies it over the drive
 	rem   2. Apps: tries every _Data\Apps\<App> folder, running its update.cmd from inside that folder
 	rem      (folders without an update.cmd are skipped; folders starting with _ are notes, not apps)
+	rem      A folder without an update.cmd can be a group of apps, each in its own folder with its own update.cmd
+	rem      (eg. _Data\Apps\Nirsoft\ProduKey, _Data\Apps\Microsoft\Office\2024); these are found too, and shown
+	rem      with spaces for the slashes (eg. "Nirsoft ProduKey")
 	rem      Several apps are updated at once (parallel, below), by _Data\Apps\_Update-Apps.ps1: each app's
 	rem      output goes to a log in the run's folder, and a line is shown as each finishes
 	rem      (the report includes the log of any app that needs you)
@@ -167,6 +170,14 @@ rem ----------------------------------------------------------------------------
 	call :moveFolder "_Data\Apps\Microsoft Activiation Scripts (MAS)" "_Data\Apps\Microsoft Activation Scripts (MAS)"
 	call :moveFolder "_Data\Apps\7zip" "_Data\Apps\7-Zip"
 	call :moveFolder "_Data\Apps\7zip CLI" "_Data\Apps\7-Zip CLI"
+	rem the NirSoft tools, moved from "_Data\Apps\Nirsoft <tool>" into the Nirsoft group folder (eg.
+	rem _Data\Apps\Nirsoft\ProduKey); only those the repo has there, so a tool added by hand keeps its own update.cmd
+	for /d %%F in ("%root%_Data\Apps\Nirsoft *") do (
+		set "tool=%%~nxF"
+		set "tool=!tool:~8!"
+		if exist "%root%_Data\Apps\Nirsoft\!tool!\update.cmd" call :moveFolder "_Data\Apps\%%~nxF" "_Data\Apps\Nirsoft\!tool!"
+	)
+	call :moveFolder "_Data\Apps\NirLauncher" "_Data\Apps\Nirsoft\NirLauncher"
 	rem folders whose name only changed case: Windows sees them as the same folder, so just rename
 	call :renameCase "_Data\Apps" "RKill"
 

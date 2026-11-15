@@ -35,6 +35,20 @@ $ErrorActionPreference = 'Stop'
 $Root = [IO.Path]::GetFullPath($Root.TrimEnd('.'))
 if (-not $Root.EndsWith('\')) { $Root += '\' }
 $appsDir = Join-Path $Root '_Data\Apps'
+# apps are named by their folder from _Data\Apps (eg. "Nirsoft\ProduKey" for an app in a group folder), and shown
+# with spaces instead (eg. "Nirsoft ProduKey"), as run.cmd lists them
+function Show([string]$name) { $name -replace '\\', ' ' }
+# the app folders, in Update-Tool's order (as _Update-Apps.ps1 finds them: a folder with an update.cmd is an app,
+# one without is a group of apps, unless it's in _Data\Apps itself with none inside it; download folders aren't
+# looked in)
+function Find-AppNames([string]$folder, [string]$prefix = '', [int]$depth = 1) {
+    foreach ($dir in Get-ChildItem -LiteralPath $folder -Directory | Where-Object { $_.Name -notlike '_*' -and ($depth -eq 1 -or $_.Name -notin @('Installer', 'Portable', 'CLI')) } | Sort-Object Name) {
+        $name = $prefix + $dir.Name
+        if (Test-Path -LiteralPath (Join-Path $dir.FullName 'update.cmd')) { $name; continue }
+        $inside = if ($depth -lt 4) { @(Find-AppNames $dir.FullName "$name\" ($depth + 1)) } else { @() }
+        if ($inside) { $inside } elseif ($depth -eq 1) { $name }
+    }
+}
 
 function Get-Free([string]$path) {
     try { return ([IO.DriveInfo]([IO.Path]::GetPathRoot($path))).AvailableFreeSpace } catch { return $null }
@@ -168,7 +182,7 @@ $notTried = @()
 if ($Cancelled) {
     # (stopped before it got to the apps: the app folders, as Update-Tool lists them)
     if (-not $plan -and $DoApps -eq '1' -and (Test-Path -LiteralPath $appsDir)) {
-        $plan = @(Get-ChildItem -LiteralPath $appsDir -Directory | Where-Object { $_.Name -notlike '_*' } | ForEach-Object { $_.Name })
+        $plan = @(Find-AppNames $appsDir)
     }
     # the apps being updated (several at once; an older Update-Tool.cmd did one at a time, as step=app*<n>*<name>)
     $wereRunning = if ($stepKind -eq 'apps') { $startedApps } elseif ($stepKind -eq 'app' -and $stepApp) { @($stepApp) } else { @() }
@@ -204,12 +218,13 @@ $stoppedAt = ''
 if ($Cancelled) {
     $stoppedAt = switch ($stepKind) {
         'scripts' { 'while updating the scripts from GitHub' }
-        'app' { "while updating $stepApp (app $stepNumber of $([Math]::Max($plan.Count, [int]$stepNumber)))" }
+        'app' { "while updating $(Show $stepApp) (app $stepNumber of $([Math]::Max($plan.Count, [int]$stepNumber)))" }
         'apps' {
             $finishedCount = @($apps | Where-Object { $_.Status -notin @('cancelled', 'notrun') }).Count
-            $names = if ($interrupted.Count -gt 3) { ($interrupted[0..2] -join ', ') + " and $($interrupted.Count - 3) more" }
-                elseif ($interrupted.Count -gt 1) { ($interrupted[0..($interrupted.Count - 2)] -join ', ') + " and $($interrupted[-1])" }
-                else { "$interrupted" }
+            $shown = @($interrupted | ForEach-Object { Show $_ })
+            $names = if ($shown.Count -gt 3) { ($shown[0..2] -join ', ') + " and $($shown.Count - 3) more" }
+                elseif ($shown.Count -gt 1) { ($shown[0..($shown.Count - 2)] -join ', ') + " and $($shown[-1])" }
+                else { "$shown" }
             "while updating the apps ($finishedCount of $($plan.Count) done$(if ($names) { "; $names $(if ($interrupted.Count -eq 1) { 'was' } else { 'were' }) still updating" }))"
         }
         'finish' { 'after trying every app, while finishing up' }
@@ -275,7 +290,7 @@ if ($Cancelled) {
     [void]$attention.Append("<article class=`"card stop`"><header><h3>Finish the update</h3><span class=`"badge cancelled`">Cancelled</span></header>")
     [void]$attention.Append("<p>The update was stopped $(Enc $stoppedAt), at $(Enc $finished.ToString('h:mm tt')).</p>")
     if ($notTried) {
-        [void]$attention.Append("<p>$(if ($notTried.Count -eq 1) { "1 app wasn't tried, so it's as it was" } else { "$($notTried.Count) apps weren't tried, so they're as they were" }): <span class=`"files`">$(($notTried | ForEach-Object { "<code>$(Enc $_)</code>" }) -join ' ')</span></p>")
+        [void]$attention.Append("<p>$(if ($notTried.Count -eq 1) { "1 app wasn't tried, so it's as it was" } else { "$($notTried.Count) apps weren't tried, so they're as they were" }): <span class=`"files`">$(($notTried | ForEach-Object { "<code>$(Enc (Show $_))</code>" }) -join ' ')</span></p>")
     }
     if ($Scripts -eq 'cancelled') { [void]$attention.Append('<p>The scripts were stopped part-way through updating, so the drive may have a mix of old and new scripts.</p>') }
     # run it again: just the apps once the scripts are done (/apps), or just the scripts for a /scripts run
@@ -289,7 +304,7 @@ foreach ($app in $apps | Where-Object { $_.Status -in @('failed', 'manual', 'blo
     $folderUrl = FileUrl $app.Folder
     $partsNeeding = @($app.Parts | Where-Object { $_.status -in @('failed', 'manual', 'blocked', 'cancelled') })
     $shownActions = @{}
-    [void]$attention.Append("<article class=`"card $($app.Status)`"><header><h3>$(Enc $app.Name)</h3>$(Badge $app.Status)</header>")
+    [void]$attention.Append("<article class=`"card $($app.Status)`"><header><h3>$(Enc (Show $app.Name))</h3>$(Badge $app.Status)</header>")
     if (-not $partsNeeding -and $app.Status -eq 'cancelled') {
         # stopped before the helper started on a part, or between parts
         $done = @($app.Parts | Where-Object { $_.status -in @('updated', 'current') } | ForEach-Object { $_.part })
@@ -367,17 +382,17 @@ foreach ($app in $apps | Where-Object { $_.Status -in @('failed', 'manual', 'blo
 $updatedRows = New-Object Text.StringBuilder
 foreach ($part in $parts | Where-Object { $_.status -in @('updated', 'blocked') }) {
     $from = if ($part.oldVersion -or $part.oldBuilt) { Version $part.oldVersion $part.oldBuilt } else { '<span class="dim">new</span>' }
-    [void]$updatedRows.Append("<tr><td>$(Enc $part.app)</td><td>$(Enc $part.part)</td><td>$from</td><td>$(Version $part.version $part.built)</td><td class=`"num`">$(Size $part.downloaded)</td><td class=`"num`">$(Span ([TimeSpan]::FromSeconds([double]$part.seconds)))</td></tr>")
+    [void]$updatedRows.Append("<tr><td>$(Enc (Show $part.app))</td><td>$(Enc $part.part)</td><td>$from</td><td>$(Version $part.version $part.built)</td><td class=`"num`">$(Size $part.downloaded)</td><td class=`"num`">$(Span ([TimeSpan]::FromSeconds([double]$part.seconds)))</td></tr>")
 }
 
 $allRows = New-Object Text.StringBuilder
 foreach ($app in $apps) {
     if (-not $app.Parts) {
-        [void]$allRows.Append("<tr data-status=`"$($app.Status)`"><td>$(Enc $app.Name)</td><td class=`"dim`">&ndash;</td><td>$(Badge $app.Status)</td><td class=`"dim`">&ndash;</td><td class=`"num dim`">&ndash;</td></tr>")
+        [void]$allRows.Append("<tr data-status=`"$($app.Status)`"><td>$(Enc (Show $app.Name))</td><td class=`"dim`">&ndash;</td><td>$(Badge $app.Status)</td><td class=`"dim`">&ndash;</td><td class=`"num dim`">&ndash;</td></tr>")
         continue
     }
     foreach ($part in $app.Parts) {
-        [void]$allRows.Append("<tr data-status=`"$($part.status)`"><td>$(Enc $app.Name)</td><td>$(Enc $(if ($part.type) { $part.type } else { $part.part }))</td><td>$(Badge $part.status)</td><td>$(Version $part.version $part.built)</td><td class=`"num`">$(Span ([TimeSpan]::FromSeconds([double]$part.seconds)))</td></tr>")
+        [void]$allRows.Append("<tr data-status=`"$($part.status)`"><td>$(Enc (Show $app.Name))</td><td>$(Enc $(if ($part.type) { $part.type } else { $part.part }))</td><td>$(Badge $part.status)</td><td>$(Version $part.version $part.built)</td><td class=`"num`">$(Span ([TimeSpan]::FromSeconds([double]$part.seconds)))</td></tr>")
     }
 }
 

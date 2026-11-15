@@ -28,14 +28,41 @@ $encoding = try { [Console]::OutputEncoding } catch { [Text.Encoding]::Default }
 if ($encoding.CodePage -eq 65001) { $encoding = New-Object Text.UTF8Encoding $false }
 function Add-Line([string]$name, [string]$text) { [IO.File]::AppendAllText((Join-Path $RunDir $name), "$text`r`n", $encoding) }
 
-# the apps, in the order Update-Tool has always used
-$apps = @(Get-ChildItem -LiteralPath $AppsDir -Directory | Where-Object { $_.Name -notlike '_*' } | ForEach-Object -Begin { $n = 0 } -Process {
+# the app folders, by name (folders starting with _ are notes, not apps). A folder with an update.cmd is an app;
+# one without is a group of apps (eg. Nirsoft\ProduKey, Microsoft\Office\2024), so the apps inside it are found
+# too, named by their path from here (up to 4 folders down). A folder here without an update.cmd that has no
+# apps inside it is listed as is (skipped, as it can't be updated). Download folders (Installer, Portable, CLI)
+# are never looked in, as a downloaded app can have an update.cmd of its own (eg. WSUS Offline's client\Update.cmd).
+function Find-Apps([string]$folder, [string]$prefix = '', [int]$depth = 1) {
+    foreach ($dir in Get-ChildItem -LiteralPath $folder -Directory | Where-Object { $_.Name -notlike '_*' -and ($depth -eq 1 -or $_.Name -notin @('Installer', 'Portable', 'CLI')) } | Sort-Object Name) {
+        $name = $prefix + $dir.Name
+        if (Test-Path -LiteralPath (Join-Path $dir.FullName 'update.cmd')) { [pscustomobject]@{ Name = $name; Folder = $dir.FullName }; continue }
+        $inside = if ($depth -lt 4) { @(Find-Apps $dir.FullName "$name\" ($depth + 1)) } else { @() }
+        if ($inside) { $inside } elseif ($depth -eq 1) { [pscustomobject]@{ Name = $name; Folder = $dir.FullName } }
+    }
+}
+$apps = @(Find-Apps $AppsDir | ForEach-Object -Begin { $n = 0 } -Process {
     $n++
-    $script = Join-Path $_.FullName 'update.cmd'
+    $script = Join-Path $_.Folder 'update.cmd'
     $hasScript = Test-Path -LiteralPath $script
-    # other app folders its update.cmd uses (eg. the folder it moves an older copy from)
-    $uses = if ($hasScript) { @([regex]::Matches([IO.File]::ReadAllText($script), '%~dp0\.\.\\([^"\\%]+)') | ForEach-Object { $_.Groups[1].Value.Trim() }) } else { @() }
-    [pscustomobject]@{ Index = $n; Name = $_.Name; Folder = $_.FullName; HasScript = $hasScript; Uses = $uses }
+    # other app folders its update.cmd uses (eg. the folder it moves an older copy from, "%~dp0..\7-Zip Portable"),
+    # named from _Data\Apps like the apps are (the shared helper, a folder or more up, isn't one)
+    $parent = Split-Path -Parent $_.Name
+    $uses = if ($hasScript) {
+        @([regex]::Matches([IO.File]::ReadAllText($script), '%~dp0\.\.\\([^"%]+)') | ForEach-Object {
+            $path = $_.Groups[1].Value.Trim().TrimEnd('\')
+            $up = $parent
+            while ($path -match '^\.\.\\(.*)$') { $path = $Matches[1]; $up = if ($up) { Split-Path -Parent $up } else { '' } }
+            # (each folder along the path, as it may go on into the app's own folders, eg. "7-Zip\Portable")
+            $sofar = $up
+            foreach ($part in $path -split '\\' | Where-Object { $_ }) {
+                if ($part -like '_*') { break }
+                $sofar = if ($sofar) { "$sofar\$part" } else { $part }
+                $sofar
+            }
+        })
+    } else { @() }
+    [pscustomobject]@{ Index = $n; Name = $_.Name; Show = $_.Name -replace '\\', ' '; Folder = $_.Folder; HasScript = $hasScript; Uses = $uses }
 })
 $total = $apps.Count
 foreach ($app in $apps) { Add-Line 'plan.txt' $app.Name }
@@ -76,10 +103,10 @@ function Read-NewResults {
     }
 }
 
-$width = [Math]::Min(42, ($apps | ForEach-Object { $_.Name.Length } | Measure-Object -Maximum).Maximum)
+$width = [Math]::Min(42, ($apps | ForEach-Object { $_.Show.Length } | Measure-Object -Maximum).Maximum)
 $done = 0
 function Show-Line([object]$app, [string]$text, [string]$colour, [double]$seconds = -1) {
-    $name = if ($app.Name.Length -gt $width) { $app.Name.Substring(0, $width - 1) + '~' } else { $app.Name }
+    $name = if ($app.Show.Length -gt $width) { $app.Show.Substring(0, $width - 1) + '~' } else { $app.Show }
     $time = if ($seconds -ge 0) { ' ({0:N0} s)' -f $seconds } else { '' }
     Write-Host ("[{0,3}/{1}] {2} " -f $script:done, $total, $name.PadRight($width)) -NoNewline
     Write-Host "$text$time" -ForegroundColor $colour
@@ -114,7 +141,7 @@ function Complete-App([object]$run) {
 
 function Start-App([object]$app) {
     # (characters cmd would read as variables or escapes are left out of the log's name)
-    $logName = '{0:D3} {1}.log' -f $app.Index, ($app.Name -replace '[%!^&]', '_')
+    $logName = '{0:D3} {1}.log' -f $app.Index, ($app.Show -replace '[%!^&]', '_')
     $log = Join-Path $logDir $logName
     $psi = New-Object Diagnostics.ProcessStartInfo
     $psi.FileName = Join-Path $env:SystemRoot 'System32\cmd.exe'

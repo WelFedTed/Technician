@@ -8,6 +8,8 @@ rem ----------------------------------------------------------------------------
 	rem Lists every app in _Data\Apps to search with fzf: type part of a name (letters in order are enough, eg.
 	rem "wnmrg" for WinMerge), move with the arrow keys or the mouse, Enter starts it, Esc closes without starting
 	rem anything
+	rem Apps in a group folder are listed too, with spaces for the slashes (eg. _Data\Apps\Nirsoft\ProduKey is
+	rem "Nirsoft ProduKey", _Data\Apps\Microsoft\Office\2024 is "Microsoft Office 2024"; see Finding the Apps below)
 	rem The app is started with its own launcher, the first it has of: run.cmd (the portable app), install.cmd
 	rem (its installer), cli.cmd (a command prompt with its command-line tools)
 	rem fzf is kept on the USB like the other apps (_Data\Apps\fzf, updated by Update-Tool.cmd). Without it (before
@@ -32,7 +34,9 @@ rem ----------------------------------------------------------------------------
 	:gotQuery
 	set "list=%TEMP%\USB-Tool-run-%RANDOM%%RANDOM%.txt"
 	set "pick=%list%.pick"
+	set "found=%list%.found"
 	set "selected="
+	set "shown="
 
 
 rem The Apps
@@ -42,16 +46,10 @@ rem ----------------------------------------------------------------------------
 		pause
 		exit /b 1
 	)
-	rem the app folders with a launcher (folders starting with _ are notes, not apps), one per line in a file,
-	rem so names with & or ( ) in them are never read as commands
+	rem the apps with a launcher, one per line in a file (so names with & or ( ) in them are never read as
+	rem commands), as "<name shown>|<folder from _Data\Apps>", eg. "Nirsoft ProduKey|Nirsoft\ProduKey"
 	type nul > "%list%"
-	for /f "delims=" %%D in ('dir /b /ad /on "%apps%" ^| findstr /v /b "_"') do (
-		set "launcher="
-		if exist "%apps%\%%D\run.cmd" set "launcher=1"
-		if exist "%apps%\%%D\install.cmd" set "launcher=1"
-		if exist "%apps%\%%D\cli.cmd" set "launcher=1"
-		if defined launcher >>"%list%" echo(%%D
-	)
+	call :findApps "%apps%" "" "" 1
 
 
 rem Pick One
@@ -68,8 +66,12 @@ rem ----------------------------------------------------------------------------
 	if not defined fzf goto noFzf
 
 	rem (fzf draws in the window itself; only the chosen name goes to the file. Esc leaves it empty)
-	"%fzf%" --prompt="Run app > " --header="Type to search, Enter starts it, Esc closes" --layout=reverse --info=inline --query="%query%" < "%list%" > "%pick%"
-	if exist "%pick%" set /p selected=<"%pick%"
+	rem (only the name before the | is shown and searched)
+	"%fzf%" --prompt="Run app > " --header="Type to search, Enter starts it, Esc closes" --layout=reverse --info=inline --delimiter="[|]" --with-nth=1 --query="%query%" < "%list%" > "%pick%"
+	if exist "%pick%" for /f "usebackq tokens=1* delims=|" %%A in ("%pick%") do (
+		set "shown=%%A"
+		set "selected=%%B"
+	)
 	goto launch
 
 	:noFzf
@@ -80,20 +82,27 @@ rem ----------------------------------------------------------------------------
 	rem "crystal disk" finds CrystalDiskInfo)
 	if defined query set "squeezed=%query: =%"
 	if defined query (
-		findstr /n /i /l /c:"%query%" "%list%" || findstr /n /i /l /c:"%squeezed%" "%list%"
+		findstr /n /i /l /c:"%query%" "%list%" > "%found%" || findstr /n /i /l /c:"%squeezed%" "%list%" > "%found%"
 	) else (
-		findstr /n "^" "%list%"
+		findstr /n "^" "%list%" > "%found%"
 	)
 	if errorlevel 1 (
 		echo No app's name has "%query%" in it.
 		pause
 		goto cleanUp
 	)
+	rem (each as "<number>:<name shown>", leaving out its folder after the |)
+	for /f "usebackq tokens=1 delims=|" %%A in ("%found%") do echo(%%A
 	echo:
 	set "number="
 	set /p "number=Type the app's number and press Enter (or just Enter to close): "
 	if not defined number goto cleanUp
-	for /f "tokens=1* delims=:" %%A in ('findstr /n "^" "%list%"') do if "%%A" == "%number%" set "selected=%%B"
+	for /f "tokens=1* delims=:" %%A in ('findstr /n "^" "%list%"') do if "%%A" == "%number%" (
+		for /f "tokens=1* delims=|" %%C in ("%%B") do (
+			set "shown=%%C"
+			set "selected=%%D"
+		)
+	)
 	if not defined selected (
 		echo There's no app number %number%.
 		pause
@@ -111,20 +120,50 @@ rem ----------------------------------------------------------------------------
 	)
 	if not defined script (
 		setlocal EnableDelayedExpansion
-		echo Couldn't find a launcher for "!selected!".
+		echo Couldn't find a launcher for "!shown!".
 		endlocal
 		pause
 		goto cleanUp
 	)
-	del /q "%list%" "%pick%" 2>nul
+	del /q "%list%" "%pick%" "%found%" 2>nul
 	rem (the name through delayed expansion, so & or ( ) in it, eg. "O&O ShutUp10++", aren't read as commands)
 	setlocal EnableDelayedExpansion
-	title !selected!
-	echo Starting !selected!...
+	title !shown!
+	echo Starting !shown!...
 	endlocal
 	call "%script%"
 	exit /b
 
 :cleanUp
-	del /q "%list%" "%pick%" 2>nul
+	del /q "%list%" "%pick%" "%found%" 2>nul
+	exit /b
+
+
+rem Finding the Apps
+rem ----------------------------------------------------------------------------------------------------
+	rem :findApps <folder> <its path from _Data\Apps, with a \ after it> <its name shown, with a space after it> <depth>
+	rem Each folder in it with an update.cmd is an app, listed if it has a launcher. A folder without one is a group
+	rem of apps (eg. Nirsoft\ProduKey, Microsoft\Office\2024), so the apps inside it are found too (up to 4 folders
+	rem down). Folders starting with _ are notes, not apps; download folders (Installer, Portable, CLI) are never
+	rem looked in, as a downloaded app can have an update.cmd of its own (eg. WSUS Offline's client\Update.cmd).
+	rem (the names stay in quotes and for variables, so & or ( ) in them aren't read as commands)
+	:findApps
+	for /f "delims=" %%D in ('dir /b /ad /on "%~1" 2^>nul ^| findstr /v /b "_"') do call :findApp "%~1\%%D" "%~2%%D" "%~3%%D" %~4
+	exit /b
+
+	:findApp
+	if not "%~4" == "1" for %%T in (Installer Portable CLI) do if /i "%~nx1" == "%%T" exit /b
+	if exist "%~1\update.cmd" (
+		if exist "%~1\run.cmd" goto listApp
+		if exist "%~1\install.cmd" goto listApp
+		if exist "%~1\cli.cmd" goto listApp
+		exit /b
+	)
+	if %~4 GEQ 4 exit /b
+	set /a "depth=%~4 + 1"
+	call :findApps "%~1" "%~2\" "%~3 " %depth%
+	exit /b
+
+	:listApp
+	for %%N in ("%~3|%~2") do >>"%list%" echo(%%~N
 	exit /b
