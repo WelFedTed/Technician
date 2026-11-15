@@ -112,7 +112,11 @@ $toolsDir = Join-Path $env:LOCALAPPDATA 'USB-Tool\tools'
 # the type folder (Installer, Portable or CLI) may not exist yet on the USB
 New-Item -ItemType Directory -Path $AppDir -Force | Out-Null
 $AppDir = (Resolve-Path -LiteralPath $AppDir).Path
-$alwaysKeep = @('update.cmd', '*.url', 'run.cmd', 'install.cmd', 'cli.cmd', '*.version', 'checksums.sfv', '*.par2')
+# while an update replaces the app's files, this note is in its folder (-AppDir); if the update is stopped
+# part-way (Ctrl+C, the window closed, the USB pulled out), the note is still there, so the next update
+# redoes the app rather than trusting its version file
+$inProgressName = 'update-in-progress.txt'
+$alwaysKeep = @('update.cmd', '*.url', 'run.cmd', 'install.cmd', 'cli.cmd', '*.version', 'checksums.sfv', '*.par2', $inProgressName)
 # each app folder holds up to three of these, each with its own build folders, version file and checksums
 $typeFolders = @('Installer', 'Portable', 'CLI')
 
@@ -148,10 +152,11 @@ $script:stagingRoot = $null
 function Get-StagingFolder {
     if (-not $script:stagingRoot) {
         $script:stagingRoot = Get-StagingRoot
-        # leftovers from an update that was closed part-way (after a day, so another update running now is left alone)
+        # leftovers from an update that was closed part-way (after a day, so other updates running now are left
+        # alone; by when they were made, as downloads keep the server's file date, which can be years old)
         if ($script:stagingRoot -ne $env:TEMP) {
             Get-ChildItem -LiteralPath $script:stagingRoot -Filter 'USB-Tool-*' -Force -ErrorAction SilentlyContinue |
-                Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-1) } |
+                Where-Object { $_.CreationTime -lt (Get-Date).AddDays(-1) } |
                 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
@@ -514,27 +519,43 @@ function Test-Download([string]$path, [string]$address, [switch]$AllowPlain) {
 # Applying the update
 # ---------------------------------------------------------------------------------------------
 
+# the cached tools are made under a name of their own, then moved into place: Update-Tool updates several apps
+# at once, so two may fetch the same tool at the same moment (whichever is first is kept)
+function New-ToolTemp { Join-Path $toolsDir ('tmp-' + [Guid]::NewGuid().ToString('N')) }
+function Move-ToolIntoPlace([string]$made, [string]$target, [switch]$Folder) {
+    try {
+        if ($Folder) { [IO.Directory]::Move($made, $target) } else { [IO.File]::Move($made, $target) }
+    }
+    catch {
+        if (-not (Test-Path -LiteralPath $target)) { throw }
+        # (another update put it there first)
+        Remove-Item -LiteralPath $made -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 # (-InZip: the exe's name in the zip, when it's cached under another name)
 function Get-Tool([string]$exeName, [string]$address, [switch]$Zipped, [string]$InZip = $exeName) {
     $exe = Join-Path $toolsDir $exeName
     if (Test-Path -LiteralPath $exe) { return $exe }
     New-Item -ItemType Directory -Path $toolsDir -Force | Out-Null
     Say "Downloading $exeName (one-off, cached in $toolsDir)..."
-    if ($Zipped) {
-        $zip = Join-Path $toolsDir "$exeName.zip"
-        & $curl -sSL --fail -A $userAgent -o $zip $address
+    $download = New-ToolTemp
+    try {
+        & $curl -sSL --fail -A $userAgent -o $download $address
         if ($LASTEXITCODE -ne 0) { throw "Couldn't download $exeName" }
-        $unzipped = Join-Path $toolsDir ([Guid]::NewGuid().ToString('N'))
-        [IO.Compression.ZipFile]::ExtractToDirectory($zip, $unzipped)
-        $found = Get-ChildItem -LiteralPath $unzipped -Recurse -Filter $InZip | Select-Object -First 1
-        if (-not $found) { throw "$InZip wasn't in the download" }
-        Move-Item -LiteralPath $found.FullName -Destination $exe -Force
-        Remove-Item -LiteralPath $zip, $unzipped -Recurse -Force
+        if ($Zipped) {
+            $unzipped = New-ToolTemp
+            try {
+                [IO.Compression.ZipFile]::ExtractToDirectory($download, $unzipped)
+                $found = Get-ChildItem -LiteralPath $unzipped -Recurse -Filter $InZip | Select-Object -First 1
+                if (-not $found) { throw "$InZip wasn't in the download" }
+                Move-ToolIntoPlace $found.FullName $exe
+            }
+            finally { Remove-Item -LiteralPath $unzipped -Recurse -Force -ErrorAction SilentlyContinue }
+        }
+        else { Move-ToolIntoPlace $download $exe }
     }
-    else {
-        & $curl -sSL --fail -A $userAgent -o $exe $address
-        if ($LASTEXITCODE -ne 0) { throw "Couldn't download $exeName" }
-    }
+    finally { Remove-Item -LiteralPath $download -Force -ErrorAction SilentlyContinue }
     return $exe
 }
 
@@ -575,13 +596,18 @@ function Get-SevenZipFull {
     # the 32-bit build runs everywhere
     $installer = $release.assets | Where-Object { $_.name -match '^7z\d+\.exe$' } | Select-Object -First 1
     if (-not $installer) { throw "Couldn't find the 7-Zip installer in the latest 7-Zip release" }
-    $download = Join-Path $toolsDir '7z-installer.exe'
-    & $curl -sSL --fail -A $userAgent -o $download $installer.browser_download_url
-    if ($LASTEXITCODE -ne 0) { throw "Couldn't download 7-Zip" }
-    if (Test-Path -LiteralPath $folder) { Remove-Item -LiteralPath $folder -Recurse -Force }
-    & $sevenZip x $download "-o$folder" -y | Out-Null
-    Remove-Item -LiteralPath $download -Force
-    if (-not (Test-Path -LiteralPath $exe)) { throw "Couldn't unpack 7-Zip" }
+    $download = New-ToolTemp
+    $unpacked = New-ToolTemp
+    try {
+        & $curl -sSL --fail -A $userAgent -o $download $installer.browser_download_url
+        if ($LASTEXITCODE -ne 0) { throw "Couldn't download 7-Zip" }
+        & $sevenZip x $download "-o$unpacked" -y | Out-Null
+        if (-not (Test-Path -LiteralPath (Join-Path $unpacked '7z.exe'))) { throw "Couldn't unpack 7-Zip" }
+        # (a 7z folder left incomplete by an older version of this script)
+        if ((Test-Path -LiteralPath $folder) -and -not (Test-Path -LiteralPath $exe)) { Remove-Item -LiteralPath $folder -Recurse -Force -ErrorAction SilentlyContinue }
+        Move-ToolIntoPlace $unpacked $folder -Folder
+    }
+    finally { Remove-Item -LiteralPath $download, $unpacked -Recurse -Force -ErrorAction SilentlyContinue }
     return $exe
 }
 
@@ -616,14 +642,16 @@ function Get-SevenZipA {
     $release = Get-GitHubRelease 'ip7z/7zip'
     $extra = $release.assets | Where-Object { $_.name -match '^7z\d+-extra\.7z$' } | Select-Object -First 1
     if (-not $extra) { throw "Couldn't find 7-Zip Extra in the latest 7-Zip release" }
-    $archive = Join-Path $toolsDir '7z-extra.7z'
-    $unpacked = Join-Path $toolsDir ([Guid]::NewGuid().ToString('N'))
-    & $curl -sSL --fail -A $userAgent -o $archive $extra.browser_download_url
-    if ($LASTEXITCODE -ne 0) { throw "Couldn't download 7-Zip Extra" }
-    & $sevenZip x $archive "-o$unpacked" -y | Out-Null
-    # the 32-bit 7za.exe at the top of the archive runs everywhere
-    Move-Item -LiteralPath (Join-Path $unpacked '7za.exe') -Destination $exe -Force
-    Remove-Item -LiteralPath $archive, $unpacked -Recurse -Force
+    $archive = New-ToolTemp
+    $unpacked = New-ToolTemp
+    try {
+        & $curl -sSL --fail -A $userAgent -o $archive $extra.browser_download_url
+        if ($LASTEXITCODE -ne 0) { throw "Couldn't download 7-Zip Extra" }
+        & $sevenZip x $archive "-o$unpacked" -y | Out-Null
+        # the 32-bit 7za.exe at the top of the archive runs everywhere
+        Move-ToolIntoPlace (Join-Path $unpacked '7za.exe') $exe
+    }
+    finally { Remove-Item -LiteralPath $archive, $unpacked -Recurse -Force -ErrorAction SilentlyContinue }
     return $exe
 }
 
@@ -1019,7 +1047,11 @@ function Write-Report([string]$status, [hashtable]$more = @{}) {
         }
         foreach ($key in $more.Keys) { $record[$key] = $more[$key] }
         $line = ([pscustomobject]$record | ConvertTo-Json -Compress -Depth 3) + "`r`n"
-        [IO.File]::AppendAllText($env:USB_TOOL_REPORT, $line, (New-Object Text.UTF8Encoding $false))
+        # (other apps' updates, running at the same time, add theirs too, so wait a moment if one is writing)
+        for ($try = 1; ; $try++) {
+            try { [IO.File]::AppendAllText($env:USB_TOOL_REPORT, $line, (New-Object Text.UTF8Encoding $false)); break }
+            catch [IO.IOException] { if ($try -ge 40) { throw }; Start-Sleep -Milliseconds (Get-Random -Minimum 20 -Maximum 120) }
+        }
     }
     catch { Say "WARNING: couldn't add this app to the update report: $($_.Exception.Message)" }
 }
@@ -1133,6 +1165,12 @@ try {
     if ($oldRecord -match '(?m)^blocked=') { $oldRecord = '' }
     # after moving files the checksums are out of date, so do a full update
     if ($movedRootFiles) { $oldRecord = '' }
+    # the last update was stopped while it replaced the files, so they may be half old, half new
+    $inProgress = Join-Path $AppDir $inProgressName
+    if (Test-Path -LiteralPath $inProgress) {
+        Say 'The last update of this was stopped part-way, so updating it again...'
+        $oldRecord = ''
+    }
     $oldKey = (($oldRecord -split "`r?`n") | Where-Object { $_ -and $_ -notlike 'built=*' }) -join "`r`n"
     if (-not $Url -and $oldRecord -and (-not $wingetKey -or $oldRecord.Contains($wingetKey))) {
         $unchanged = @($jobs | Where-Object { $oldRecord.Contains("link=$($_.Link)") }).Count -eq $jobs.Count
@@ -1246,6 +1284,7 @@ try {
     }
 
     Say 'Applying update...'
+    [IO.File]::WriteAllText($inProgress, "An update of this app was replacing its files. If this note is still here, the update was stopped part-way, so the next update redoes it.`r`n")
     $script:applying = $true
     $cleaned = @{}
     foreach ($job in $jobs) {
@@ -1280,6 +1319,8 @@ try {
     # files Defender blocked are noted so the next run tries again (eg. after adding an exclusion)
     if ($script:blocked.Count -gt 0) { $versionText += "`r`nblocked=" + ($script:blocked -join ',') }
     [IO.File]::WriteAllText($versionPath, $versionText)
+    # (the files and their version record now match)
+    Remove-Item -LiteralPath $inProgress -Force -ErrorAction SilentlyContinue
     Say "Version: $version (built $($buildDate.ToString('yyyy-MM-dd')))"
 
     Say 'Updating checksums...'

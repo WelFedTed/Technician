@@ -9,6 +9,9 @@ rem ----------------------------------------------------------------------------
 	rem   1. Scripts: downloads the latest USB-Tool_Scripts folder from GitHub and copies it over the drive
 	rem   2. Apps: tries every _Data\Apps\<App> folder, running its update.cmd from inside that folder
 	rem      (folders without an update.cmd are skipped; folders starting with _ are notes, not apps)
+	rem      Several apps are updated at once (parallel, below), by _Data\Apps\_Update-Apps.ps1: each app's
+	rem      output goes to a log in the run's folder, and a line is shown as each finishes
+	rem      (the report includes the log of any app that needs you)
 	rem      Each update.cmd uses the shared helper _Data\Apps\_Update-App.ps1, keeping each kind of download
 	rem      in its own folder (Installer, Portable, CLI); apps saved in the old layout (build folders straight
 	rem      in the app folder, or folders such as "7-Zip Portable") are moved into these on their next update
@@ -50,6 +53,8 @@ rem ----------------------------------------------------------------------------
 	set "runState=%runDir%\state.txt"
 	rem clear PSModulePath so Windows PowerShell loads its own modules (it breaks if started from PowerShell 7)
 	set "PSModulePath="
+	rem how many apps to update at once (most of each app's check is waiting for its website; 1 = one at a time)
+	set "parallel=6"
 
 	set "doScripts=1"
 	set "doApps=1"
@@ -177,56 +182,36 @@ rem ----------------------------------------------------------------------------
 rem Update Apps
 rem ----------------------------------------------------------------------------------------------------
 :updateApps
-	call :header "Updating apps"
-
-	rem folders starting with _ are notes (eg. "_need a portable pdf reader"), not apps
-	rem (listed first, so a report made after Ctrl+C can say which apps weren't tried)
-	type nul > "%appsPlan%"
-	for /d %%D in ("%root%_Data\Apps\*") do (
-		set "folderName=%%~nxD"
-		if not "!folderName:~0,1!" == "_" >>"%appsPlan%" echo:!folderName!
-	)
-	for /d %%D in ("%root%_Data\Apps\*") do (
-		set "folderName=%%~nxD"
-		if not "!folderName:~0,1!" == "_" call :updateApp "%%~fD"
-	)
-	exit /b 0
-
-:updateApp
-	set /a appTotal+=1
-	set "appName=%~nx1"
-	rem set the header text directly; passing names with & through call would break them
-	set "headerText=[!appTotal!] !appName!"
-	call :header
-	>>"%runState%" echo step=app*!appTotal!*!appName!
-
-	if not exist "%~1\update.cmd" (
-		echo No update.cmd, skipping
-		set /a appSkipped+=1
-		rem (* can't be in a folder name, so it separates the fields)
-		>>"%appsList%" echo skip*!appName!
+	call :header "Updating apps (%parallel% at a time)"
+	if not exist "%root%_Data\Apps\_Update-Apps.ps1" (
+		echo _Data\Apps\_Update-Apps.ps1 is missing, so the apps can't be updated. Run Update-Tool.cmd /scripts first.
 		exit /b 0
 	)
-
-	pushd "%~1"
-	rem .\ is needed on PCs that don't search the current folder for commands
-	cmd /d /c .\update.cmd /nopause
-	set "appResult=!errorlevel!"
-	popd
+	rem (it writes plan.txt, apps.txt and state.txt in the run's folder; each app's output is in its logs folder)
+	powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Apps.ps1" -AppsDir "%root%_Data\Apps" -RunDir "%runDir%" -Parallel %parallel%
 	title USB Tool Updater
-	>>"%appsList%" echo !appResult!*!appName!
 
+	rem the summary's numbers, from each app's line in apps.txt: <update.cmd's exit code, or skip>*<name>
 	rem update.cmd exit codes: 0 = updated or up to date, 2 = needs a manual update,
 	rem 3 = updated but Windows Defender blocked some files, anything else = failed
-	if "!appResult!" == "0" (
-		set /a appCount+=1
-	) else if "!appResult!" == "3" (
-		set /a appCount+=1
-		set "appBlocked=!appBlocked!;!appName!"
-	) else if "!appResult!" == "2" (
-		set "appManual=!appManual!;!appName!"
-	) else (
-		set "appFailed=!appFailed!;!appName!"
+	rem (* can't be in a folder name, so it separates the fields)
+	if not exist "%appsList%" exit /b 0
+	for /f "usebackq tokens=1* delims=*" %%A in ("%appsList%") do (
+		set /a appTotal+=1
+		set "appResult=%%A"
+		set "appName=%%B"
+		if "!appResult!" == "skip" (
+			set /a appSkipped+=1
+		) else if "!appResult!" == "0" (
+			set /a appCount+=1
+		) else if "!appResult!" == "3" (
+			set /a appCount+=1
+			set "appBlocked=!appBlocked!;!appName!"
+		) else if "!appResult!" == "2" (
+			set "appManual=!appManual!;!appName!"
+		) else (
+			set "appFailed=!appFailed!;!appName!"
+		)
 	)
 	exit /b 0
 
@@ -288,9 +273,12 @@ rem as a record of when the drive was last updated
 rem Summary
 rem ----------------------------------------------------------------------------------------------------
 :summary
-	rem the drive's "last updated" file (eg. v2026-11-14.version), unless the script update failed
+	rem the drive's "last updated" file (eg. v2026-11-14.version), unless the script update failed, or the apps
+	rem were stopped part-way (Ctrl+C, then N to carry on)
+	set "appsStopped=0"
+	if exist "%runState%" findstr /x /c:"stopped=1" "%runState%" >nul && set "appsStopped=1"
 	set "stampName="
-	if not "%scriptsResult%" == "FAILED" call :stampDrive
+	if not "%scriptsResult%" == "FAILED" if "!appsStopped!" == "0" call :stampDrive
 	rem the app updates download and unpack in _Data\Temp on the drive; remove it once it's empty
 	rmdir "%root%_Data\Temp" 2>nul
 
@@ -298,19 +286,20 @@ rem ----------------------------------------------------------------------------
 	if defined stampName echo Drive:   last updated !stampName:~1,10! ^(!stampName!^)
 	echo Scripts: %scriptsResult%
 	if "%doApps%" == "1" ( echo Apps:    !appCount! updated or already up to date, !appSkipped! skipped ^(no update.cmd^) ) else ( echo Apps:    skipped )
+	if "!appsStopped!" == "1" echo          STOPPED part-way, so not every app was updated ^(the drive's "last updated" date wasn't changed^)
 	if defined appFailed (
 		echo:
-		echo These apps FAILED to update ^(scroll up for the reason^):
+		echo These apps FAILED to update ^(the report says why^):
 		for %%W in ("!appFailed:;=" "!") do if not "%%~W" == "" echo   %%~W
 	)
 	if defined appBlocked (
 		echo:
-		echo These apps updated, but Windows Defender blocked some of their files ^(scroll up for which^):
+		echo These apps updated, but Windows Defender blocked some of their files ^(the report lists which^):
 		for %%W in ("!appBlocked:;=" "!") do if not "%%~W" == "" echo   %%~W
 	)
 	if defined appManual (
 		echo:
-		echo These apps need updating by hand ^(scroll up for where to get them^):
+		echo These apps need updating by hand ^(the report says where to get them^):
 		for %%W in ("!appManual:;=" "!") do if not "%%~W" == "" echo   %%~W
 	)
 	echo:

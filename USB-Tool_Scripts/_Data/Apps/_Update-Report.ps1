@@ -114,11 +114,14 @@ $startFile = Join-Path $DataDir 'start.json'
 $start = if (Test-Path -LiteralPath $startFile) { Get-Content -LiteralPath $startFile -Raw | ConvertFrom-Json } else { $null }
 $started = if ($start) { [DateTime]::Parse($start.started) } else { $finished }
 
-# how far the run got (the last line for each key counts)
+# how far the run got (the last line for each key counts), and the apps started (start=<n>*<name>, one per app,
+# from _Update-Apps.ps1, which updates several at once)
 $state = @{}
+$startedApps = @()
 foreach ($line in Read-Lines (Join-Path $DataDir 'state.txt')) {
     $key, $value = $line -split '=', 2
-    if ($null -ne $value) { $state[$key.Trim()] = $value.Trim() }
+    if ($null -eq $value) { continue }
+    if ($key.Trim() -eq 'start') { $startedApps += ($value -split '\*', 2)[-1].Trim() } else { $state[$key.Trim()] = $value.Trim() }
 }
 $stepKind, $stepNumber, $stepApp = "$($state.step)" -split '\*', 3
 if ($Cancelled) {
@@ -129,6 +132,9 @@ if ($Cancelled) {
     $SelfUpdate = if ($state.selfUpdate) { $state.selfUpdate } else { '0' }
     $Stamp = if ($state.stamp) { $state.stamp } else { '' }
 }
+# the apps were stopped with Ctrl+C, and Update-Tool was then told to carry on (N), so it finished up
+# (what was stopped is the apps, not the steps after them)
+if ($state.stopped -eq '1') { $Cancelled = $true; $stepKind = 'apps' }
 
 $parts = @()
 $resultsFile = Join-Path $DataDir 'results.jsonl'
@@ -155,19 +161,21 @@ foreach ($line in Read-Lines (Join-Path $DataDir 'apps.txt')) {
     }
     $apps += [pscustomobject]@{ Name = $name; Code = $code.Trim(); Status = $status; Parts = $own; Folder = (Join-Path $appsDir $name) }
 }
-# stopped early: the app it was on, then the apps it never got to
-$plan = @()
-$current = $null
+# stopped early: the apps it was on, then the apps it never got to
+$plan = @(Read-Lines (Join-Path $DataDir 'plan.txt') | ForEach-Object { $_.Trim() })
+$interrupted = @()
 $notTried = @()
 if ($Cancelled) {
-    $plan = @(Read-Lines (Join-Path $DataDir 'plan.txt') | ForEach-Object { $_.Trim() })
     # (stopped before it got to the apps: the app folders, as Update-Tool lists them)
     if (-not $plan -and $DoApps -eq '1' -and (Test-Path -LiteralPath $appsDir)) {
         $plan = @(Get-ChildItem -LiteralPath $appsDir -Directory | Where-Object { $_.Name -notlike '_*' } | ForEach-Object { $_.Name })
     }
-    if ($stepKind -eq 'app' -and $stepApp -and -not ($apps | Where-Object { $_.Name -eq $stepApp })) {
-        $current = [pscustomobject]@{ Name = $stepApp; Code = ''; Status = 'cancelled'; Parts = @($parts | Where-Object { $_.app -eq $stepApp }); Folder = (Join-Path $appsDir $stepApp) }
-        $apps += $current
+    # the apps being updated (several at once; an older Update-Tool.cmd did one at a time, as step=app*<n>*<name>)
+    $wereRunning = if ($stepKind -eq 'apps') { $startedApps } elseif ($stepKind -eq 'app' -and $stepApp) { @($stepApp) } else { @() }
+    foreach ($name in $wereRunning) {
+        if ($apps | Where-Object { $_.Name -eq $name }) { continue }
+        $interrupted += $name
+        $apps += [pscustomobject]@{ Name = $name; Code = ''; Status = 'cancelled'; Parts = @($parts | Where-Object { $_.app -eq $name }); Folder = (Join-Path $appsDir $name) }
     }
     foreach ($name in $plan) {
         if ($apps | Where-Object { $_.Name -eq $name }) { continue }
@@ -181,6 +189,11 @@ foreach ($group in $parts | Group-Object app) {
     $worst = foreach ($s in 'failed', 'cancelled', 'manual', 'blocked', 'updated', 'current') { if ($group.Group | Where-Object { $_.status -eq $s }) { $s; break } }
     $apps += [pscustomobject]@{ Name = $group.Name; Code = ''; Status = $worst; Parts = @($group.Group); Folder = $group.Group[0].appFolder }
 }
+# in the order they were planned (several are updated at once, so they finish in any order)
+if ($plan) {
+    $order = @{}; for ($i = 0; $i -lt $plan.Count; $i++) { $order[$plan[$i]] = $i }
+    $apps = @($apps | Sort-Object { if ($order.ContainsKey($_.Name)) { $order[$_.Name] } else { [int]::MaxValue } })
+}
 
 function Count($status) { @($apps | Where-Object { $_.Status -eq $status }).Count }
 $counts = @{}
@@ -192,6 +205,13 @@ if ($Cancelled) {
     $stoppedAt = switch ($stepKind) {
         'scripts' { 'while updating the scripts from GitHub' }
         'app' { "while updating $stepApp (app $stepNumber of $([Math]::Max($plan.Count, [int]$stepNumber)))" }
+        'apps' {
+            $finishedCount = @($apps | Where-Object { $_.Status -notin @('cancelled', 'notrun') }).Count
+            $names = if ($interrupted.Count -gt 3) { ($interrupted[0..2] -join ', ') + " and $($interrupted.Count - 3) more" }
+                elseif ($interrupted.Count -gt 1) { ($interrupted[0..($interrupted.Count - 2)] -join ', ') + " and $($interrupted[-1])" }
+                else { "$interrupted" }
+            "while updating the apps ($finishedCount of $($plan.Count) done$(if ($names) { "; $names $(if ($interrupted.Count -eq 1) { 'was' } else { 'were' }) still updating" }))"
+        }
         'finish' { 'after trying every app, while finishing up' }
         'report' { 'while making this report' }
         default { 'as it started' }
@@ -229,6 +249,18 @@ function RunBox([string]$label, [string]$path, [string]$hint = 'Copy, then press
 <div class="run"><div class="run-label">$(Enc $label)</div><div class="run-row"><code>$(Enc $path)</code><button type="button" class="copy" data-copy="$(Enc $path)">Copy</button></div><div class="dim small">$(Enc $hint)</div></div>
 "@
 }
+# an app's update log (the apps are updated several at once, so each one's output is in its own log, named
+# "<n> <name>.log" for its place in plan.txt), without curl's progress bars, and only its last lines
+function Get-AppLog([string]$name) {
+    $index = [Array]::IndexOf($plan, $name)
+    if ($index -lt 0) { return '' }
+    $file = Get-ChildItem -LiteralPath (Join-Path $DataDir 'logs') -Filter ('{0:D3} *.log' -f ($index + 1)) -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $file) { return '' }
+    $encoding = try { [Console]::OutputEncoding } catch { [Text.Encoding]::Default }
+    $lines = [IO.File]::ReadAllText($file.FullName, $encoding) -split "`r`n|`n|`r" |
+        Where-Object { $_.Trim() -and $_ -notmatch '^[#\s.%0-9]*$' -and $_ -notmatch '^-{20,}$' }
+    return (@($lines) | Select-Object -Last 40) -join "`n"
+}
 $badgeText = @{ updated = 'Updated'; current = 'Up to date'; manual = 'Update by hand'; failed = 'Failed'; blocked = 'Defender blocked files'; skipped = 'No update.cmd'
     cancelled = 'Stopped part-way'; notrun = 'Not tried' }
 function Badge([string]$status) { "<span class=`"badge $status`">$(Enc $badgeText[$status])</span>" }
@@ -261,7 +293,9 @@ foreach ($app in $apps | Where-Object { $_.Status -in @('failed', 'manual', 'blo
     if (-not $partsNeeding -and $app.Status -eq 'cancelled') {
         # stopped before the helper started on a part, or between parts
         $done = @($app.Parts | Where-Object { $_.status -in @('updated', 'current') } | ForEach-Object { $_.part })
-        [void]$attention.Append("<p>The update was stopped while this app was being updated$(if ($done) { " (after $(Enc ($done -join ', ')))" }). Update it again to finish it.</p>")
+        # (its update was ended while replacing files if it left its in-progress note; the next update redoes it)
+        $halfDone = Get-ChildItem -LiteralPath $app.Folder -Filter 'update-in-progress.txt' -File -Recurse -Depth 1 -ErrorAction SilentlyContinue | Select-Object -First 1
+        [void]$attention.Append("<p>The update was stopped while this app was being updated$(if ($done) { " (after $(Enc ($done -join ', ')))" }).$(if ($halfDone) { ' It was replacing its files, so its folder may be half-updated; the next update redoes it.' }) Update it again to finish it.</p>")
         [void]$attention.Append((RunBox 'Update it again' (Join-Path $app.Folder 'update.cmd')))
     }
     elseif (-not $partsNeeding) {
@@ -320,6 +354,8 @@ foreach ($app in $apps | Where-Object { $_.Status -in @('failed', 'manual', 'blo
         }
         [void]$attention.Append("</section>")
     }
+    $log = Get-AppLog $app.Name
+    if ($log) { [void]$attention.Append("<details class=`"log`"><summary>What its update said</summary><pre>$(Enc $log)</pre></details>") }
     if ($folderUrl) { [void]$attention.Append("<p class=`"small`"><a href=`"$(Enc $folderUrl)`">Open the app's folder</a></p>") }
     [void]$attention.Append("</article>")
 }
@@ -446,6 +482,8 @@ p { overflow-wrap: anywhere; }
 .run-row code { flex: 1; min-width: 0; padding: 7px 10px; overflow-wrap: anywhere; }
 code { background: var(--code); border-radius: 6px; padding: 1px 6px; font: 13px Consolas, "Cascadia Mono", monospace; overflow-wrap: anywhere; }
 .files code { display: inline-block; margin: 2px 2px 0 0; }
+details.log { margin: 10px 0 4px; } details.log summary { cursor: pointer; color: var(--dim); font-size: 13px; }
+details.log pre { background: var(--code); border-radius: 8px; padding: 10px 12px; margin: 6px 0 0; font: 12px/1.45 Consolas, "Cascadia Mono", monospace; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow-y: auto; }
 button { font: inherit; cursor: pointer; }
 .copy { padding: 0 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--text); font-weight: 600; }
 .copy.done { color: var(--good); }
