@@ -38,8 +38,12 @@
 #                                     uses from its own folder (scripts, styles, images, fonts) are copied into
 #                                     -Into, the page as index.html (or its own name), so it opens from the USB.
 #                                     Scripts and links to other sites (statistics, cookie banners) are left
-#                                     out, as they don't work offline. Copied again each run, and replaced only
-#                                     when something changed.
+#                                     out, as they don't work offline; images from other sites are copied into
+#                                     _external. Pages linked by address only (a/b, a/) are saved as a/b.html
+#                                     and a/index.html, as on GitHub Pages, and pages listed in a site's JSON
+#                                     index ("slug": ...) are copied too. Copied again each run, and replaced
+#                                     only when something changed. A site that needs a web server (eg. the
+#                                     COPS Manual's Quartz site) is shown with _Serve-Site.ps1.
 #   -Manual [-Page <url>] [-Note <text>]  can't be downloaded automatically; prints where to get it
 #       [-Action <script> -ActionText <text>]   a script in the app folder that gets it instead (eg. Aseprite's
 #                                     build.cmd), offered in Update-Tool's report
@@ -477,7 +481,10 @@ function Save-Site([string]$page, [string]$folder) {
     $basePath = ([Uri]$baseUrl).AbsolutePath
     New-Item -ItemType Directory -Path $folder | Out-Null
     $copyStart = (Get-Date).AddSeconds(-5)
-    $seen = @{}; $bytes = [long]0
+    $seen = @{}; $bytes = [long]0; $missing = @()
+    # images from other sites (eg. a page's pictures kept on GitHub), saved in _external\<site>\... with the
+    # page pointed at the copy: copy's path -> address
+    $external = @{}
     # in rounds: the page, then every file it names, then the files those name, ...; each round is one curl run
     # that fetches several files at once over the same connections (one file at a time took EIZO's monitor test
     # nearly 2 minutes)
@@ -488,15 +495,17 @@ function Save-Site([string]$page, [string]$folder) {
         $list = "$folder.curl.txt"
         # (curl reads \ as an escape in this list, so paths use /)
         $lines = foreach ($rel in $round) {
-            $address = if ($rel -eq $start) { $page } else { $baseUrl + (($rel -split '/' | ForEach-Object { [Uri]::EscapeDataString($_) }) -join '/') }
+            $address = if ($rel -eq $start) { $page } elseif ($external.ContainsKey($rel)) { $external[$rel] } else { $baseUrl + (($rel -split '/' | ForEach-Object { [Uri]::EscapeDataString($_) }) -join '/') }
             "url = `"$address`""
             "output = `"$((Join-Path $folder ($rel -replace '/', '\')) -replace '\\', '/')`""
         }
         [IO.File]::WriteAllLines($list, [string[]]$lines)
         try {
-            & $curl -sSL -R --fail --retry 2 --connect-timeout 20 --create-dirs --parallel --parallel-max 8 -A $userAgent -K $list 2>$null
+            # (no -S: with this script's stop-on-error setting, Windows PowerShell treats anything curl says about a
+            # missing file as a failure, even when it's sent to $null; missing files are noted below instead)
+            & $curl -sL -R --fail --retry 2 --connect-timeout 20 --create-dirs --parallel --parallel-max 8 -A $userAgent -K $list 2>$null
             # (an older curl, before --parallel: the same, a file at a time)
-            if ($LASTEXITCODE -eq 2) { & $curl -sSL -R --fail --retry 2 --connect-timeout 20 --create-dirs -A $userAgent -K $list 2>$null }
+            if ($LASTEXITCODE -eq 2) { & $curl -sL -R --fail --retry 2 --connect-timeout 20 --create-dirs -A $userAgent -K $list 2>$null }
         }
         finally { Remove-Item -LiteralPath $list -Force -ErrorAction SilentlyContinue }
         $next = New-Object Collections.Generic.List[string]
@@ -504,20 +513,26 @@ function Save-Site([string]$page, [string]$folder) {
             $target = Join-Path $folder ($rel -replace '/', '\')
             if (-not (Test-Path -LiteralPath $target)) {
                 if ($rel -eq $start) { throw "Couldn't load $page (curl exit code $LASTEXITCODE)" }
-                Say "WARNING: $rel isn't on the site, so it's left out"
+                $missing += $rel
                 continue
             }
             $bytes += (Get-Item -LiteralPath $target).Length
             # the links in this file, as paths in the site's folder (other sites, data: and anchors are left alone)
+            # (file names in scripts, also those in a page's own <script>s, eg. a fetch("./static/contentIndex.json"))
+            $inScripts = '["'']([\w./-]+\.(?:png|jpe?g|svg|gif|webp|css|js|woff2?|ttf|eot|otf|html?|json))["'']'
             $patterns = switch -regex ($rel) {
-                '\.html?$' { @('(?:src|href)\s*=\s*"([^"]+)"', "(?:src|href)\s*=\s*'([^']+)'") }
+                '\.html?$' { @('(?:src|href)\s*=\s*"([^"]+)"', "(?:src|href)\s*=\s*'([^']+)'", $inScripts) }
                 '\.css$' { @('url\(\s*([^)]+?)\s*\)') }
-                '\.js$' { @('["'']([\w./-]+\.(?:png|jpe?g|svg|gif|webp|css|js|woff2?|ttf|eot|otf|html?|json))["'']') }
+                '\.js$' { @($inScripts) }
+                # a site's index of its pages, eg. Quartz's static/contentIndex.json ("slug":"Concepts/Checksums")
+                '\.json$' { @('"slug"\s*:\s*"([^"]+)"') }
                 default { @() }
             }
             if (-not $patterns) { continue }
             $text = [IO.File]::ReadAllText($target)
             $dir = if ($rel.Contains('/')) { $rel.Substring(0, $rel.LastIndexOf('/') + 1) } else { '' }
+            # (slugs are written from the site's top, wherever the index is)
+            if ($rel -match '\.json$') { $dir = '' }
             foreach ($pattern in $patterns) {
                 foreach ($m in [regex]::Matches($text, $pattern, 'IgnoreCase')) {
                     $link = $m.Groups[1].Value.Trim(' ', '"', "'") -replace '[?#].*$', ''
@@ -526,15 +541,35 @@ function Save-Site([string]$page, [string]$folder) {
                     # (only files in the page's own folder; anything above it isn't part of the page)
                     if (-not $path.StartsWith($basePath)) { continue }
                     $linked = [Uri]::UnescapeDataString($path.Substring($basePath.Length))
-                    if ($linked -and -not $linked.EndsWith('/') -and -not $seen.ContainsKey($linked) -and -not $next.Contains($linked)) { $next.Add($linked) }
+                    # links to pages by address only, as on GitHub Pages: a folder is its index.html, and a name
+                    # without an extension is that page's .html (eg. tags/backup is tags/backup.html)
+                    if (-not $linked -or $linked.EndsWith('/')) { $linked += 'index.html' }
+                    elseif (($linked -split '/')[-1] -notmatch '\.') { $linked += '.html' }
+                    # (not a file name, eg. "image/.webp" in a script)
+                    if (($linked -split '/')[-1].StartsWith('.')) { continue }
+                    if (-not $seen.ContainsKey($linked) -and -not $next.Contains($linked)) { $next.Add($linked) }
                 }
             }
             # pages: leave out scripts and stylesheets from other sites (statistics, cookie banners), which would
-            # only fail or call home when the page is opened from the USB
+            # only fail or call home when the page is opened from the USB; images from other sites are copied
             if ($rel -match '\.html?$') {
+                $depth = ($dir.ToCharArray() | Where-Object { $_ -eq '/' }).Count
+                $text = [regex]::Replace($text, '(?i)(<img\b[^>]*?\bsrc\s*=\s*")(https?://[^"]+)(")', {
+                    param($m)
+                    $uri = [Uri][Net.WebUtility]::HtmlDecode($m.Groups[2].Value)
+                    $name = (@($uri.Host) + @($uri.AbsolutePath.Trim('/') -split '/' | Where-Object { $_ })) | ForEach-Object {
+                        $part = [Uri]::UnescapeDataString($_)
+                        foreach ($bad in [IO.Path]::GetInvalidFileNameChars()) { $part = $part.Replace([string]$bad, '_') }
+                        $part
+                    }
+                    $copy = '_external/' + ($name -join '/')
+                    $external[$copy] = $uri.AbsoluteUri
+                    if (-not $seen.ContainsKey($copy) -and -not $next.Contains($copy)) { $next.Add($copy) }
+                    $m.Groups[1].Value + ('../' * $depth) + (($copy -split '/' | ForEach-Object { [Uri]::EscapeDataString($_) }) -join '/') + $m.Groups[3].Value
+                })
                 $offline = [regex]::Replace($text, '(?is)<script\b[^>]*\bsrc\s*=\s*["''](?:https?:)?//[^>]*>\s*</script>\s*', '')
                 $offline = [regex]::Replace($offline, '(?is)<link\b[^>]*\bhref\s*=\s*["''](?:https?:)?//[^>]*>\s*', '')
-                if ($offline -ne $text) {
+                if ($offline -ne [IO.File]::ReadAllText($target)) {
                     $date = (Get-Item -LiteralPath $target).LastWriteTime
                     [IO.File]::WriteAllText($target, $offline, (New-Object Text.UTF8Encoding $false))
                     (Get-Item -LiteralPath $target).LastWriteTime = $date
@@ -558,7 +593,9 @@ function Save-Site([string]$page, [string]$folder) {
     $sha = [Security.Cryptography.SHA256]::Create()
     $hash = [BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($lines -join "`n")))) -replace '-', ''
     $sha.Dispose()
-    Say "Copied $($seen.Count) files ($([Math]::Round($bytes / 1KB)) KB)"
+    Say "Copied $($seen.Count - $missing.Count) files ($([Math]::Round($bytes / 1KB)) KB)"
+    # (files the site links to but doesn't have, eg. one only its own server makes)
+    if ($missing) { Say "$($missing.Count) linked file$(if ($missing.Count -ne 1) { "s aren't" } else { " isn't" }) on the site, so $(if ($missing.Count -ne 1) { "they're" } else { "it's" }) left out: $(($missing | Select-Object -First 5) -join ', ')$(if ($missing.Count -gt 5) { ', ...' })" }
     return [pscustomobject]@{ Start = $start; Bytes = $bytes; Hash = $hash }
 }
 
