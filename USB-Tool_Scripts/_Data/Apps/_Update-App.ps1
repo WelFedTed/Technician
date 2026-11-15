@@ -534,6 +534,8 @@ function Save-Site([string]$page, [string]$folder) {
                 default { @() }
             }
             if (-not $patterns) { continue }
+            # (copies from other sites are the libraries' own files: their links point at the library's server)
+            if ($rel.StartsWith('_external/')) { continue }
             $text = [IO.File]::ReadAllText($target)
             $dir = if ($rel.Contains('/')) { $rel.Substring(0, $rel.LastIndexOf('/') + 1) } else { '' }
             # (slugs are written from the site's top, wherever the index is)
@@ -555,13 +557,17 @@ function Save-Site([string]$page, [string]$folder) {
                     if (-not $seen.ContainsKey($linked) -and -not $next.Contains($linked)) { $next.Add($linked) }
                 }
             }
-            # pages: leave out scripts and stylesheets from other sites (statistics, cookie banners), which would
-            # only fail or call home when the page is opened from the USB; images from other sites are copied
+            # pages: leave out scripts and stylesheets from other sites (ads, statistics, cookie banners), which
+            # would only fail or call home when the page is opened from the USB. Copied instead: images from other
+            # sites, and scripts from the public library servers (eg. jQuery from Google's), which the page needs
             if ($rel -match '\.html?$') {
                 $depth = ($dir.ToCharArray() | Where-Object { $_ -eq '/' }).Count
-                $text = [regex]::Replace($text, '(?i)(<img\b[^>]*?\bsrc\s*=\s*")(https?://[^"]+)(")', {
+                $toCopy = {
                     param($m)
-                    $uri = [Uri][Net.WebUtility]::HtmlDecode($m.Groups[2].Value)
+                    # (links like //ajax.googleapis.com/... use the page's own https)
+                    $address = [Net.WebUtility]::HtmlDecode($m.Groups[2].Value)
+                    if ($address.StartsWith('//')) { $address = 'https:' + $address }
+                    $uri = [Uri]$address
                     $name = (@($uri.Host) + @($uri.AbsolutePath.Trim('/') -split '/' | Where-Object { $_ })) | ForEach-Object {
                         $part = [Uri]::UnescapeDataString($_)
                         foreach ($bad in [IO.Path]::GetInvalidFileNameChars()) { $part = $part.Replace([string]$bad, '_') }
@@ -571,7 +577,10 @@ function Save-Site([string]$page, [string]$folder) {
                     $external[$copy] = $uri.AbsoluteUri
                     if (-not $seen.ContainsKey($copy) -and -not $next.Contains($copy)) { $next.Add($copy) }
                     $m.Groups[1].Value + ('../' * $depth) + (($copy -split '/' | ForEach-Object { [Uri]::EscapeDataString($_) }) -join '/') + $m.Groups[3].Value
-                })
+                }
+                $text = [regex]::Replace($text, '(?i)(<img\b[^>]*?\bsrc\s*=\s*")(https?://[^"]+)(")', $toCopy)
+                $libraries = 'ajax\.googleapis\.com|cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net|code\.jquery\.com|unpkg\.com'
+                $text = [regex]::Replace($text, "(?i)(<script\b[^>]*?\bsrc\s*=\s*`")((?:https?:)?//(?:$libraries)/[^`"]+)(`")", $toCopy)
                 $offline = [regex]::Replace($text, '(?is)<script\b[^>]*\bsrc\s*=\s*["''](?:https?:)?//[^>]*>\s*</script>\s*', '')
                 $offline = [regex]::Replace($offline, '(?is)<link\b[^>]*\bhref\s*=\s*["''](?:https?:)?//[^>]*>\s*', '')
                 if ($offline -ne [IO.File]::ReadAllText($target)) {
