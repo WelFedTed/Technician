@@ -64,6 +64,8 @@
 #                                     x64   = only runs on 64-bit Windows
 #                                     x86   = runs on 32-bit Windows (also installers and scripts)
 #                                     ARM64 = ARM64 Windows build
+#                                     Any   = one build that runs on every kind of Windows, whatever the
+#                                             processor (eg. a web page such as EIZO's monitor test)
 #                                     x86_x64 / x86_x64_ARM64 = one download holding several builds that
 #                                     share files (eg. CPU-Z's cpuz_x32.exe + cpuz_x64.exe + cpuz.ini)
 #                                     Anything else at the top of the app folder, and any build folder the
@@ -1001,7 +1003,7 @@ function Write-Parity {
 }
 
 # build folder names; an app uses one or more of these
-$archFolders = @('x86', 'x64', 'ARM64', 'x86_x64', 'x86_x64_ARM64')
+$archFolders = @('x86', 'x64', 'ARM64', 'x86_x64', 'x86_x64_ARM64', 'Any')
 
 # moves everything at the top of the app folder (except update.cmd, *.url, run.cmd and version/checksum/parity
 # files) into $target, and merges build folders the app no longer uses (not in $used) into it too;

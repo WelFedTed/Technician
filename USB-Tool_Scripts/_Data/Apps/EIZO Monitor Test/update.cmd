@@ -14,8 +14,8 @@ set "resultRank=0"
 rem Portable: the test runs in the browser, so the page and its files are copied to run offline
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "EIZO Monitor Test" ^
-    -Site "https://www.eizo.be/monitor-test/" -Into "x86" ^
-    -VersionFrom "x86\js\main.min.js" -VersionMatch "version=.V([0-9.]+)" ^
+    -Site "https://www.eizo.be/monitor-test/" -Into "Any" ^
+    -VersionFrom "Any\js\main.min.js" -VersionMatch "version=.V([0-9.]+)" ^
     -Clean
 call :result
 
