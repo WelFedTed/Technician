@@ -11,6 +11,14 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem Installer
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "Aseprite (installer)" ^
+    -Manual ^
+    -Page "https://github.com/aseprite/aseprite/blob/main/INSTALL.md" ^
+    -Note "build.cmd in this folder makes the installer along with the portable build (see the Portable note)."
+call :result
+
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "Aseprite" ^
