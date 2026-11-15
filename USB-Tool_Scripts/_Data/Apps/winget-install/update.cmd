@@ -15,7 +15,7 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "winget-install (asheroto)" ^
     -GitHub "asheroto/winget-install" ^
-    -Asset "^winget-install\.ps1$" -Into "x86" ^
+    -Asset "^winget-install\.ps1$" -Into "Any" ^
     -Clean
 call :result
 

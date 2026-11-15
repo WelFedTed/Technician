@@ -14,7 +14,7 @@ set "resultRank=0"
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "NirSoft DotNetResourcesExtract" ^
-    -Url "https://www.nirsoft.net/utils/dotnetresourcesextract.zip" -Into "x86" ^
+    -Url "https://www.nirsoft.net/utils/dotnetresourcesextract.zip" -Into "Any" ^
     -Extract -Clean -Keep "*.cfg"
 call :result
 

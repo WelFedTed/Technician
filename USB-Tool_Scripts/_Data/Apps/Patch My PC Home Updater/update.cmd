@@ -15,7 +15,7 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "Patch My PC Home Updater" ^
     -Url "https://patchmypc.com/freeupdater/PatchMyPC.exe" ^
-    -SaveAs "PatchMyPC.exe" -Into "x86"
+    -SaveAs "PatchMyPC.exe" -Into "Any"
 call :result
 
 if /i not "%~1" == "/nopause" pause

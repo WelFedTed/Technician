@@ -97,6 +97,7 @@ rem ----------------------------------------------------------------------------
 	if "%arch%" == "ARM64" call :find64
 	if "%arch%" == "x64" call :find64
 	call :find86
+	call :findIn "Any\%A%"
 	if not "%arch%" == "x86" call :findIn "%N%_x64%E%" "%N%64%E%"
 	call :findIn "%N%_x86%E%" "%N%_x32%E%" "%A%"
 	goto nextName

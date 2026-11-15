@@ -23,7 +23,7 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "Greenshot (portable)" ^
     -GitHub "greenshot/greenshot" ^
-    -Asset "^Greenshot-PORTABLE-[\d.]+-RELEASE\.zip$" -Into "x86" ^
+    -Asset "^Greenshot-PORTABLE-[\d.]+-RELEASE\.zip$" -Into "Any" ^
     -Extract -Clean -Keep "Greenshot.ini"
 call :result
 

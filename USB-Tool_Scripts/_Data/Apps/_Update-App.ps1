@@ -767,11 +767,18 @@ function Get-SevenZipA {
 # copies a folder tree; files Windows Defender blocks are skipped and listed (eg. NirSoft password tools),
 # so one flagged tool doesn't stop a whole package like NirLauncher from updating
 $script:blocked = @()
-function Copy-AllowedFiles([string]$source, [string]$destination) {
+# -Keep's files and folders (the app's settings, eg. Greenshot's greenshot.ini) are the USB's copy, not the
+# download's: a kept file that's already there isn't overwritten, and a kept folder only gets files it doesn't
+# have yet (many downloads include default settings, which replaced the USB's on every update before this)
+function Copy-AllowedFiles([string]$source, [string]$destination, [switch]$KeepExisting, [switch]$NotTop) {
     New-Item -ItemType Directory -Path $destination -Force | Out-Null
+    # (-Keep names are for the top of the build folder, as with -Clean)
+    $keepNames = if ($NotTop) { @() } else { @(($Keep -split '[,;]') | ForEach-Object { $_.Trim() } | Where-Object { $_ }) }
     foreach ($item in Get-ChildItem -LiteralPath $source -Force) {
         $target = Join-Path $destination $item.Name
-        if ($item.PSIsContainer) { Copy-AllowedFiles $item.FullName $target; continue }
+        $kept = $KeepExisting -or [bool]($keepNames | Where-Object { $item.Name -like $_ })
+        if ($item.PSIsContainer) { Copy-AllowedFiles $item.FullName $target -KeepExisting:([bool]$kept) -NotTop; continue }
+        if ($kept -and (Test-Path -LiteralPath $target)) { continue }
         try { Copy-Item -LiteralPath $item.FullName -Destination $target -Force }
         catch {
             if ($_.Exception.Message -notmatch 'virus or potentially unwanted software') { throw }

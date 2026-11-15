@@ -15,7 +15,7 @@ rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Raycast (Microsoft Store installer)" ^
     -Url "https://get.microsoft.com/installer/download/9PFXXSHC64H3" ^
-    -SaveAs "Raycast Installer.exe" -Into "x86"
+    -SaveAs "Raycast Installer.exe" -Into "Any"
 call :result
 
 if /i not "%~1" == "/nopause" pause

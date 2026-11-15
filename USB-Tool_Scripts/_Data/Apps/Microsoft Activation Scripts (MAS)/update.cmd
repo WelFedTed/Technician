@@ -15,7 +15,7 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Microsoft Activation Scripts (MAS)" ^
     -Url "https://github.com/massgravel/Microsoft-Activation-Scripts/archive/refs/heads/master.zip" ^
-    -Extract -Into "x86" -Clean
+    -Extract -Into "Any" -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -15,7 +15,7 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "DriverStore Explorer (RAPR)" ^
     -GitHub "lostindark/DriverStoreExplorer" ^
-    -Asset "^DriverStoreExplorer-v[\d.]+\.zip$" -Into "x86" ^
+    -Asset "^DriverStoreExplorer-v[\d.]+\.zip$" -Into "Any" ^
     -Extract -Clean
 call :result
 

@@ -15,7 +15,7 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "O&O ShutUp10++" ^
     -Url "https://dl5.oo-software.com/files/ooshutup10/OOSU10.exe" ^
-    -SaveAs "OOSU10.exe" -Into "x86"
+    -SaveAs "OOSU10.exe" -Into "x64"
 call :result
 
 if /i not "%~1" == "/nopause" pause
