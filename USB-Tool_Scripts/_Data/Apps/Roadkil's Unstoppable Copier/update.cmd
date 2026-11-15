@@ -14,8 +14,9 @@ set "resultRank=0"
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Roadkil's Unstoppable Copier" ^
-    -Manual ^
-    -Note "Roadkil.net has shut down, so there are no new versions. Keep the copy you have."
+    -Page "https://www.roadkil.net/program.php?ProgramID=29" ^
+    -Url "https://roadkil.net/download.php?FileID=421&ProgramID=29" -SaveAs "UnstopCpy.exe" -Into "x86" ^
+    -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause
