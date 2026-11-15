@@ -23,6 +23,9 @@
 #                                     one, eg. DevToys 2): the newest release that has the asset, whether or not
 #                                     it's marked as a pre-release (also for repos that publish other platforms'
 #                                     releases in between, eg. Mole's -windows releases)
+#       [-SkipPreReleases]            with -PreRelease: ... but not a pre-release (a beta, rc, ...), for repos that
+#                                     publish other things' releases in between, eg. Bitwarden's desktop releases
+#                                     among its browser, web and CLI ones
 #   -Winget <package id>              the installers listed for a winget package, eg. "Canva.Affinity" (as in
 #                                     "winget show -e --id Canva.Affinity"), read from its manifest in
 #                                     github.com/microsoft/winget-pkgs, so winget itself isn't needed: the x64
@@ -116,7 +119,7 @@ param(
     [string]$MoveFrom,
     [switch]$CheckOnly,
     [string]$PageIndex, [string]$PageIndexLink,
-    [switch]$PreRelease
+    [switch]$PreRelease, [switch]$SkipPreReleases
 )
 
 $ErrorActionPreference = 'Stop'
@@ -270,7 +273,7 @@ function Get-GitHubRelease([string]$repo) {
 function Get-GitHubReleases([string]$repo) {
     try {
         # (Windows PowerShell passes a JSON array on as one object, so it's unrolled)
-        $all = @(Get-Text "https://api.github.com/repos/$repo/releases?per_page=30" | ConvertFrom-Json)
+        $all = @(Get-Text "https://api.github.com/repos/$repo/releases?per_page=100" | ConvertFrom-Json)
         return @($all | ForEach-Object { $_ } | Where-Object { -not $_.draft })
     }
     catch {
@@ -292,6 +295,8 @@ function Find-GitHubAsset([string]$pattern) {
             if (-not $script:releases) { throw "No releases found for $GitHub" }
         }
         for ($i = 0; $i -lt $script:releases.Count; $i++) {
+            # (-SkipPreReleases: GitHub's pre-release flag, or the tag when it's read from the releases page)
+            if ($SkipPreReleases -and ($script:releases[$i].prerelease -or "$($script:releases[$i].tag_name)" -match '(?i)[-.](alpha|beta|rc|pre|preview)')) { continue }
             if ($script:releases[$i].fromPage) { $script:releases[$i] = Get-GitHubReleaseFromPage $GitHub $script:releases[$i].tag_name }
             $candidate = $script:releases[$i]
             $match = $candidate.assets | Where-Object { $_.name -match $pattern } | Select-Object -First 1
