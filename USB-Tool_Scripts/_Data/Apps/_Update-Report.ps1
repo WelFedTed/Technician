@@ -2,7 +2,10 @@
 # --------------------------------------------------
 # Update-Tool.cmd runs this twice, with a folder in %TEMP% (-DataDir) for the run's details:
 #   -Begin                        at the start: notes the time and the free space, and starts the watcher
-#   (without -Begin)              at the end: makes Update-Report.html in -DataDir from
+#   (without -Begin)              at the end: makes the report in -OutDir, named for when the run started
+#                                 (eg. Update-Report_2026-11-15_18-37-29.html, so each run's is kept), and
+#                                 puts its path in report.txt in -DataDir (without -OutDir, as from an older
+#                                 Update-Tool.cmd: Update-Report.html in -DataDir); it's made from
 #       results.jsonl             a line per app part, written by _Update-App.ps1 (status, versions, links)
 #       apps.txt                  a line per app folder, written by Update-Tool.cmd: <exit code or skip>*<name>
 #       plan.txt                  every app folder the run was going to try, in order
@@ -16,6 +19,7 @@
 # it stopped and which apps weren't tried, and opens it.
 param(
     [Parameter(Mandatory = $true)][string]$DataDir,
+    [string]$OutDir,
     [Parameter(Mandatory = $true)][string]$Root,
     [switch]$Begin,
     [switch]$Watch,
@@ -36,7 +40,16 @@ function Get-Free([string]$path) {
     try { return ([IO.DriveInfo]([IO.Path]::GetPathRoot($path))).AvailableFreeSpace } catch { return $null }
 }
 
-$report = Join-Path $DataDir 'Update-Report.html'
+# the report's file: named for when the run started (from start.json), so each run's is kept
+function Get-ReportPath {
+    if (-not $OutDir) { return Join-Path $DataDir 'Update-Report.html' }
+    $when = Get-Date
+    $startFile = Join-Path $DataDir 'start.json'
+    if (Test-Path -LiteralPath $startFile) {
+        try { $when = [DateTime]::Parse((Get-Content -LiteralPath $startFile -Raw | ConvertFrom-Json).started) } catch { }
+    }
+    return Join-Path $OutDir ('Update-Report_{0:yyyy-MM-dd_HH-mm-ss}.html' -f $when)
+}
 
 if ($Begin) {
     New-Item -ItemType Directory -Path $DataDir -Force | Out-Null
@@ -46,12 +59,14 @@ if ($Begin) {
         # (this was started by Update-Tool's own cmd.exe, so the watcher can also tell if its window closes)
         $cmdPid = [int](Get-CimInstance Win32_Process -Filter "ProcessId=$PID").ParentProcessId
         $watchArgs = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`" -Watch -DataDir `"$DataDir`" -Root `"$($Root).`" -ParentPid $cmdPid"
+        if ($OutDir) { $watchArgs += " -OutDir `"$OutDir`"" }
         Start-Process -FilePath (Join-Path $PSHOME 'powershell.exe') -ArgumentList $watchArgs -WindowStyle Hidden
     }
     catch { Write-Host "WARNING: if this update is stopped early, it won't make a report ($($_.Exception.Message))" }
     exit 0
 }
 
+$report = Get-ReportPath
 $Cancelled = $false
 if ($Watch) {
     $lock = Join-Path $DataDir 'running.lock'
@@ -466,7 +481,7 @@ $(if ($Cancelled) { "<dt>Cancelled</dt><dd>$(Enc $finished.ToString('h:mm:ss tt'
 $attentionHtml
 $updatedHtml
 $allHtml
-<p class="dim small">Made by Update-Tool.cmd. This page is saved in $(Enc $DataDir) and is replaced by the next update.</p>
+<p class="dim small">Made by Update-Tool.cmd. Saved as $(Enc $report)$(if ($OutDir) { '; each update makes its own report next to this one.' } else { ', and replaced by the next update.' })</p>
 </main>
 <script>
 document.addEventListener('click', function (e) {
@@ -491,7 +506,13 @@ if (find) find.addEventListener('input', apply);
 </html>
 "@
 
+if ($OutDir) { New-Item -ItemType Directory -Path $OutDir -Force | Out-Null }
 [IO.File]::WriteAllText($report, $html, (New-Object Text.UTF8Encoding $false))
+# (for Update-Tool.cmd to open; in the console's code page, which is how cmd reads it)
+$encoding = try { [Console]::OutputEncoding } catch { [Text.Encoding]::Default }
+# (no byte-order mark, which cmd would read as part of the path)
+if ($encoding.CodePage -eq 65001) { $encoding = New-Object Text.UTF8Encoding $false }
+[IO.File]::WriteAllText((Join-Path $DataDir 'report.txt'), $report, $encoding)
 Write-Host "Report: $report"
 # (the watcher opens it itself, as Update-Tool was stopped before it could)
 if ($Watch) { Start-Process -FilePath $report }

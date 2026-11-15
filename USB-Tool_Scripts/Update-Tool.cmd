@@ -15,12 +15,14 @@ rem ----------------------------------------------------------------------------
 	rem      (folders that were merged or renamed, eg. "7-Zip Portable", may show as skipped once afterwards)
 	rem   3. Drive: replaces v<date>.version in the drive's root with today's date (eg. v2026-11-14.version),
 	rem      a record of when the drive was last updated (skipped if the scripts couldn't be updated)
-	rem   4. Report: makes an HTML report in %TEMP%\USB-Tool-Report and opens it: the run's numbers, what each
-	rem      app did, and what needs doing by hand (download links, scripts to run such as Aseprite's build.cmd)
+	rem   4. Report: makes an HTML report and opens it: the run's numbers, what each app did, and what needs
+	rem      doing by hand (download links, scripts to run such as Aseprite's build.cmd)
+	rem      Each run's report is kept, named for when the run started, eg.
+	rem      %TEMP%\USB-Tool-Reports\Update-Report_2026-11-15_18-37-29.html
 	rem      (made by _Data\Apps\_Update-Report.ps1, from what each app's update writes to %USB_TOOL_REPORT%)
 	rem      If the update is stopped early (Ctrl+C, or closing the window), the report is still made, saying
 	rem      where it stopped and which apps weren't tried: a batch file can't run anything once it's stopped,
-	rem      so a hidden watcher makes it once the run lets go of running.lock in the report's folder
+	rem      so a hidden watcher makes it once the run lets go of running.lock in the run's folder
 	rem Usage: Update-Tool.cmd [/scripts ^| /apps]   (no argument = update both)
 	rem Files on the drive that aren't in the repo (eg. the apps themselves) are never deleted
 	rem Scripts on the drive are overwritten with the repo version, so make local changes in the repo
@@ -37,13 +39,15 @@ rem ----------------------------------------------------------------------------
 	set "src=%work%\Technician-%branch%\USB-Tool_Scripts"
 	set "curl=%SystemRoot%\System32\curl.exe"
 	set "tar=%SystemRoot%\System32\tar.exe"
-	rem the report's details and the report itself (replaced on each run)
-	set "reportDir=%TEMP%\USB-Tool-Report"
-	set "USB_TOOL_REPORT=%reportDir%\results.jsonl"
-	set "appsList=%reportDir%\apps.txt"
+	rem the reports (one per run, kept), and this run's details for its report (in Run, replaced each run)
+	rem (not USB-Tool-Report, which older versions of this script delete as they start)
+	set "reportDir=%TEMP%\USB-Tool-Reports"
+	set "runDir=%reportDir%\Run"
+	set "USB_TOOL_REPORT=%runDir%\results.jsonl"
+	set "appsList=%runDir%\apps.txt"
 	rem every app folder this run will try, and how far it got (for the report if it's stopped early)
-	set "appsPlan=%reportDir%\plan.txt"
-	set "runState=%reportDir%\state.txt"
+	set "appsPlan=%runDir%\plan.txt"
+	set "runState=%runDir%\state.txt"
 	rem clear PSModulePath so Windows PowerShell loads its own modules (it breaks if started from PowerShell 7)
 	set "PSModulePath="
 
@@ -85,12 +89,12 @@ rem ----------------------------------------------------------------------------
 	)
 	echo Connected
 
-	rem a fresh folder for this run's report
-	if exist "%reportDir%" rmdir /s /q "%reportDir%"
-	mkdir "%reportDir%"
+	rem a fresh folder for this run's details (the reports next to it are kept)
+	if exist "%runDir%" rmdir /s /q "%runDir%"
+	mkdir "%runDir%"
 	type nul > "%appsList%"
 	rem (-Begin also starts the hidden watcher that makes the report if this run is stopped early)
-	if exist "%root%_Data\Apps\_Update-Report.ps1" powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -Begin -DataDir "%reportDir%" -Root "%root%." -DoScripts "%doScripts%" -DoApps "%doApps%"
+	if exist "%root%_Data\Apps\_Update-Report.ps1" powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -Begin -DataDir "%runDir%" -OutDir "%reportDir%" -Root "%root%." -DoScripts "%doScripts%" -DoApps "%doApps%"
 
 
 rem Update
@@ -98,7 +102,7 @@ rem ----------------------------------------------------------------------------
 	rem the run keeps running.lock open until it's done, so the watcher can tell when it was stopped
 	rem (if the lock can't be made, the update still runs, just without a report when it's stopped)
 	set "ran=0"
-	call :run 9>"%reportDir%\running.lock"
+	call :run 9>"%runDir%\running.lock"
 	if "!ran!" == "0" call :run
 	goto end
 
@@ -314,7 +318,7 @@ rem ----------------------------------------------------------------------------
 	rem the HTML report (opened at the end, once the run has let go of running.lock)
 	>>"%runState%" echo step=report
 	if exist "%root%_Data\Apps\_Update-Report.ps1" (
-		powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -DataDir "%reportDir%" -Root "%root%." -Scripts "%scriptsResult%" -SelfUpdate "%selfUpdate%" -DoApps "%doApps%" -Stamp "!stampName!"
+		powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -DataDir "%runDir%" -OutDir "%reportDir%" -Root "%root%." -Scripts "%scriptsResult%" -SelfUpdate "%selfUpdate%" -DoApps "%doApps%" -Stamp "!stampName!"
 		echo:
 	)
 	exit /b 0
@@ -324,7 +328,10 @@ rem End
 rem ----------------------------------------------------------------------------------------------------
 :end
 	rem the report, in the default browser
-	if exist "%reportDir%\Update-Report.html" start "" "%reportDir%\Update-Report.html"
+	rem (its name, which has the time the run started in it, is in report.txt)
+	set "reportFile="
+	if exist "%runDir%\report.txt" set /p reportFile=<"%runDir%\report.txt"
+	if defined reportFile if exist "!reportFile!" start "" "!reportFile!"
 
 	rem replace this script last; the whole block is read before it runs, so overwriting is safe here
 	if "%selfUpdate%" == "1" (
