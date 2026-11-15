@@ -34,6 +34,12 @@
 #       [-WingetType <type>]          when it has several installers for one architecture, prefer this type
 #                                     (eg. msi, exe, msix, inno, nullsoft, wix)
 #       [-WingetScope user|machine]   ... and this scope (default: machine)
+#   -Site <url>                       a web page that works offline, eg. a monitor test: the page and every file it
+#                                     uses from its own folder (scripts, styles, images, fonts) are copied into
+#                                     -Into, the page as index.html (or its own name), so it opens from the USB.
+#                                     Scripts and links to other sites (statistics, cookie banners) are left
+#                                     out, as they don't work offline. Copied again each run, and replaced only
+#                                     when something changed.
 #   -Manual [-Page <url>] [-Note <text>]  can't be downloaded automatically; prints where to get it
 #       [-Action <script> -ActionText <text>]   a script in the app folder that gets it instead (eg. Aseprite's
 #                                     build.cmd), offered in Update-Tool's report
@@ -77,6 +83,8 @@
 #   -UserAgent <text>                 send this instead of a browser user agent (eg. "curl" for SourceForge)
 #   -Inner, -Inner86, -InnerArm       take this folder from inside the archive instead of all of it
 #   -VersionFrom <file>               read the version from this file instead of the link
+#       [-VersionMatch <regex>]       ... from the file's text, the regex's first group (eg. a site's script that
+#                                     says version="V2.1": -VersionMatch 'version="V([\d.]+)"'), not an exe's version
 #   -VersionFromUrl                   read the version from the download link before the exe (for installers
 #                                     whose exe carries the installer's version, eg. Firefox)
 #
@@ -97,7 +105,8 @@ param(
     [switch]$Flatten, [switch]$Clean, [string]$Keep, [string]$DataFolder,
     [string]$Referer, [string]$Password, [string]$UserAgent, [string]$ExtraAsset,
     [string]$Inner, [string]$Inner86, [string]$InnerArm,
-    [string]$VersionFrom, [switch]$VersionFromUrl,
+    [string]$VersionFrom, [string]$VersionMatch, [switch]$VersionFromUrl,
+    [string]$Site,
     [string]$MoveFrom,
     [switch]$CheckOnly,
     [string]$PageIndex, [string]$PageIndexLink,
@@ -453,6 +462,104 @@ function Get-Download([string]$address, [string]$outFile) {
     return [Uri]::UnescapeDataString(($finalUrl | Select-Object -Last 1).Split('?')[0])
 }
 
+# -Site: copies a web page and every file it uses from its own folder into $folder, following links in the page
+# (src/href), its styles (url(...)) and its scripts (quoted file names), so it works offline. Files keep the
+# server's dates (for the build date). Returns the start page's name, the bytes copied, and one SHA256 for all
+# of it (to tell whether anything changed since last time).
+function Save-Site([string]$page, [string]$folder) {
+    $pageUri = [Uri]$page
+    $baseUrl = $pageUri.GetLeftPart([UriPartial]::Path)
+    $baseUrl = $baseUrl.Substring(0, $baseUrl.LastIndexOf('/') + 1)
+    $start = [Uri]::UnescapeDataString($pageUri.AbsolutePath.Substring($pageUri.AbsolutePath.LastIndexOf('/') + 1))
+    if (-not $start) { $start = 'index.html' }
+    $basePath = ([Uri]$baseUrl).AbsolutePath
+    New-Item -ItemType Directory -Path $folder | Out-Null
+    $copyStart = (Get-Date).AddSeconds(-5)
+    $seen = @{}; $bytes = [long]0
+    # in rounds: the page, then every file it names, then the files those name, ...; each round is one curl run
+    # that fetches several files at once over the same connections (one file at a time took EIZO's monitor test
+    # nearly 2 minutes)
+    $round = @($start)
+    while ($round) {
+        foreach ($rel in $round) { $seen[$rel] = $true }
+        if ($seen.Count -gt 1000) { throw "More than 1000 files on $page; is it really a page that works offline?" }
+        $list = "$folder.curl.txt"
+        # (curl reads \ as an escape in this list, so paths use /)
+        $lines = foreach ($rel in $round) {
+            $address = if ($rel -eq $start) { $page } else { $baseUrl + (($rel -split '/' | ForEach-Object { [Uri]::EscapeDataString($_) }) -join '/') }
+            "url = `"$address`""
+            "output = `"$((Join-Path $folder ($rel -replace '/', '\')) -replace '\\', '/')`""
+        }
+        [IO.File]::WriteAllLines($list, [string[]]$lines)
+        try {
+            & $curl -sSL -R --fail --retry 2 --connect-timeout 20 --create-dirs --parallel --parallel-max 8 -A $userAgent -K $list 2>$null
+            # (an older curl, before --parallel: the same, a file at a time)
+            if ($LASTEXITCODE -eq 2) { & $curl -sSL -R --fail --retry 2 --connect-timeout 20 --create-dirs -A $userAgent -K $list 2>$null }
+        }
+        finally { Remove-Item -LiteralPath $list -Force -ErrorAction SilentlyContinue }
+        $next = New-Object Collections.Generic.List[string]
+        foreach ($rel in $round) {
+            $target = Join-Path $folder ($rel -replace '/', '\')
+            if (-not (Test-Path -LiteralPath $target)) {
+                if ($rel -eq $start) { throw "Couldn't load $page (curl exit code $LASTEXITCODE)" }
+                Say "WARNING: $rel isn't on the site, so it's left out"
+                continue
+            }
+            $bytes += (Get-Item -LiteralPath $target).Length
+            # the links in this file, as paths in the site's folder (other sites, data: and anchors are left alone)
+            $patterns = switch -regex ($rel) {
+                '\.html?$' { @('(?:src|href)\s*=\s*"([^"]+)"', "(?:src|href)\s*=\s*'([^']+)'") }
+                '\.css$' { @('url\(\s*([^)]+?)\s*\)') }
+                '\.js$' { @('["'']([\w./-]+\.(?:png|jpe?g|svg|gif|webp|css|js|woff2?|ttf|eot|otf|html?|json))["'']') }
+                default { @() }
+            }
+            if (-not $patterns) { continue }
+            $text = [IO.File]::ReadAllText($target)
+            $dir = if ($rel.Contains('/')) { $rel.Substring(0, $rel.LastIndexOf('/') + 1) } else { '' }
+            foreach ($pattern in $patterns) {
+                foreach ($m in [regex]::Matches($text, $pattern, 'IgnoreCase')) {
+                    $link = $m.Groups[1].Value.Trim(' ', '"', "'") -replace '[?#].*$', ''
+                    if (-not $link -or $link -match '^(?:[a-z][a-z0-9+.-]*:|//)') { continue }
+                    $path = ([Uri]::new([Uri]::new($baseUrl + $dir), $link)).AbsolutePath
+                    # (only files in the page's own folder; anything above it isn't part of the page)
+                    if (-not $path.StartsWith($basePath)) { continue }
+                    $linked = [Uri]::UnescapeDataString($path.Substring($basePath.Length))
+                    if ($linked -and -not $linked.EndsWith('/') -and -not $seen.ContainsKey($linked) -and -not $next.Contains($linked)) { $next.Add($linked) }
+                }
+            }
+            # pages: leave out scripts and stylesheets from other sites (statistics, cookie banners), which would
+            # only fail or call home when the page is opened from the USB
+            if ($rel -match '\.html?$') {
+                $offline = [regex]::Replace($text, '(?is)<script\b[^>]*\bsrc\s*=\s*["''](?:https?:)?//[^>]*>\s*</script>\s*', '')
+                $offline = [regex]::Replace($offline, '(?is)<link\b[^>]*\bhref\s*=\s*["''](?:https?:)?//[^>]*>\s*', '')
+                if ($offline -ne $text) {
+                    $date = (Get-Item -LiteralPath $target).LastWriteTime
+                    [IO.File]::WriteAllText($target, $offline, (New-Object Text.UTF8Encoding $false))
+                    (Get-Item -LiteralPath $target).LastWriteTime = $date
+                }
+            }
+        }
+        $round = @($next)
+    }
+    # files the server gave no date (eg. a page it makes on request) get the newest date it gave, so the copy
+    # is dated by the site's files rather than by today
+    $files = @(Get-ChildItem -LiteralPath $folder -Recurse -File)
+    $dated = @($files | Where-Object { $_.LastWriteTime -lt $copyStart })
+    if ($dated) {
+        $newest = ($dated | Measure-Object LastWriteTime -Maximum).Maximum
+        foreach ($f in $files | Where-Object { $_.LastWriteTime -ge $copyStart }) { $f.LastWriteTime = $newest }
+    }
+    # one hash for the whole copy: each file's path and contents
+    $lines = Get-ChildItem -LiteralPath $folder -Recurse -File | Sort-Object FullName | ForEach-Object {
+        $_.FullName.Substring($folder.Length + 1) + ':' + (Get-Sha256 $_.FullName)
+    }
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $hash = [BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes(($lines -join "`n")))) -replace '-', ''
+    $sha.Dispose()
+    Say "Copied $($seen.Count) files ($([Math]::Round($bytes / 1KB)) KB)"
+    return [pscustomobject]@{ Start = $start; Bytes = $bytes; Hash = $hash }
+}
+
 # file name for a download without -SaveAs: GitHub redirects to a link ending in a random ID,
 # so prefer the name in the original link, then the redirected link's, and make sure it has an extension
 function Get-DownloadName([string]$link, [string]$finalUrl, [string]$kind) {
@@ -755,7 +862,15 @@ function Get-MsiVersion([string]$path) {
 }
 
 function Get-Version([object[]]$jobs) {
-    if ($VersionFrom) {
+    if ($VersionFrom -and $VersionMatch) {
+        $file = Join-Path $AppDir $VersionFrom
+        if (Test-Path -LiteralPath $file) {
+            $m = [regex]::Match([IO.File]::ReadAllText($file), $VersionMatch)
+            if ($m.Success -and $m.Groups[1].Value) { return $m.Groups[1].Value }
+        }
+        Say "WARNING: no version matching '$VersionMatch' in $VersionFrom"
+    }
+    elseif ($VersionFrom) {
         $file = Join-Path $AppDir $VersionFrom
         if (Test-Path -LiteralPath $file) {
             $v = (Get-Item -LiteralPath $file).VersionInfo.FileVersionRaw
@@ -1038,7 +1153,7 @@ function Write-Report([string]$status, [hashtable]$more = @{}) {
         $now = Get-VersionFromName "$((Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File -ErrorAction SilentlyContinue | Select-Object -First 1).Name)"
         $before = Get-VersionFromName $script:oldVersionName
         # where to get it by hand: its page, its GitHub releases, or the download itself
-        $source = if ($Page) { $Page } elseif ($GitHub) { "https://github.com/$GitHub/releases/latest" } elseif ($Winget) { "https://github.com/microsoft/winget-pkgs/tree/master/$(Get-WingetPath $Winget)" } elseif ($Url) { $Url } else { '' }
+        $source = if ($Page) { $Page } elseif ($GitHub) { "https://github.com/$GitHub/releases/latest" } elseif ($Winget) { "https://github.com/microsoft/winget-pkgs/tree/master/$(Get-WingetPath $Winget)" } elseif ($Site) { $Site } elseif ($Url) { $Url } else { '' }
         $record = [ordered]@{
             app = Split-Path -Leaf $appFolder; appFolder = $appFolder; part = $Name; type = $type; status = $status
             version = $now.Version; built = $now.Built; oldVersion = $before.Version; oldBuilt = $before.Built
@@ -1111,6 +1226,11 @@ try {
     }
     $jobs = @()
     if ($Winget) { $jobs = @(Get-WingetJobs) }
+    elseif ($Site) {
+        # (copied into a folder like an unzipped download, so it's applied the same way)
+        $jobs = @([pscustomobject]@{ Link = $Site; SaveAs = $null; Into = $Into; Inner = $null; IsSite = $true })
+        $Extract = $true
+    }
     else {
         $link = Resolve-Link $Url $Link $Asset
         if (-not $link) { throw 'No download source given (use -Url, -Page/-Link, -GitHub/-Asset or -Winget)' }
@@ -1172,7 +1292,8 @@ try {
         $oldRecord = ''
     }
     $oldKey = (($oldRecord -split "`r?`n") | Where-Object { $_ -and $_ -notlike 'built=*' }) -join "`r`n"
-    if (-not $Url -and $oldRecord -and (-not $wingetKey -or $oldRecord.Contains($wingetKey))) {
+    # (a site's address doesn't change when its files do, so it's always copied and compared)
+    if (-not $Url -and -not $Site -and $oldRecord -and (-not $wingetKey -or $oldRecord.Contains($wingetKey))) {
         $unchanged = @($jobs | Where-Object { $oldRecord.Contains("link=$($_.Link)") }).Count -eq $jobs.Count
         if ($unchanged -and (Test-AppFiles $jobs)) {
             Add-DataFolder $jobs
@@ -1197,6 +1318,19 @@ try {
     }
 
     foreach ($job in $jobs) {
+        if ($job.IsSite) {
+            Say "Copying $($job.Link) and the files it uses..."
+            $staging = New-StagingPath site
+            $downloads += $staging
+            $copy = Save-Site $job.Link $staging
+            $script:downloadedBytes += $copy.Bytes
+            $folder = if ($job.Into) { Join-Path $AppDir $job.Into } else { $AppDir }
+            $job | Add-Member -NotePropertyMembers @{
+                Temp = $null; Kind = 'site'; FinalUrl = $job.Link; Folder = $folder; Source = $staging
+                Target = (Join-Path $folder $copy.Start); Hash = $copy.Hash; ServerDate = $null
+            }
+            continue
+        }
         Say "Downloading $($job.Link)"
         $temp = New-StagingPath download
         $downloads += $temp
@@ -1258,6 +1392,8 @@ try {
     if ($Extract) {
         Say 'Extracting...'
         foreach ($job in $jobs) {
+            # (a copied site is already a folder)
+            if ($job.IsSite) { continue }
             $staging = New-StagingPath extract
             $downloads += $staging
             if ($job.Kind -notin @('zip', '7z')) {
