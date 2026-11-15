@@ -14,9 +14,9 @@ set "resultRank=0"
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "WSUS Offline" ^
-    -Manual ^
     -Page "https://gitlab.com/wsusoffline/wsusoffline" ^
-    -Note "Check the project page for a newer release."
+    -Winget "WSUSOfflineUpdate.CommunityEdition" -Into "x86" ^
+    -Flatten
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -14,9 +14,10 @@ set "resultRank=0"
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Display Driver Uninstaller (DDU)" ^
-    -Manual ^
     -Page "https://www.wagnardsoft.com/display-driver-uninstaller-ddu" ^
-    -Note "Wagnardsoft hides the download behind a button, so it has to be downloaded by hand."
+    -Winget "Wagnardsoft.DisplayDriverUninstaller" -Into "x64" ^
+    -Clean ^
+    -Paf
 call :result
 
 if /i not "%~1" == "/nopause" pause

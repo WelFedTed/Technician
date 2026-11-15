@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title Install FileBot
 
-set "application=*.exe"
+set "application=*.msi"
 set "arguments="
 set "folder=Installer"
 

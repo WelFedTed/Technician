@@ -14,9 +14,9 @@ set "resultRank=0"
 rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Spybot Anti-Beacon" ^
-    -Manual ^
     -Page "https://www.safer-networking.org/products/spybot-anti-beacon/download/" ^
-    -Note "Safer-Networking's download page has no fixed link, so save the installer by hand."
+    -Winget "SaferNetworking.SpybotAntiBeacon" -Into "x86" ^
+    -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause

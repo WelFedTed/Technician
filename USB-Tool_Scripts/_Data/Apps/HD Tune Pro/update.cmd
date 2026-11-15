@@ -14,9 +14,9 @@ set "resultRank=0"
 rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" -MoveFrom "%~dp0." ^
     -Name "HD Tune Pro" ^
-    -Manual ^
     -Page "https://www.hdtune.com/download.html" ^
-    -Note "HD Tune Pro is paid software, so download it and re-enter the licence by hand."
+    -Winget "EFDSoftware.HDTunePro" -Into "x86" ^
+    -Clean
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

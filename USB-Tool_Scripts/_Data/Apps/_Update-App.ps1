@@ -23,6 +23,17 @@
 #                                     one, eg. DevToys 2): the newest release that has the asset, whether or not
 #                                     it's marked as a pre-release (also for repos that publish other platforms'
 #                                     releases in between, eg. Mole's -windows releases)
+#   -Winget <package id>              the installers listed for a winget package, eg. "Canva.Affinity" (as in
+#                                     "winget show -e --id Canva.Affinity"), read from its manifest in
+#                                     github.com/microsoft/winget-pkgs, so winget itself isn't needed: the x64
+#                                     installer goes in -Into (or the x86 / neutral one, if it has no x64),
+#                                     the x86 one in -Into86 and the ARM64 one in -IntoArm, when those are given.
+#                                     Downloads are checked against the SHA256 winget lists. A .zip is unzipped,
+#                                     keeping just the installer in it (or all of it, for a portable app).
+#                                     (-Page is still worth giving: it's the "download it by hand" link)
+#       [-WingetType <type>]          when it has several installers for one architecture, prefer this type
+#                                     (eg. msi, exe, msix, inno, nullsoft, wix)
+#       [-WingetScope user|machine]   ... and this scope (default: machine)
 #   -Manual [-Page <url>] [-Note <text>]  can't be downloaded automatically; prints where to get it
 #       [-Action <script> -ActionText <text>]   a script in the app folder that gets it instead (eg. Aseprite's
 #                                     build.cmd), offered in Update-Tool's report
@@ -41,7 +52,8 @@
 #   -Paf                              a PortableApps.com installer (.paf.exe): unpack the ready-to-run app
 #                                     straight into the build folder (eg. x86_x64\7-ZipPortable.exe + App\)
 #                                     and delete the installer; the app's Data folder (its settings) is
-#                                     kept when updating
+#                                     kept when updating. Also for other NSIS installers that just hold a
+#                                     ready-to-run app (eg. DDU's setup.exe)
 #   -Into, -Into86, -IntoArm          the build folder for each download:
 #                                     x64   = only runs on 64-bit Windows
 #                                     x86   = runs on 32-bit Windows (also installers and scripts)
@@ -78,6 +90,7 @@ param(
     [string]$Page, [string]$Link, [string]$Link86, [string]$LinkArm,
     [string]$UrlFormat, [string]$UrlFormat86, [string]$UrlFormatArm, [string]$Page86, [string]$PageArm,
     [string]$GitHub, [string]$Asset, [string]$Asset86, [string]$AssetArm,
+    [string]$Winget, [string]$WingetType, [string]$WingetScope,
     [switch]$Manual, [string]$Note, [string]$Action, [string]$ActionText,
     [string]$SaveAs, [string]$SaveAs86, [string]$SaveAsArm,
     [switch]$Extract, [switch]$Paf, [string]$Into, [string]$Into86, [string]$IntoArm,
@@ -286,13 +299,141 @@ function Resolve-Link([string]$direct, [string]$pageLink, [string]$asset) {
     return $null
 }
 
+# winget packages: read from their manifests in github.com/microsoft/winget-pkgs (what winget itself installs
+# from), rather than from the winget command, which not every PC has and whose output depends on the
+# language Windows is in
+function Get-WingetPath([string]$id) { 'manifests/{0}/{1}' -f $id.Substring(0, 1).ToLower(), ($id -replace '\.', '/') }
+
+# the package's newest version (each version has its own folder of manifests)
+function Get-WingetVersion([string]$id) {
+    $path = Get-WingetPath $id
+    try {
+        $names = @(Get-Text "https://api.github.com/repos/microsoft/winget-pkgs/contents/$path" | ConvertFrom-Json | ForEach-Object { $_ } |
+            Where-Object { $_.type -eq 'dir' } | ForEach-Object { $_.name })
+    }
+    catch {
+        Say "GitHub's API didn't answer ($($_.Exception.Message)), so reading the winget-pkgs page instead..."
+        $html = Get-Text "https://github.com/microsoft/winget-pkgs/tree/master/$path"
+        $names = @([regex]::Matches($html, '"name":"([^"]+)","path":"' + [regex]::Escape($path) + '/[^"]+","contentType":"directory"') |
+            ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique)
+    }
+    # (other folders hold related packages, eg. Guru3D.Afterburner.Beta in Afterburner\Beta)
+    $versions = @($names | Where-Object { $_ -match '^v?\d' })
+    if (-not $versions) { throw "No versions of $id in winget's list (is the package ID right?)" }
+    return Select-Highest $versions
+}
+
+function ConvertFrom-YamlValue([string]$value) {
+    $value = $value.Trim()
+    if ($value -match '^"(.*)"$' -or $value -match "^'(.*)'$") { return $Matches[1] }
+    return $value
+}
+
+# the package's installers, each with the package-wide settings it doesn't set itself
+# (just enough YAML for winget's installer manifests: top-level keys, and the Installers list)
+function Get-WingetPackage([string]$id) {
+    $version = Get-WingetVersion $id
+    $base = "https://raw.githubusercontent.com/microsoft/winget-pkgs/master/$(Get-WingetPath $id)/$version"
+    # (older packages have everything in one <id>.yaml)
+    $yaml = try { Get-Text "$base/$id.installer.yaml" } catch { Get-Text "$base/$id.yaml" }
+    $top = @{}; $topNested = @(); $installers = @()
+    $inList = $false; $item = $null; $itemIndent = -1
+    foreach ($line in $yaml -split "`r?`n") {
+        $line = $line -replace '\s+#.*$', ''
+        if (-not $line.Trim() -or $line.TrimStart().StartsWith('#')) { continue }
+        $indent = $line.Length - $line.TrimStart().Length
+        $text = $line.Trim()
+        if ($indent -eq 0 -and -not $text.StartsWith('-')) {
+            $inList = $text -match '^Installers:\s*$'
+            if ($text -match '^(\w+):\s*(.*)$' -and $Matches[2]) { $top[$Matches[1]] = ConvertFrom-YamlValue $Matches[2] }
+            continue
+        }
+        # the files to take from a .zip, wherever they're listed
+        if ($text -match '^(-\s+)?RelativeFilePath:\s*(.+)$') {
+            $file = ConvertFrom-YamlValue $Matches[2]
+            if ($inList -and $item) { $item.Nested += $file } elseif (-not $inList) { $topNested += $file }
+            continue
+        }
+        if (-not $inList) { continue }
+        if ($text.StartsWith('- ') -and ($itemIndent -lt 0 -or $indent -eq $itemIndent)) {
+            $itemIndent = $indent
+            $item = @{ Nested = @() }
+            $installers += $item
+            $text = $text.Substring(2).Trim()
+            $indent += 2
+        }
+        # (only the installer's own settings, not ones nested deeper such as AppsAndFeaturesEntries)
+        if ($item -and $indent -eq $itemIndent + 2 -and $text -match '^(\w+):\s*(.*)$' -and $Matches[2]) { $item[$Matches[1]] = ConvertFrom-YamlValue $Matches[2] }
+    }
+    $list = foreach ($i in $installers) {
+        $get = { param($key) if ($i.ContainsKey($key)) { $i[$key] } else { $top[$key] } }
+        [pscustomobject]@{
+            Arch = "$(& $get 'Architecture')".ToLower(); Url = & $get 'InstallerUrl'; Sha256 = "$(& $get 'InstallerSha256')".ToUpper()
+            Type = & $get 'InstallerType'; NestedType = & $get 'NestedInstallerType'; Scope = & $get 'Scope'; Locale = & $get 'InstallerLocale'
+            Nested = $(if ($i.Nested) { $i.Nested } else { $topNested })
+        }
+    }
+    if (-not $list) { throw "No installers in winget's manifest for $id $version" }
+    $packageVersion = if ($top.PackageVersion) { $top.PackageVersion } else { $version }
+    $date = if ($top.ReleaseDate) { $top.ReleaseDate } else { ($installers | Where-Object { $_.ReleaseDate } | Select-Object -First 1).ReleaseDate }
+    return [pscustomobject]@{ Version = $packageVersion; ReleaseDate = $date; Installers = @($list) }
+}
+
+# the best installer for these architectures: English (or no language), then -WingetType, then -WingetScope
+# (machine when not given)
+function Select-WingetInstaller([object[]]$installers, [string[]]$arches) {
+    $fits = @($installers | Where-Object { $_.Arch -in $arches -and $_.Url })
+    $english = @($fits | Where-Object { -not $_.Locale -or $_.Locale -like 'en*' })
+    if ($english) { $fits = $english }
+    $scope = if ($WingetScope) { $WingetScope } else { 'machine' }
+    $best = $null; $bestScore = -1
+    # (the first of equally good ones, as listed)
+    foreach ($candidate in $fits) {
+        $score = 0
+        if ($WingetType -and ($candidate.Type -eq $WingetType -or $candidate.NestedType -eq $WingetType)) { $score += 4 }
+        if ($candidate.Scope -eq $scope) { $score += 2 }
+        if ($candidate.Locale -eq 'en-US') { $score += 1 }
+        if ($score -gt $bestScore) { $best = $candidate; $bestScore = $score }
+    }
+    return $best
+}
+
+# the download jobs for a winget package (see -Winget at the top)
+function Get-WingetJobs {
+    $package = Get-WingetPackage $Winget
+    $script:wingetVersion = $package.Version
+    $script:wingetListed = $package.Version
+    $script:wingetDate = $package.ReleaseDate
+    Say "winget's latest $Winget is $($package.Version)"
+    $found = @()
+    $main = Select-WingetInstaller $package.Installers @('x64')
+    if (-not $main) { $main = Select-WingetInstaller $package.Installers @('x86', 'neutral') }
+    if (-not $main) { throw "No x64 or x86 installer in winget's $Winget $($package.Version)" }
+    $found += [pscustomobject]@{ Installer = $main; Into = $Into }
+    foreach ($alt in @(@{ Into = $Into86; Arches = @('x86', 'neutral'); Name = '32-bit' }, @{ Into = $IntoArm; Arches = @('arm64'); Name = 'ARM64' })) {
+        if (-not $alt.Into) { continue }
+        $installer = Select-WingetInstaller $package.Installers $alt.Arches
+        if (-not $installer) { Say "winget's $Winget $($package.Version) has no $($alt.Name) installer, so there's none in $($alt.Into)"; continue }
+        # (the same download for both, unless each takes its own installer from one .zip, eg. RealVNC's MSIs)
+        if ($installer.Url -eq $main.Url -and "$($installer.Nested)" -eq "$($main.Nested)") { continue }
+        $found += [pscustomobject]@{ Installer = $installer; Into = $alt.Into }
+    }
+    # a .zip holding the installer: unzip it, and keep just the installer (unless it's the app itself)
+    if ($main.Type -eq 'zip') { $script:Extract = $true }
+    foreach ($f in $found) {
+        $takeOnly = if ($f.Installer.Type -eq 'zip' -and $f.Installer.NestedType -ne 'portable') { @($f.Installer.Nested) } else { @() }
+        [pscustomobject]@{ Link = $f.Installer.Url; SaveAs = $null; Into = $f.Into; Inner = $null; Sha256 = $f.Installer.Sha256; TakeOnly = $takeOnly }
+    }
+}
+
 # ---------------------------------------------------------------------------------------------
 # Downloading and checking
 # ---------------------------------------------------------------------------------------------
 
 function Get-Download([string]$address, [string]$outFile) {
     # -R keeps the server's Last-Modified date on the file, used for the build date
-    $curlArgs = @('-L', '-R', '--fail', '--retry', '2', '--connect-timeout', '20', '--progress-bar', '-A', $userAgent, '-o', $outFile, '-w', '%{url_effective}')
+    # (--globoff: links can contain [ ], eg. Guru3D's "[Guru3D]-MSIAfterburnerSetup.zip")
+    $curlArgs = @('-L', '-R', '--fail', '--globoff', '--retry', '2', '--connect-timeout', '20', '--progress-bar', '-A', $userAgent, '-o', $outFile, '-w', '%{url_effective}')
     if ($Referer) { $curlArgs += @('-e', $Referer) }
     $finalUrl = & $curl @curlArgs $address
     if ($LASTEXITCODE -ne 0) { throw "Download failed (curl exit code $LASTEXITCODE): $address" }
@@ -427,8 +568,8 @@ function Expand-Paf([string]$installer, [string]$staging) {
     New-Item -ItemType Directory -Path $staging | Out-Null
     & $sevenZip x $installer "-o$staging" -y | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "Couldn't unpack the PortableApps installer (7z exit code $LASTEXITCODE)" }
-    # the installer's own files, not part of the app
-    Get-ChildItem -LiteralPath $staging -Force | Where-Object { $_.Name -like '$*' -or $_.Name -like '`[NSIS`]*' } | Remove-Item -Recurse -Force
+    # the installer's own files, not part of the app ($PLUGINSDIR, [NSIS].nsi, [0], uninst.exe.nsis)
+    Get-ChildItem -LiteralPath $staging -Force | Where-Object { $_.Name -like '$*' -or $_.Name -like '`[*' -or $_.Name -like '*.nsis' } | Remove-Item -Recurse -Force
     if (-not (Get-ChildItem -LiteralPath $staging -Filter '*.exe' -File | Select-Object -First 1)) {
         throw 'No launcher (.exe) at the top of the PortableApps installer'
     }
@@ -574,6 +715,7 @@ function Get-Version([object[]]$jobs) {
         foreach ($bad in [IO.Path]::GetInvalidFileNameChars()) { $tag = $tag.Replace([string]$bad, '-') }
         if ($tag) { return $tag }
     }
+    if ($script:wingetVersion) { return $script:wingetVersion }
     # PortableApps apps say their version in appinfo.ini (the installer itself is deleted)
     if ($Paf -and $jobs[0].PafVersion) { return $jobs[0].PafVersion }
     # some installers carry their own (installer) version, not the app's, so read the link instead
@@ -628,6 +770,11 @@ function Get-BuildDate([object[]]$jobs) {
     # 1. GitHub release date
     if ($script:release -and $script:release.published_at) {
         return ([datetime]$script:release.published_at).ToLocalTime()
+    }
+    # 1b. the release date winget lists, if it does
+    if ($script:wingetDate) {
+        $listed = [datetime]::MinValue
+        if ([datetime]::TryParse("$($script:wingetDate)", [ref]$listed)) { return $listed }
     }
     $job = $jobs[0]
     # 2. archives: the newest file inside (zip/7z entries keep their build timestamps)
@@ -784,8 +931,9 @@ function Test-AppFiles([object[]]$jobs, [switch]$Quiet) {
             if (-not $Quiet) { Say "The $($job.Into) folder is missing or empty, so downloading again..." }
             return $false
         }
-        # PortableApps apps are unpacked (older versions of this script kept just the .paf.exe installer)
-        if ($Paf -and -not (Test-Path -LiteralPath (Join-Path $folder 'App'))) {
+        # PortableApps apps are unpacked (older versions of this script kept just the .paf.exe installer; other
+        # -Paf installers, eg. DDU's, have no App folder, so the leftover installer is what's looked for)
+        if ($Paf -and (Get-ChildItem -LiteralPath $folder -Filter '*.paf.exe' -File -ErrorAction SilentlyContinue | Select-Object -First 1)) {
             if (-not $Quiet) { Say "The PortableApps app in $($job.Into) hasn't been unpacked yet, so updating..." }
             return $false
         }
@@ -822,15 +970,16 @@ $script:startTime = Get-Date
 $script:downloadedBytes = [long]0
 $script:reported = $false
 function Write-Report([string]$status, [hashtable]$more = @{}) {
-    if (-not $env:USB_TOOL_REPORT -or $CheckOnly) { return }
+    # (noted even when there's no report to write: it's how the finally block knows the update wasn't stopped)
     $script:reported = $true
+    if (-not $env:USB_TOOL_REPORT -or $CheckOnly) { return }
     try {
         $type = Split-Path -Leaf $AppDir
         $appFolder = if ($typeFolders -contains $type) { Split-Path -Parent $AppDir } else { $type = ''; $AppDir }
         $now = Get-VersionFromName "$((Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File -ErrorAction SilentlyContinue | Select-Object -First 1).Name)"
         $before = Get-VersionFromName $script:oldVersionName
         # where to get it by hand: its page, its GitHub releases, or the download itself
-        $source = if ($Page) { $Page } elseif ($GitHub) { "https://github.com/$GitHub/releases/latest" } elseif ($Url) { $Url } else { '' }
+        $source = if ($Page) { $Page } elseif ($GitHub) { "https://github.com/$GitHub/releases/latest" } elseif ($Winget) { "https://github.com/microsoft/winget-pkgs/tree/master/$(Get-WingetPath $Winget)" } elseif ($Url) { $Url } else { '' }
         $record = [ordered]@{
             app = Split-Path -Leaf $appFolder; appFolder = $appFolder; part = $Name; type = $type; status = $status
             version = $now.Version; built = $now.Built; oldVersion = $before.Version; oldBuilt = $before.Built
@@ -898,21 +1047,26 @@ try {
         if ($PageArm) { $PageArm = $PageArm -f $release }
     }
     $jobs = @()
-    $link = Resolve-Link $Url $Link $Asset
-    if (-not $link) { throw 'No download source given (use -Url, -Page/-Link or -GitHub/-Asset)' }
-    $jobs += [pscustomobject]@{ Link = $link; SaveAs = $SaveAs; Into = $Into; Inner = $Inner }
-    $link86 = Resolve-AltLink $Url86 $Link86 $Asset86 $Page86 $UrlFormat86
-    $linkArm = Resolve-AltLink $UrlArm $LinkArm $AssetArm $PageArm $UrlFormatArm
-    foreach ($extraLink in ($Extra -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ }) {
-        $jobs += [pscustomobject]@{ Link = $extraLink; SaveAs = $null; Into = $Into; IsExtra = $true }
-    }
-    if ($GitHub -and $ExtraAsset) {
-        foreach ($extraFile in $script:release.assets | Where-Object { $_.name -match $ExtraAsset -and $_.browser_download_url -ne $link }) {
-            $jobs += [pscustomobject]@{ Link = $extraFile.browser_download_url; SaveAs = $null; Into = $Into; IsExtra = $true }
+    if ($Winget) { $jobs = @(Get-WingetJobs) }
+    else {
+        $link = Resolve-Link $Url $Link $Asset
+        if (-not $link) { throw 'No download source given (use -Url, -Page/-Link, -GitHub/-Asset or -Winget)' }
+        $jobs += [pscustomobject]@{ Link = $link; SaveAs = $SaveAs; Into = $Into; Inner = $Inner }
+        $link86 = Resolve-AltLink $Url86 $Link86 $Asset86 $Page86 $UrlFormat86
+        $linkArm = Resolve-AltLink $UrlArm $LinkArm $AssetArm $PageArm $UrlFormatArm
+        foreach ($extraLink in ($Extra -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ }) {
+            $jobs += [pscustomobject]@{ Link = $extraLink; SaveAs = $null; Into = $Into; IsExtra = $true }
         }
+        if ($GitHub -and $ExtraAsset) {
+            foreach ($extraFile in $script:release.assets | Where-Object { $_.name -match $ExtraAsset -and $_.browser_download_url -ne $link }) {
+                $jobs += [pscustomobject]@{ Link = $extraFile.browser_download_url; SaveAs = $null; Into = $Into; IsExtra = $true }
+            }
+        }
+        if ($link86) { $jobs += [pscustomobject]@{ Link = $link86; SaveAs = $SaveAs86; Into = $Into86; Inner = $Inner86 } }
+        if ($linkArm) { $jobs += [pscustomobject]@{ Link = $linkArm; SaveAs = $SaveAsArm; Into = $IntoArm; Inner = $InnerArm } }
     }
-    if ($link86) { $jobs += [pscustomobject]@{ Link = $link86; SaveAs = $SaveAs86; Into = $Into86; Inner = $Inner86 } }
-    if ($linkArm) { $jobs += [pscustomobject]@{ Link = $linkArm; SaveAs = $SaveAsArm; Into = $IntoArm; Inner = $InnerArm } }
+    # (a winget package's version is part of what's recorded, as some vendors' links don't change between versions)
+    $wingetKey = if ($Winget) { "winget=$Winget $script:wingetListed" } else { '' }
 
     # -CheckOnly: show where each link leads and what it is (from its first 1 KB), without changing anything
     if ($CheckOnly) {
@@ -949,7 +1103,7 @@ try {
     # after moving files the checksums are out of date, so do a full update
     if ($movedRootFiles) { $oldRecord = '' }
     $oldKey = (($oldRecord -split "`r?`n") | Where-Object { $_ -and $_ -notlike 'built=*' }) -join "`r`n"
-    if (-not $Url -and $oldRecord) {
+    if (-not $Url -and $oldRecord -and (-not $wingetKey -or $oldRecord.Contains($wingetKey))) {
         $unchanged = @($jobs | Where-Object { $oldRecord.Contains("link=$($_.Link)") }).Count -eq $jobs.Count
         if ($unchanged -and (Test-AppFiles $jobs)) {
             Add-DataFolder $jobs
@@ -992,6 +1146,13 @@ try {
                 if ($stamp -lt (Get-Date).AddMinutes(-10)) { $stamp } else { $null }
             )
         }
+        if ($job.Sha256 -and $job.Hash -ne $job.Sha256) {
+            # the vendor has usually put out a newer build at the same link since winget listed it, so it's kept,
+            # with its version read from the file rather than taken from winget's listing
+            Say "WARNING: this isn't the file winget lists (its SHA256 differs), probably a newer build at the same link."
+            $script:wingetVersion = $null
+            $script:wingetDate = $null
+        }
     }
 
     # skip everything if the downloads match what was installed last time
@@ -999,6 +1160,7 @@ try {
         "link=$($_.Link)"; "url=$($_.FinalUrl)"; "sha256=$($_.Hash)"
         if ($_.Stamp) { "stamp=$($_.Stamp)" }
     }) -join "`r`n"
+    if ($wingetKey) { $record += "`r`n$wingetKey" }
     $installed = $jobs | Where-Object { $Extract -or $Paf -or (Test-Path -LiteralPath $_.Target) }
     # some links change on every visit (eg. ReNamer's carry a new key each time), so the same files as last
     # time also count as up to date
@@ -1037,6 +1199,18 @@ try {
                 continue
             }
             $job | Add-Member -NotePropertyName Source -NotePropertyValue (Expand-ToStaging $job.Temp $job.Kind $staging $job.Inner)
+            if ($job.TakeOnly) {
+                # just the installer from the .zip (winget's NestedInstallerFiles), eg. MSI Afterburner's setup.exe
+                $picked = New-StagingPath extract
+                $downloads += $picked
+                New-Item -ItemType Directory -Path $picked | Out-Null
+                foreach ($file in $job.TakeOnly) {
+                    $inZip = Join-Path $job.Source ($file -replace '^\.\\', '')
+                    if (-not (Test-Path -LiteralPath $inZip)) { throw "No '$file' in the download (winget's listing may be out of date)" }
+                    Copy-Item -LiteralPath $inZip -Destination $picked
+                }
+                $job.Source = $picked
+            }
         }
     }
 

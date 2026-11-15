@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title Display Driver Uninstaller (DDU)
 
-set "application=*.exe"
+set "application=Display Driver Uninstaller.exe"
 set "arguments="
 set "folder=Portable"
 

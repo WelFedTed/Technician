@@ -14,9 +14,9 @@ set "resultRank=0"
 rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "MSI Afterburner" ^
-    -Manual ^
     -Page "https://www.msi.com/Landing/afterburner/graphics-cards" ^
-    -Note "MSI blocks scripted downloads. Get MSIAfterburnerSetup.zip there and save the setup exe from it in Installer\x86."
+    -Winget "Guru3D.Afterburner" -Into "x86" ^
+    -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause

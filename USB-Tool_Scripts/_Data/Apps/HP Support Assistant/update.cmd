@@ -14,9 +14,9 @@ set "resultRank=0"
 rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" -MoveFrom "%~dp0." ^
     -Name "HP Support Assistant" ^
-    -Manual ^
     -Page "https://support.hp.com/au-en/help/hp-support-assistant" ^
-    -Note "HP changes the download link with every release."
+    -Winget "HP.SupportAssistant" -Into "x64" ^
+    -Clean
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

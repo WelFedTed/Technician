@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title WSUS Offline
 
-set "application=*.exe"
+set "application=UpdateGenerator.exe"
 set "arguments="
 set "folder=Portable"
 

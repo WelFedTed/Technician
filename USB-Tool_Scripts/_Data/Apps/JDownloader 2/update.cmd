@@ -14,9 +14,9 @@ set "resultRank=0"
 rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" -MoveFrom "%~dp0." ^
     -Name "JDownloader 2" ^
-    -Manual ^
     -Page "https://jdownloader.org/jdownloader2" ^
-    -Note "JDownloader is downloaded through file-hosting mirrors, so get it by hand."
+    -Winget "AppWork.JDownloader" -Into "x64" -Into86 "x86" -IntoArm "ARM64" ^
+    -Clean
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

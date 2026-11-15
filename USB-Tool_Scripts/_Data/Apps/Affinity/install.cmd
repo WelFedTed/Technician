@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title Install Affinity
 
-set "application=*.exe"
+set "application=*.msix"
 set "arguments="
 set "folder=Installer"
 
