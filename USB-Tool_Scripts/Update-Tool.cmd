@@ -240,6 +240,8 @@ rem ----------------------------------------------------------------------------
 	rem the drive's "last updated" file (eg. v2026-11-14.version), unless the script update failed
 	set "stampName="
 	if not "%scriptsResult%" == "FAILED" call :stampDrive
+	rem the app updates download and unpack in _Data\Temp on the drive; remove it once it's empty
+	rmdir "%root%_Data\Temp" 2>nul
 
 	call :header "Summary"
 	if defined stampName echo Drive:   last updated !stampName:~1,10! ^(!stampName!^)

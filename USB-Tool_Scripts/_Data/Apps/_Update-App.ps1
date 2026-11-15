@@ -100,6 +100,41 @@ $alwaysKeep = @('update.cmd', '*.url', 'run.cmd', 'install.cmd', 'cli.cmd', '*.v
 # each app folder holds up to three of these, each with its own build folders, version file and checksums
 $typeFolders = @('Installer', 'Portable', 'CLI')
 
+# downloads are saved and unpacked in _Data\Temp on the USB itself, not in %TEMP%: the files end up on the
+# USB anyway, and the PC's C: drive may be nearly full (big apps need several GB while unpacking)
+# (the unpacked files are still copied into place, not moved: reading each file is when Windows Defender
+# checks it, so files it blocks are noted straight away rather than vanishing from the app folder later)
+function Get-StagingRoot {
+    $folder = $AppDir
+    while ($folder) {
+        if ((Split-Path -Leaf $folder) -eq '_Data') { break }
+        $folder = Split-Path -Parent $folder
+    }
+    $candidates = @()
+    if ($folder) { $candidates += Join-Path $folder 'Temp' }
+    # (not inside a USB tool, eg. a test folder, or the USB is read-only: fall back to the PC's temp folder)
+    $candidates += $env:TEMP
+    foreach ($root in $candidates) {
+        try {
+            New-Item -ItemType Directory -Path $root -Force -ErrorAction Stop | Out-Null
+            $probe = Join-Path $root ("USB-Tool-probe-" + [Guid]::NewGuid().ToString('N'))
+            [IO.File]::WriteAllText($probe, '')
+            Remove-Item -LiteralPath $probe -Force
+            return $root
+        }
+        catch { }
+    }
+    return $env:TEMP
+}
+$stagingRoot = Get-StagingRoot
+function New-StagingPath([string]$kind) { Join-Path $stagingRoot ("USB-Tool-$kind-" + [Guid]::NewGuid().ToString('N')) }
+# leftovers from an update that was closed part-way (after a day, so another update running now is left alone)
+if ($stagingRoot -ne $env:TEMP) {
+    Get-ChildItem -LiteralPath $stagingRoot -Filter 'USB-Tool-*' -Force -ErrorAction SilentlyContinue |
+        Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-1) } |
+        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+}
+
 # .NET is used for hashing and unzipping instead of Get-FileHash / Expand-Archive,
 # because those cmdlets go missing when PowerShell's module path is broken (eg. launched from PowerShell 7)
 Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -822,7 +857,7 @@ try {
     if ($CheckOnly) {
         $bad = 0
         foreach ($job in $jobs) {
-            $sample = Join-Path $env:TEMP ("USB-Tool-check-" + [Guid]::NewGuid().ToString('N'))
+            $sample = New-StagingPath check
             $curlArgs = @('-sSL', '--fail', '--connect-timeout', '20', '--max-time', '60', '-r', '0-1023', '-A', $userAgent, '-o', $sample, '-D', '-', '-w', '%{url_effective}')
             if ($Referer) { $curlArgs += @('-e', $Referer) }
             $out = @(& $curl @curlArgs $job.Link 2>&1 | ForEach-Object { "$_" })
@@ -877,7 +912,7 @@ try {
 
     foreach ($job in $jobs) {
         Say "Downloading $($job.Link)"
-        $temp = Join-Path $env:TEMP ("USB-Tool-download-" + [Guid]::NewGuid().ToString('N'))
+        $temp = New-StagingPath download
         $downloads += $temp
         $finalUrl = Get-Download $job.Link $temp
         $kind = Test-Download $temp $job.Link -AllowPlain:([bool]$job.IsExtra)
@@ -916,7 +951,7 @@ try {
     if ($Paf) {
         Say 'Unpacking the PortableApps installer...'
         foreach ($job in $jobs) {
-            $staging = Join-Path $env:TEMP ("USB-Tool-paf-" + [Guid]::NewGuid().ToString('N'))
+            $staging = New-StagingPath paf
             $downloads += $staging
             $pafVersion = Expand-Paf $job.Temp $staging
             $job | Add-Member -NotePropertyMembers @{ Source = $staging; PafVersion = $pafVersion }
@@ -927,7 +962,7 @@ try {
     if ($Extract) {
         Say 'Extracting...'
         foreach ($job in $jobs) {
-            $staging = Join-Path $env:TEMP ("USB-Tool-extract-" + [Guid]::NewGuid().ToString('N'))
+            $staging = New-StagingPath extract
             $downloads += $staging
             if ($job.Kind -notin @('zip', '7z')) {
                 # a plain -Extra file: staged as-is, so it's copied next to the unzipped app
@@ -991,7 +1026,7 @@ try {
 
     if ($script:blocked.Count -gt 0) {
         Say "WARNING: Windows Defender blocked $($script:blocked.Count) file(s), so they weren't copied: $($script:blocked -join ', ')"
-        Say 'To keep them, add a Defender exclusion for this app folder and %TEMP%, then run the update again.'
+        Say "To keep them, add a Defender exclusion for this app folder and $stagingRoot, then run the update again."
         Say 'Done (with blocked files)'
         exit 3
     }
@@ -1002,7 +1037,7 @@ catch {
     $message = $_.Exception.Message
     if ($message -match 'virus or potentially unwanted software') {
         $message = 'Windows Defender blocked a file in this app as unwanted software (common for password-recovery and repair tools). ' +
-            'Add a Defender exclusion for this app folder and %TEMP%, or update it by hand.'
+            "Add a Defender exclusion for this app folder and $stagingRoot, or update it by hand."
     }
     Say "FAILED: $message"
     if ($script:applying) {
