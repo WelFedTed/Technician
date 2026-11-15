@@ -142,14 +142,22 @@ function Get-StagingRoot {
     }
     return $env:TEMP
 }
-$stagingRoot = Get-StagingRoot
-function New-StagingPath([string]$kind) { Join-Path $stagingRoot ("USB-Tool-$kind-" + [Guid]::NewGuid().ToString('N')) }
-# leftovers from an update that was closed part-way (after a day, so another update running now is left alone)
-if ($stagingRoot -ne $env:TEMP) {
-    Get-ChildItem -LiteralPath $stagingRoot -Filter 'USB-Tool-*' -Force -ErrorAction SilentlyContinue |
-        Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-1) } |
-        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+# (found when first needed, as most runs find the app already up to date and download nothing: checking the
+# USB can be written to, and tidying it, would otherwise slow every app's check)
+$script:stagingRoot = $null
+function Get-StagingFolder {
+    if (-not $script:stagingRoot) {
+        $script:stagingRoot = Get-StagingRoot
+        # leftovers from an update that was closed part-way (after a day, so another update running now is left alone)
+        if ($script:stagingRoot -ne $env:TEMP) {
+            Get-ChildItem -LiteralPath $script:stagingRoot -Filter 'USB-Tool-*' -Force -ErrorAction SilentlyContinue |
+                Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-1) } |
+                Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+    return $script:stagingRoot
 }
+function New-StagingPath([string]$kind) { Join-Path (Get-StagingFolder) ("USB-Tool-$kind-" + [Guid]::NewGuid().ToString('N')) }
 
 # .NET is used for hashing and unzipping instead of Get-FileHash / Expand-Archive,
 # because those cmdlets go missing when PowerShell's module path is broken (eg. launched from PowerShell 7)
@@ -463,6 +471,21 @@ function Get-RemoteStamp([string]$address) {
     return ''
 }
 
+# whether a server stamp matches one recorded last time. With an ETag, the ETag and size are enough: the ETag
+# changes whenever the file does, while some servers give the same file a different Last-Modified date from
+# one request to the next (eg. Google's for Chrome, which had it downloaded in full on every run)
+function Test-SameStamp([string]$stamp, [string]$record) {
+    if (-not $stamp) { return $false }
+    $etag, $null, $size = $stamp -split '\|'
+    foreach ($line in $record -split "`r?`n" | Where-Object { $_ -like 'stamp=*' }) {
+        $old = $line.Substring(6)
+        if ($old -eq $stamp) { return $true }
+        $oldEtag, $null, $oldSize = $old -split '\|'
+        if ($etag -and $etag -eq $oldEtag -and $size -eq $oldSize) { return $true }
+    }
+    return $false
+}
+
 function Get-FileKind([string]$path) {
     $bytes = [byte[]]::new(8)
     $stream = [IO.File]::OpenRead($path)
@@ -658,7 +681,9 @@ function Expand-ToStaging([string]$archive, [string]$kind, [string]$staging, [st
 # Version file, checksums and parity
 # ---------------------------------------------------------------------------------------------
 
-Add-Type -TypeDefinition @'
+# CRC32s for checksums.sfv, compiled only when checksums are written: compiling takes a moment every time this
+# script starts, and most runs find the app already up to date
+$crc32Source = @'
 public static class UsbToolCrc32 {
     static readonly uint[] Table = MakeTable();
     static uint[] MakeTable() {
@@ -682,6 +707,7 @@ public static class UsbToolCrc32 {
     }
 }
 '@
+function Initialize-Crc32 { if (-not ('UsbToolCrc32' -as [type])) { Add-Type -TypeDefinition $crc32Source } }
 
 # ProductVersion from an .msi installer's property table
 function Get-MsiVersion([string]$path) {
@@ -797,6 +823,7 @@ function Get-BuildDate([object[]]$jobs) {
 }
 
 function Write-Checksums {
+    Initialize-Crc32
     $sfv = Join-Path $AppDir 'checksums.sfv'
     $files = Get-ChildItem -LiteralPath $AppDir -Recurse -File -Force |
         Where-Object { $_.Name -ne 'checksums.sfv' -and $_.Extension -ne '.par2' } |
@@ -1121,7 +1148,7 @@ try {
     # fixed links don't show the version, so compare the server's file date/size/ETag instead of downloading
     foreach ($job in $jobs) { $job | Add-Member -NotePropertyName Stamp -NotePropertyValue $(if ($Url) { Get-RemoteStamp $job.Link } else { '' }) }
     if ($Url -and $oldRecord) {
-        $unchanged = @($jobs | Where-Object { $_.Stamp -and $oldRecord.Contains("stamp=$($_.Stamp)") }).Count -eq $jobs.Count
+        $unchanged = @($jobs | Where-Object { Test-SameStamp $_.Stamp $oldRecord }).Count -eq $jobs.Count
         if ($unchanged -and (Test-AppFiles $jobs)) {
             Add-DataFolder $jobs
             Repair-OldVersionName $versionFile
@@ -1269,9 +1296,9 @@ try {
 
     if ($script:blocked.Count -gt 0) {
         Say "WARNING: Windows Defender blocked $($script:blocked.Count) file(s), so they weren't copied: $($script:blocked -join ', ')"
-        Say "To keep them, add a Defender exclusion for this app folder and $stagingRoot, then run the update again."
+        Say "To keep them, add a Defender exclusion for this app folder and $(Get-StagingFolder), then run the update again."
         Say 'Done (with blocked files)'
-        Write-Report 'blocked' @{ blocked = @($script:blocked); exclusion = $stagingRoot }
+        Write-Report 'blocked' @{ blocked = @($script:blocked); exclusion = (Get-StagingFolder) }
         exit 3
     }
     Say 'Done'
@@ -1282,7 +1309,7 @@ catch {
     $message = $_.Exception.Message
     if ($message -match 'virus or potentially unwanted software') {
         $message = 'Windows Defender blocked a file in this app as unwanted software (common for password-recovery and repair tools). ' +
-            "Add a Defender exclusion for this app folder and $stagingRoot, or update it by hand."
+            "Add a Defender exclusion for this app folder and $(Get-StagingFolder), or update it by hand."
     }
     Say "FAILED: $message"
     if ($script:applying) {
