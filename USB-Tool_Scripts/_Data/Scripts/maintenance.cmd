@@ -66,8 +66,9 @@ call :begin "Creating restore point"
 powershell -NoProfile -Command "Checkpoint-Computer -Description 'Before maintenance' -RestorePointType MODIFY_SETTINGS -ErrorAction Stop -WarningAction SilentlyContinue -WarningVariable w; if ($w) { $m = '  No restore point created: ' + $w[0].Message; Write-Output $m; Add-Content -LiteralPath $env:log -Value $m; exit 2 }; Write-Output '  Restore point created.'"
 call :end %errorlevel%
 
-rem topgrade also updates winget packages, so winget is only run directly
-rem when topgrade isn't installed
+rem topgrade also updates winget packages and Microsoft Store apps (it runs
+rem "store updates --apply" right after its WinGet step), so winget and the
+rem Store CLI are only run directly when topgrade isn't installed
 where topgrade >nul 2>&1
 if errorlevel 1 goto noTopgrade
 
@@ -89,6 +90,21 @@ rem (-1978335189 = 0x8A15002B "no applicable update", i.e. nothing to upgrade)
 call :begin "Upgrading all packages (winget)"
 winget upgrade --all --silent --accept-source-agreements --accept-package-agreements
 call :end %errorlevel% "0 -1978335189"
+
+rem Microsoft Store apps, via the Store CLI (store.exe, built into recent
+rem Windows 11). --apply installs the updates without asking; without it the
+rem CLI stops at a "install now? [y/n]" prompt.
+where store >nul 2>&1
+if errorlevel 1 goto noStoreCli
+call :begin "Updating Microsoft Store apps (store)"
+store updates --apply
+call :end %errorlevel%
+goto packagesDone
+
+:noStoreCli
+echo Microsoft Store CLI not found, skipping Store app updates.
+>>"%log%" echo [SKIP]  Updating Microsoft Store apps - store CLI not installed
+echo:
 
 :packagesDone
 
@@ -145,9 +161,18 @@ call :begin "Running disk cleanup"
 cleanmgr /sagerun:10
 call :end %errorlevel%
 
-call :begin "Running disk optimization - all drives"
-defrag /c /o /h /u /v
-call :end %errorlevel%
+rem Fixed NTFS drives, used by both disk optimization and disk check. (defrag /c
+rem would also try volumes that can't be optimized, e.g. a FAT32 USB stick, and
+rem could end with an error code every run.) Falls back to C: if the list can't
+rem be read.
+set "drives="
+for /f %%v in ('powershell -NoProfile -Command "Get-Volume | Where-Object { $_.FileSystem -eq 'NTFS' -and $_.DriveLetter -and $_.DriveType -eq 'Fixed' } | Sort-Object DriveLetter | ForEach-Object { $_.DriveLetter }"') do call :addDrive %%v
+if not defined drives set "drives=C"
+echo Fixed NTFS drives: %drives%
+echo:
+
+rem /o = the right optimization per drive type (TRIM for SSDs, defrag for HDDs)
+for %%v in (%drives%) do call :optimizeDrive %%v
 
 rem Drive health as reported by the drives themselves (SMART / NVMe status)
 call :begin "Checking drive health"
@@ -158,12 +183,7 @@ rem Online scan of every fixed NTFS drive. /r can't run while Windows is using
 rem a drive, so chkdsk would stop and ask to schedule a full (hours-long) scan at
 rem the next restart. If a scan finds problems, it says so; repair them with
 rem   chkdsk X: /spotfix
-set /a scanned=0
-for /f %%v in ('powershell -NoProfile -Command "Get-Volume | Where-Object { $_.FileSystem -eq 'NTFS' -and $_.DriveLetter -and $_.DriveType -eq 'Fixed' } | Sort-Object DriveLetter | ForEach-Object { $_.DriveLetter }"') do call :scanDrive %%v
-if %scanned% gtr 0 goto scansDone
-rem (couldn't list the drives - scan C: at least)
-call :scanDrive C
-:scansDone
+for %%v in (%drives%) do call :scanDrive %%v
 
 rem Restart needed? (pending component servicing, Windows Update, or files
 rem queued to be replaced at boot)
@@ -223,9 +243,20 @@ exit /b 0
 echo:
 exit /b 0
 
+rem :addDrive X - append drive letter X to the drives list
+:addDrive
+if defined drives (set "drives=%drives% %1") else (set "drives=%1")
+exit /b 0
+
+rem :optimizeDrive X - optimize drive X: (TRIM / defrag as suited)
+:optimizeDrive
+call :begin "Optimizing drive %1:"
+defrag %1: /o /h /u /v
+call :end %errorlevel%
+exit /b 0
+
 rem :scanDrive X - online chkdsk scan of drive X:
 :scanDrive
-set /a scanned+=1
 call :begin "Checking drive %1: - online scan"
 chkdsk %1: /scan /perf
 call :end %errorlevel%
