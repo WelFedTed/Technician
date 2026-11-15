@@ -24,6 +24,9 @@
 #                                     it's marked as a pre-release (also for repos that publish other platforms'
 #                                     releases in between, eg. Mole's -windows releases)
 #   -Manual [-Page <url>] [-Note <text>]  can't be downloaded automatically; prints where to get it
+#       [-Action <script> -ActionText <text>]   a script in the app folder that gets it instead (eg. Aseprite's
+#                                     build.cmd), offered in Update-Tool's report
+#       [-GitHub <owner/repo>]        counts as up to date when the USB already has the latest release's version
 # Optional 32-bit and ARM64 downloads (the same options with 86 or Arm on the end):
 #   -Url86 / -Link86 / -Asset86 from the same source,
 #   or -UrlFormat86 to build it from the same version -Link captured,
@@ -75,7 +78,7 @@ param(
     [string]$Page, [string]$Link, [string]$Link86, [string]$LinkArm,
     [string]$UrlFormat, [string]$UrlFormat86, [string]$UrlFormatArm, [string]$Page86, [string]$PageArm,
     [string]$GitHub, [string]$Asset, [string]$Asset86, [string]$AssetArm,
-    [switch]$Manual, [string]$Note,
+    [switch]$Manual, [string]$Note, [string]$Action, [string]$ActionText,
     [string]$SaveAs, [string]$SaveAs86, [string]$SaveAsArm,
     [switch]$Extract, [switch]$Paf, [string]$Into, [string]$Into86, [string]$IntoArm,
     [switch]$Flatten, [switch]$Clean, [string]$Keep, [string]$DataFolder,
@@ -802,6 +805,46 @@ function Repair-OldVersionName($file) {
 }
 
 # ---------------------------------------------------------------------------------------------
+# Update-Tool's report
+# ---------------------------------------------------------------------------------------------
+
+# the version in a version file's name: v26.06_2026-11-07.version gives 26.06 (and the date)
+function Get-VersionFromName([string]$fileName) {
+    if ($fileName -match '^v(.+)_(\d{4}-\d{2}-\d{2})\.version$') { return @{ Version = $Matches[1]; Built = $Matches[2] } }
+    if ($fileName -match '^v(\d{4}-\d{2}-\d{2})\.version$') { return @{ Version = ''; Built = $Matches[1] } }
+    return @{ Version = ''; Built = '' }
+}
+
+# Update-Tool.cmd sets USB_TOOL_REPORT to a file; each part of each app adds a line to it saying how it went
+# (status: updated, current, manual, failed, blocked, or cancelled when it was stopped part-way, eg. with
+# Ctrl+C), which Update-Tool's HTML report is made from
+$script:startTime = Get-Date
+$script:downloadedBytes = [long]0
+$script:reported = $false
+function Write-Report([string]$status, [hashtable]$more = @{}) {
+    if (-not $env:USB_TOOL_REPORT -or $CheckOnly) { return }
+    $script:reported = $true
+    try {
+        $type = Split-Path -Leaf $AppDir
+        $appFolder = if ($typeFolders -contains $type) { Split-Path -Parent $AppDir } else { $type = ''; $AppDir }
+        $now = Get-VersionFromName "$((Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File -ErrorAction SilentlyContinue | Select-Object -First 1).Name)"
+        $before = Get-VersionFromName $script:oldVersionName
+        # where to get it by hand: its page, its GitHub releases, or the download itself
+        $source = if ($Page) { $Page } elseif ($GitHub) { "https://github.com/$GitHub/releases/latest" } elseif ($Url) { $Url } else { '' }
+        $record = [ordered]@{
+            app = Split-Path -Leaf $appFolder; appFolder = $appFolder; part = $Name; type = $type; status = $status
+            version = $now.Version; built = $now.Built; oldVersion = $before.Version; oldBuilt = $before.Built
+            seconds = [Math]::Round(((Get-Date) - $script:startTime).TotalSeconds, 1); downloaded = $script:downloadedBytes
+            source = $source; note = $Note; action = $Action; actionText = $ActionText; message = ''; blocked = @()
+        }
+        foreach ($key in $more.Keys) { $record[$key] = $more[$key] }
+        $line = ([pscustomobject]$record | ConvertTo-Json -Compress -Depth 3) + "`r`n"
+        [IO.File]::AppendAllText($env:USB_TOOL_REPORT, $line, (New-Object Text.UTF8Encoding $false))
+    }
+    catch { Say "WARNING: couldn't add this app to the update report: $($_.Exception.Message)" }
+}
+
+# ---------------------------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------------------------
 
@@ -812,12 +855,30 @@ if ($MoveFrom) {
     try { Move-OldLayout $MoveFrom }
     catch { Say "WARNING: couldn't move the old layout from ${MoveFrom}: $($_.Exception.Message)" }
 }
+# (the version on the USB before this update, for the report)
+$script:oldVersionName = "$((Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File -ErrorAction SilentlyContinue | Select-Object -First 1).Name)"
 
 if ($Manual) {
+    # with -GitHub, the latest release says whether the copy on the USB is still current (eg. a build
+    # made with Aseprite's build.cmd); this reads the /releases/latest redirect, not GitHub's limited API
+    $latest = ''
+    if ($GitHub) {
+        $final = & $curl -sSIL --fail --retry 2 --connect-timeout 20 -A $userAgent -o NUL -w '%{url_effective}' "https://github.com/$GitHub/releases/latest" 2>$null
+        if ($LASTEXITCODE -eq 0 -and "$final" -match '/releases/tag/(.+)$') { $latest = [regex]::Match([Uri]::UnescapeDataString($Matches[1]), '\d+(\.\d+)+').Value }
+        $have = (Get-VersionFromName $script:oldVersionName).Version
+        if ($latest -and $have -eq $latest) {
+            Say "Already up to date ($have is the latest release)"
+            Write-Report 'current' @{ latest = $latest }
+            exit 0
+        }
+        if ($latest) { Say "The latest release is $latest; $(if ($have) { "this USB has $have" } else { "it isn't on this USB yet" })." }
+    }
     Say 'This app has to be updated by hand.'
     if ($Page) { Say "Download it from: $Page" }
     if ($Note) { Say $Note }
+    if ($Action) { Say "Or run $Action in the app's folder$(if ($ActionText) { " ($ActionText)" })." }
     Say "Put builds that only run on 64-bit Windows in $AppDir\x64, and anything that runs on 32-bit Windows in $AppDir\x86."
+    Write-Report 'manual' @{ latest = $latest }
     exit 2
 }
 
@@ -894,6 +955,7 @@ try {
             Add-DataFolder $jobs
             Repair-OldVersionName $versionFile
             Say "Already up to date"
+            Write-Report 'current'
             exit 0
         }
     }
@@ -906,6 +968,7 @@ try {
             Add-DataFolder $jobs
             Repair-OldVersionName $versionFile
             Say "Already up to date"
+            Write-Report 'current'
             exit 0
         }
     }
@@ -915,6 +978,7 @@ try {
         $temp = New-StagingPath download
         $downloads += $temp
         $finalUrl = Get-Download $job.Link $temp
+        $script:downloadedBytes += (Get-Item -LiteralPath $temp).Length
         $kind = Test-Download $temp $job.Link -AllowPlain:([bool]$job.IsExtra)
         $folder = if ($job.Into) { Join-Path $AppDir $job.Into } else { $AppDir }
         $fileName = if ($job.SaveAs) { $job.SaveAs } else { Get-DownloadName $job.Link $finalUrl $kind }
@@ -944,6 +1008,7 @@ try {
         Add-DataFolder $jobs
         Repair-OldVersionName $versionFile
         Say "Already up to date"
+        Write-Report 'current'
         exit 0
     }
 
@@ -1028,9 +1093,11 @@ try {
         Say "WARNING: Windows Defender blocked $($script:blocked.Count) file(s), so they weren't copied: $($script:blocked -join ', ')"
         Say "To keep them, add a Defender exclusion for this app folder and $stagingRoot, then run the update again."
         Say 'Done (with blocked files)'
+        Write-Report 'blocked' @{ blocked = @($script:blocked); exclusion = $stagingRoot }
         exit 3
     }
     Say 'Done'
+    Write-Report 'updated'
     exit 0
 }
 catch {
@@ -1046,8 +1113,17 @@ catch {
         Say 'The update failed part-way through, so check this app folder.'
     }
     else { Say 'Nothing was changed; the old version (if there was one) is still in place.' }
+    Write-Report 'failed' @{ message = $message; partWay = [bool]$script:applying }
     exit 1
 }
 finally {
+    # (only reached without a result when it was stopped, eg. with Ctrl+C, which skips the catch block)
+    if (-not $script:reported -and -not $CheckOnly) {
+        if ($script:applying) {
+            # forget the recorded version so the next run redoes it
+            Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+        }
+        Write-Report 'cancelled' @{ partWay = [bool]$script:applying }
+    }
     foreach ($d in $downloads) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }
 }

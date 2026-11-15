@@ -15,6 +15,12 @@ rem ----------------------------------------------------------------------------
 	rem      (folders that were merged or renamed, eg. "7-Zip Portable", may show as skipped once afterwards)
 	rem   3. Drive: replaces v<date>.version in the drive's root with today's date (eg. v2026-11-14.version),
 	rem      a record of when the drive was last updated (skipped if the scripts couldn't be updated)
+	rem   4. Report: makes an HTML report in %TEMP%\USB-Tool-Report and opens it: the run's numbers, what each
+	rem      app did, and what needs doing by hand (download links, scripts to run such as Aseprite's build.cmd)
+	rem      (made by _Data\Apps\_Update-Report.ps1, from what each app's update writes to %USB_TOOL_REPORT%)
+	rem      If the update is stopped early (Ctrl+C, or closing the window), the report is still made, saying
+	rem      where it stopped and which apps weren't tried: a batch file can't run anything once it's stopped,
+	rem      so a hidden watcher makes it once the run lets go of running.lock in the report's folder
 	rem Usage: Update-Tool.cmd [/scripts ^| /apps]   (no argument = update both)
 	rem Files on the drive that aren't in the repo (eg. the apps themselves) are never deleted
 	rem Scripts on the drive are overwritten with the repo version, so make local changes in the repo
@@ -31,6 +37,15 @@ rem ----------------------------------------------------------------------------
 	set "src=%work%\Technician-%branch%\USB-Tool_Scripts"
 	set "curl=%SystemRoot%\System32\curl.exe"
 	set "tar=%SystemRoot%\System32\tar.exe"
+	rem the report's details and the report itself (replaced on each run)
+	set "reportDir=%TEMP%\USB-Tool-Report"
+	set "USB_TOOL_REPORT=%reportDir%\results.jsonl"
+	set "appsList=%reportDir%\apps.txt"
+	rem every app folder this run will try, and how far it got (for the report if it's stopped early)
+	set "appsPlan=%reportDir%\plan.txt"
+	set "runState=%reportDir%\state.txt"
+	rem clear PSModulePath so Windows PowerShell loads its own modules (it breaks if started from PowerShell 7)
+	set "PSModulePath="
 
 	set "doScripts=1"
 	set "doApps=1"
@@ -70,12 +85,30 @@ rem ----------------------------------------------------------------------------
 	)
 	echo Connected
 
+	rem a fresh folder for this run's report
+	if exist "%reportDir%" rmdir /s /q "%reportDir%"
+	mkdir "%reportDir%"
+	type nul > "%appsList%"
+	rem (-Begin also starts the hidden watcher that makes the report if this run is stopped early)
+	if exist "%root%_Data\Apps\_Update-Report.ps1" powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -Begin -DataDir "%reportDir%" -Root "%root%." -DoScripts "%doScripts%" -DoApps "%doApps%"
+
 
 rem Update
 rem ----------------------------------------------------------------------------------------------------
+	rem the run keeps running.lock open until it's done, so the watcher can tell when it was stopped
+	rem (if the lock can't be made, the update still runs, just without a report when it's stopped)
+	set "ran=0"
+	call :run 9>"%reportDir%\running.lock"
+	if "!ran!" == "0" call :run
+	goto end
+
+:run
+	set "ran=1"
 	if "%doScripts%" == "1" (
 		call :updateScripts
 		if errorlevel 1 ( set "scriptsResult=FAILED" ) else ( set "scriptsResult=updated" )
+		>>"%runState%" echo scripts=!scriptsResult!
+		>>"%runState%" echo selfUpdate=!selfUpdate!
 	)
 
 	if "%doApps%" == "1" call :updateApps
@@ -84,13 +117,16 @@ rem ----------------------------------------------------------------------------
 	rem TODO: update Linux + Windows ISOs
 	rem TODO: upgrade Ventoy on this drive itself (the Ventoy app files are already updated in _Data\Apps\Ventoy)
 
-	goto end
+	>>"%runState%" echo step=finish
+	call :summary
+	exit /b 0
 
 
 rem Update Scripts
 rem ----------------------------------------------------------------------------------------------------
 :updateScripts
 	call :header "Updating scripts from github.com/%repo% (%branch%)"
+	>>"%runState%" echo step=scripts
 
 	if exist "%work%" rmdir /s /q "%work%"
 	mkdir "%work%"
@@ -140,6 +176,12 @@ rem ----------------------------------------------------------------------------
 	call :header "Updating apps"
 
 	rem folders starting with _ are notes (eg. "_need a portable pdf reader"), not apps
+	rem (listed first, so a report made after Ctrl+C can say which apps weren't tried)
+	type nul > "%appsPlan%"
+	for /d %%D in ("%root%_Data\Apps\*") do (
+		set "folderName=%%~nxD"
+		if not "!folderName:~0,1!" == "_" >>"%appsPlan%" echo:!folderName!
+	)
 	for /d %%D in ("%root%_Data\Apps\*") do (
 		set "folderName=%%~nxD"
 		if not "!folderName:~0,1!" == "_" call :updateApp "%%~fD"
@@ -152,10 +194,13 @@ rem ----------------------------------------------------------------------------
 	rem set the header text directly; passing names with & through call would break them
 	set "headerText=[!appTotal!] !appName!"
 	call :header
+	>>"%runState%" echo step=app*!appTotal!*!appName!
 
 	if not exist "%~1\update.cmd" (
 		echo No update.cmd, skipping
 		set /a appSkipped+=1
+		rem (* can't be in a folder name, so it separates the fields)
+		>>"%appsList%" echo skip*!appName!
 		exit /b 0
 	)
 
@@ -165,6 +210,7 @@ rem ----------------------------------------------------------------------------
 	set "appResult=!errorlevel!"
 	popd
 	title USB Tool Updater
+	>>"%appsList%" echo !appResult!*!appName!
 
 	rem update.cmd exit codes: 0 = updated or up to date, 2 = needs a manual update,
 	rem 3 = updated but Windows Defender blocked some files, anything else = failed
@@ -222,6 +268,7 @@ rem as a record of when the drive was last updated
 	del /q "%root%v*.version" 2>nul
 	type nul > "%root%v%today%.version"
 	set "stampName=v%today%.version"
+	>>"%runState%" echo stamp=!stampName!
 	exit /b 0
 
 :header
@@ -236,7 +283,7 @@ rem as a record of when the drive was last updated
 
 rem Summary
 rem ----------------------------------------------------------------------------------------------------
-:end
+:summary
 	rem the drive's "last updated" file (eg. v2026-11-14.version), unless the script update failed
 	set "stampName="
 	if not "%scriptsResult%" == "FAILED" call :stampDrive
@@ -263,6 +310,21 @@ rem ----------------------------------------------------------------------------
 		for %%W in ("!appManual:;=" "!") do if not "%%~W" == "" echo   %%~W
 	)
 	echo:
+
+	rem the HTML report (opened at the end, once the run has let go of running.lock)
+	>>"%runState%" echo step=report
+	if exist "%root%_Data\Apps\_Update-Report.ps1" (
+		powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -DataDir "%reportDir%" -Root "%root%." -Scripts "%scriptsResult%" -SelfUpdate "%selfUpdate%" -DoApps "%doApps%" -Stamp "!stampName!"
+		echo:
+	)
+	exit /b 0
+
+
+rem End
+rem ----------------------------------------------------------------------------------------------------
+:end
+	rem the report, in the default browser
+	if exist "%reportDir%\Update-Report.html" start "" "%reportDir%\Update-Report.html"
 
 	rem replace this script last; the whole block is read before it runs, so overwriting is safe here
 	if "%selfUpdate%" == "1" (

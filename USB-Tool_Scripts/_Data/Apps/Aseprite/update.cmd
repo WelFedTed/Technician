@@ -14,7 +14,8 @@ set "resultRank=0"
 rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Aseprite (installer)" ^
-    -Manual ^
+    -Manual -GitHub "aseprite/aseprite" ^
+    -Action "build.cmd" -ActionText "Build Aseprite from source: makes the portable build and the installer" ^
     -Page "https://github.com/aseprite/aseprite/blob/main/INSTALL.md" ^
     -Note "build.cmd in this folder makes the installer along with the portable build (see the Portable note)."
 call :result
@@ -22,7 +23,8 @@ call :result
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "Aseprite" ^
-    -Manual ^
+    -Manual -GitHub "aseprite/aseprite" ^
+    -Action "build.cmd" -ActionText "Build Aseprite from source: makes the portable build and the installer" ^
     -Page "https://github.com/aseprite/aseprite/blob/main/INSTALL.md" ^
     -Note "Aseprite is sold ready-built (aseprite.org, Steam). To build it from source instead, run build.cmd in this folder on a PC with Visual Studio 2022 and its C++ tools; it puts the build in Portable\x64."
 call :result
