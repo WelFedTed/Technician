@@ -51,6 +51,8 @@
 #       [-Action <script> -ActionText <text>]   a script in the app folder that gets it instead (eg. Aseprite's
 #                                     build.cmd), offered in Update-Tool's report
 #       [-GitHub <owner/repo>]        counts as up to date when the USB already has the latest release's version
+#       [-NoUpdates]                  the app isn't updated any more (eg. CodeTwo's QR tool, last released in
+#                                     2019): counts as up to date once it's been saved on the USB
 # Optional 32-bit and ARM64 downloads (the same options with 86 or Arm on the end):
 #   -Url86 / -Link86 / -Asset86 from the same source,
 #   or -UrlFormat86 to build it from the same version -Link captured,
@@ -110,7 +112,7 @@ param(
     [string]$UrlFormat, [string]$UrlFormat86, [string]$UrlFormatArm, [string]$Page86, [string]$PageArm,
     [string]$GitHub, [string]$Asset, [string]$Asset86, [string]$AssetArm,
     [string]$Winget, [string]$WingetType, [string]$WingetScope,
-    [switch]$Manual, [string]$Note, [string]$Action, [string]$ActionText,
+    [switch]$Manual, [switch]$NoUpdates, [string]$Note, [string]$Action, [string]$ActionText,
     [string]$SaveAs, [string]$SaveAs86, [string]$SaveAsArm,
     [switch]$Extract, [switch]$Sfx, [switch]$Paf, [string]$Into, [string]$Into86, [string]$IntoArm,
     [switch]$Flatten, [switch]$Clean, [string]$Keep, [string]$DataFolder,
@@ -1268,6 +1270,17 @@ if ($Manual) {
             exit 0
         }
         if ($latest) { Say "The latest release is $latest; $(if ($have) { "this USB has $have" } else { "it isn't on this USB yet" })." }
+    }
+    # an app that isn't updated any more only needs saving once (anything there besides the update's own files)
+    if ($NoUpdates) {
+        $saved = @(Get-ChildItem -LiteralPath $AppDir -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Extension -notin @('.version', '.sfv', '.par2') -and $_.Name -ne 'update-in-progress.txt' })
+        if ($saved) {
+            Say "Already on this USB ($($saved[0].Name)), and there's nothing newer: this app isn't updated any more"
+            Write-Report 'current'
+            exit 0
+        }
+        Say "It isn't on this USB yet."
     }
     Say 'This app has to be updated by hand.'
     if ($Page) { Say "Download it from: $Page" }
