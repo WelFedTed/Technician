@@ -9,7 +9,7 @@ rem ----------------------------------------------------------------------------
 	rem "wnmrg" for WinMerge), move with the arrow keys or the mouse, Enter starts it, Esc closes without starting
 	rem anything
 	rem Apps in a group folder are listed too, with spaces for the slashes (eg. _Data\Apps\Nirsoft\ProduKey is
-	rem "Nirsoft ProduKey", _Data\Apps\Microsoft\Office\2024 is "Microsoft Office 2024"; see Finding the Apps below)
+	rem "Nirsoft ProduKey", _Data\Apps\Microsoft\Sysinternals\TCPView is "Microsoft Sysinternals TCPView"; see Finding the Apps below)
 	rem The app is started with its own launcher, the first it has of: run.cmd (the portable app), install.cmd
 	rem (its installer), cli.cmd (a command prompt with its command-line tools)
 	rem fzf is kept on the USB like the other apps (_Data\Apps\fzf, updated by Update-Tool.cmd). Without it (before
@@ -143,7 +143,7 @@ rem Finding the Apps
 rem ----------------------------------------------------------------------------------------------------
 	rem :findApps <folder> <its path from _Data\Apps, with a \ after it> <its name shown, with a space after it> <depth>
 	rem Each folder in it with an update.cmd is an app, listed if it has a launcher. A folder without one is a group
-	rem of apps (eg. Nirsoft\ProduKey, Microsoft\Office\2024), so the apps inside it are found too (up to 4 folders
+	rem of apps (eg. Nirsoft\ProduKey, Microsoft\Sysinternals\TCPView), so the apps inside it are found too (up to 4 folders
 	rem down). Folders starting with _ are notes, not apps; download folders (Installer, Portable, CLI) are never
 	rem looked in, as a downloaded app can have an update.cmd of its own (eg. WSUS Offline's client\Update.cmd).
 	rem (the names stay in quotes and for variables, so & or ( ) in them aren't read as commands)

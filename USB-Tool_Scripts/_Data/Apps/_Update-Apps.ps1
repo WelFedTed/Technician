@@ -29,7 +29,7 @@ if ($encoding.CodePage -eq 65001) { $encoding = New-Object Text.UTF8Encoding $fa
 function Add-Line([string]$name, [string]$text) { [IO.File]::AppendAllText((Join-Path $RunDir $name), "$text`r`n", $encoding) }
 
 # the app folders, by name (folders starting with _ are notes, not apps). A folder with an update.cmd is an app;
-# one without is a group of apps (eg. Nirsoft\ProduKey, Microsoft\Office\2024), so the apps inside it are found
+# one without is a group of apps (eg. Nirsoft\ProduKey, Microsoft\Sysinternals\TCPView), so the apps inside it are found
 # too, named by their path from here (up to 4 folders down). A folder here without an update.cmd that has no
 # apps inside it is listed as is (skipped, as it can't be updated). Download folders (Installer, Portable, CLI)
 # are never looked in, as a downloaded app can have an update.cmd of its own (eg. WSUS Offline's client\Update.cmd).

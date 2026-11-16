@@ -10,7 +10,7 @@ rem ----------------------------------------------------------------------------
 	rem   2. Apps: tries every _Data\Apps\<App> folder, running its update.cmd from inside that folder
 	rem      (folders without an update.cmd are skipped; folders starting with _ are notes, not apps)
 	rem      A folder without an update.cmd can be a group of apps, each in its own folder with its own update.cmd
-	rem      (eg. _Data\Apps\Nirsoft\ProduKey, _Data\Apps\Microsoft\Office\2024); these are found too, and shown
+	rem      (eg. _Data\Apps\Nirsoft\ProduKey, _Data\Apps\Microsoft\Sysinternals\TCPView); these are found too, and shown
 	rem      with spaces for the slashes (eg. "Nirsoft ProduKey")
 	rem      Several apps are updated at once (parallel, below), by _Data\Apps\_Update-Apps.ps1: each app's
 	rem      output goes to a log in the run's folder, and a line is shown as each finishes
@@ -167,7 +167,7 @@ rem ----------------------------------------------------------------------------
 	)
 
 	rem folders renamed in the repo: move what's in the old folder on the drive into the new one
-	call :moveFolder "_Data\Apps\Microsoft Activiation Scripts (MAS)" "_Data\Apps\Microsoft Activation Scripts (MAS)"
+	call :moveFolder "_Data\Apps\Microsoft Activiation Scripts (MAS)" "_Data\Apps\Massgrave.dev\Microsoft Activation Scripts (MAS)"
 	call :moveFolder "_Data\Apps\7zip" "_Data\Apps\7-Zip"
 	call :moveFolder "_Data\Apps\7zip CLI" "_Data\Apps\7-Zip CLI"
 	rem the NirSoft tools, moved from "_Data\Apps\Nirsoft <tool>" into the Nirsoft group folder (eg.
@@ -178,6 +178,33 @@ rem ----------------------------------------------------------------------------
 		if exist "%root%_Data\Apps\Nirsoft\!tool!\update.cmd" call :moveFolder "_Data\Apps\%%~nxF" "_Data\Apps\Nirsoft\!tool!"
 	)
 	call :moveFolder "_Data\Apps\NirLauncher" "_Data\Apps\Nirsoft\NirLauncher"
+	rem apps moved into a folder for their maker
+	call :moveFolder "_Data\Apps\Adobe Acrobat Reader" "_Data\Apps\Adobe\Acrobat Reader"
+	call :moveFolder "_Data\Apps\BandiView" "_Data\Apps\Bandisoft\BandiView"
+	call :moveFolder "_Data\Apps\Bandizip" "_Data\Apps\Bandisoft\Bandizip"
+	call :moveFolder "_Data\Apps\CPUID CPU-Z" "_Data\Apps\CPUID\CPU-Z"
+	call :moveFolder "_Data\Apps\CPUID HWMonitor" "_Data\Apps\CPUID\HWMonitor"
+	call :moveFolder "_Data\Apps\CrystalDiskInfo" "_Data\Apps\Crystal Dew World\CrystalDiskInfo"
+	call :moveFolder "_Data\Apps\CrystalDiskMark" "_Data\Apps\Crystal Dew World\CrystalDiskMark"
+	call :moveFolder "_Data\Apps\Firefox" "_Data\Apps\Mozilla\Firefox"
+	call :moveFolder "_Data\Apps\ForensiT Transwiz" "_Data\Apps\ForensiT\Transwiz"
+	call :moveFolder "_Data\Apps\FurMark 1" "_Data\Apps\Geeks3D\FurMark 1"
+	call :moveFolder "_Data\Apps\FurMark 2" "_Data\Apps\Geeks3D\FurMark 2"
+	call :moveFolder "_Data\Apps\HP Support Assistant" "_Data\Apps\HP\Support Assistant"
+	call :moveFolder "_Data\Apps\Intel PresentMon" "_Data\Apps\Intel\PresentMon"
+	call :moveFolder "_Data\Apps\Microsoft Activation Scripts (MAS)" "_Data\Apps\Massgrave.dev\Microsoft Activation Scripts (MAS)"
+	call :moveFolder "_Data\Apps\Microsoft Office" "_Data\Apps\Microsoft\Office"
+	call :moveFolder "_Data\Apps\Microsoft Safety Scanner (MSERT)" "_Data\Apps\Microsoft\Safety Scanner (MSERT)"
+	call :moveFolder "_Data\Apps\Microsoft Security Essentials" "_Data\Apps\Microsoft\Security Essentials"
+	call :moveFolder "_Data\Apps\Microsoft Visual C++ (VC++) Redistributables" "_Data\Apps\Microsoft\Visual C++ Redistributables (VC++)"
+	call :moveFolder "_Data\Apps\Microsoft Windows and Office ISO Download Tool" "_Data\Apps\HeiDoc.net\Microsoft Windows and Office ISO Download Tool"
+	call :moveFolder "_Data\Apps\PassMark KeyboardTest" "_Data\Apps\PassMark\KeyboardTest"
+	call :moveFolder "_Data\Apps\PassMark PerformanceTest" "_Data\Apps\PassMark\PerformanceTest"
+	call :moveFolder "_Data\Apps\Tweaking.com - Windows Repair" "_Data\Apps\Tweaking.com\Windows Repair"
+	rem the Sysinternals tools, in Microsoft's folder
+	for %%T in (Autoruns Disk2vhd NotMyFault "Process Explorer" "Process Monitor (ProcMon)" RootkitRevealer SDelete TCPView) do (
+		call :moveFolder "_Data\Apps\%%~T" "_Data\Apps\Microsoft\Sysinternals\%%~T"
+	)
 	rem folders whose name only changed case: Windows sees them as the same folder, so just rename
 	call :renameCase "_Data\Apps" "RKill"
 
