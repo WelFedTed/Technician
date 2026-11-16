@@ -12,7 +12,7 @@ set "result=0"
 set "resultRank=0"
 
 rem Portable
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "O&O ShutUp10++" ^
     -Url "https://dl5.oo-software.com/files/ooshutup10/OOSU10.exe" ^
     -SaveAs "OOSU10.exe" -Into "x64"

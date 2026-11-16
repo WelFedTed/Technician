@@ -203,6 +203,12 @@ rem ----------------------------------------------------------------------------
 	call :moveFolder "_Data\Apps\Microsoft Windows and Office ISO Download Tool" "_Data\Apps\HeiDoc.net\Microsoft Windows and Office ISO Download Tool"
 	call :moveFolder "_Data\Apps\PassMark KeyboardTest" "_Data\Apps\PassMark\KeyboardTest"
 	call :moveFolder "_Data\Apps\PassMark PerformanceTest" "_Data\Apps\PassMark\PerformanceTest"
+	call :moveFolder "_Data\Apps\O&O ShutUp10++" "_Data\Apps\O&O\ShutUp10++"
+	call :moveFolder "_Data\Apps\O&O Software\AppBuster" "_Data\Apps\O&O\AppBuster"
+	call :moveFolder "_Data\Apps\O&O Software\DeskInfo" "_Data\Apps\O&O\DeskInfo"
+	call :moveFolder "_Data\Apps\O&O Software\Lanytix" "_Data\Apps\O&O\Lanytix"
+	call :moveFolder "_Data\Apps\O&O Software\RegEditor" "_Data\Apps\O&O\RegEditor"
+	if exist "%root%_Data\Apps\O&O Software\" rmdir "%root%_Data\Apps\O&O Software" 2>nul
 	call :moveFolder "_Data\Apps\Roadkil's Monitor Test" "_Data\Apps\Roadkil.net\Roadkil's Monitor Test"
 	call :moveFolder "_Data\Apps\Roadkil's Unstoppable Copier" "_Data\Apps\Roadkil.net\Roadkil's Unstoppable Copier"
 	call :moveFolder "_Data\Apps\Spybot - Anti-Beacon" "_Data\Apps\Spybot\Spybot Anti-Beacon"
