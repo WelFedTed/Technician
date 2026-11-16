@@ -180,6 +180,9 @@ rem ----------------------------------------------------------------------------
 	call :moveFolder "_Data\Apps\NirLauncher" "_Data\Apps\Nirsoft\NirLauncher"
 	rem apps moved into a folder for their maker
 	call :moveFolder "_Data\Apps\Adobe Acrobat Reader" "_Data\Apps\Adobe\Acrobat Reader"
+	call :moveFolder "_Data\Apps\AdwCleaner" "_Data\Apps\Malwarebytes\AdwCleaner"
+	rem (an app whose folder became its maker's folder, with the app now in a subfolder of the same name)
+	call :moveDown "_Data\Apps\Malwarebytes" "Malwarebytes"
 	call :moveFolder "_Data\Apps\BandiView" "_Data\Apps\Bandisoft\BandiView"
 	call :moveFolder "_Data\Apps\Bandizip" "_Data\Apps\Bandisoft\Bandizip"
 	call :moveFolder "_Data\Apps\CPUID CPU-Z" "_Data\Apps\CPUID\CPU-Z"
@@ -280,6 +283,29 @@ rem moves an old folder's contents into its renamed folder (keeping the repo's u
 	)
 	rem robocopy /MOVE usually removes the old folder itself; this catches anything it skipped
 	if exist "%root%%~1\" rmdir /s /q "%root%%~1"
+	exit /b 0
+
+rem an app folder that became a group folder, with the app moved into a subfolder (eg. _Data\Apps\Malwarebytes to
+rem _Data\Apps\Malwarebytes\Malwarebytes): moves the app's downloads (its Installer, Portable and CLI folders) down
+rem into the subfolder and removes its old scripts, so the folder is just a group and the apps in it are found
+rem (only on a drive in the old layout: the folder still has its own update.cmd, and the repo's app is in the subfolder)
+:moveDown
+	if not exist "%root%%~1\update.cmd" exit /b 0
+	if not exist "%root%%~1\%~2\update.cmd" exit /b 0
+	echo:
+	echo Moving %~1 into %~1\%~2...
+	for %%T in (Installer Portable CLI) do if exist "%root%%~1\%%T\" call :moveDownType "%~1" "%~2" "%%T"
+	rem (the old scripts; the repo's are in the subfolder now)
+	for %%S in (update.cmd install.cmd run.cmd cli.cmd) do if exist "%root%%~1\%%S" del /q "%root%%~1\%%S"
+	exit /b 0
+
+:moveDownType
+	robocopy "%root%%~1\%~3" "%root%%~1\%~2\%~3" /E /MOVE /R:1 /W:1 /NJH /NJS /NDL /NFL /NP >nul
+	if errorlevel 8 (
+		echo Couldn't move everything in "%~1\%~3", so it was left in place.
+		exit /b 0
+	)
+	if exist "%root%%~1\%~3\" rmdir /s /q "%root%%~1\%~3"
 	exit /b 0
 
 rem replaces the drive's v<date>.version file (in its root) with one for today, eg. v2026-11-14.version,

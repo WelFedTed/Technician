@@ -1,6 +1,6 @@
 @echo off
 
-title Updating AdwCleaner
+title Updating WinObj
 
 rem Updates this app with the shared helper _Data\Apps\_Update-App.ps1 (see that file for the options)
 rem Run it on its own, or let Update-Tool.cmd run it for every app
@@ -12,10 +12,10 @@ set "result=0"
 set "resultRank=0"
 
 rem Portable
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
-    -Name "AdwCleaner" ^
-    -Url "https://adwcleaner.malwarebytes.com/adwcleaner?channel=release" ^
-    -SaveAs "adwcleaner.exe" -Into "x86"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
+    -Name "WinObj" ^
+    -Url "https://download.sysinternals.com/files/WinObj.zip" ^
+    -Extract -Into "x86_x64_ARM64" -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause

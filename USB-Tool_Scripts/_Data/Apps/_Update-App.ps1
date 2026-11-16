@@ -62,6 +62,8 @@
 # What to do with it:
 #   -SaveAs, -SaveAs86, -SaveAsArm    save a single file under this name (default: name from the link)
 #   -Extract                          unzip it (.zip or .7z)
+#     -Sfx                            with -Extract: the download is a self-extracting 7-Zip .exe (eg. Kdenlive's
+#                                     standalone build), unpacked like a .7z instead of being run
 #   -Paf                              a PortableApps.com installer (.paf.exe): unpack the ready-to-run app
 #                                     straight into the build folder (eg. x86_x64\7-ZipPortable.exe + App\)
 #                                     and delete the installer; the app's Data folder (its settings) is
@@ -110,7 +112,7 @@ param(
     [string]$Winget, [string]$WingetType, [string]$WingetScope,
     [switch]$Manual, [string]$Note, [string]$Action, [string]$ActionText,
     [string]$SaveAs, [string]$SaveAs86, [string]$SaveAsArm,
-    [switch]$Extract, [switch]$Paf, [string]$Into, [string]$Into86, [string]$IntoArm,
+    [switch]$Extract, [switch]$Sfx, [switch]$Paf, [string]$Into, [string]$Into86, [string]$IntoArm,
     [switch]$Flatten, [switch]$Clean, [string]$Keep, [string]$DataFolder,
     [string]$Referer, [string]$Password, [string]$UserAgent, [string]$ExtraAsset,
     [string]$Inner, [string]$Inner86, [string]$InnerArm,
@@ -671,6 +673,8 @@ function Test-Download([string]$path, [string]$address, [switch]$AllowPlain) {
     # (a small file is likely an error page, unless it's plainly a zip, exe or msi, eg. a browser extension's .xpi)
     if ($size -lt 10KB -and $kind -notin @('zip', '7z', 'exe', 'msi')) { throw "Download is only $size bytes, probably an error page: $address" }
     if ($kind -eq 'html') { throw "Download is a web page, not the app (the link may have changed): $address" }
+    # (a self-extracting 7-Zip .exe is unpacked like a .7z; 7-Zip finds the archive after the exe's stub)
+    if ($Sfx -and $kind -eq 'exe' -and -not $AllowPlain) { $kind = '7z' }
     # (-Extra files may be plain files next to the unzipped app, eg. 7zr.exe next to 7-Zip Extra)
     if ($Extract -and -not $AllowPlain -and $kind -notin @('zip', '7z')) { throw "Expected a .zip or .7z but got a $kind file: $address" }
     return $kind
