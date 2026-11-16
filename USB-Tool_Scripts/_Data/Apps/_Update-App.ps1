@@ -865,7 +865,16 @@ function Expand-ToStaging([string]$archive, [string]$kind, [string]$staging, [st
         }
     }
     else {
-        [IO.Compression.ZipFile]::ExtractToDirectory($archive, $staging)
+        try { [IO.Compression.ZipFile]::ExtractToDirectory($archive, $staging) }
+        catch {
+            # a zip packed with a method .NET can't unzip (eg. Revo Uninstaller's portable zip): the full 7-Zip can
+            if ($_.Exception.Message -notmatch 'unsupported compression method') { throw }
+            Remove-Item -LiteralPath $staging -Recurse -Force
+            New-Item -ItemType Directory -Path $staging | Out-Null
+            $sevenZip = Get-SevenZipFull
+            & $sevenZip x $archive "-o$staging" -y | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw "Couldn't extract the download (7z exit code $LASTEXITCODE)" }
+        }
     }
     $top =@(Get-ChildItem -LiteralPath $staging -Force)
     if ($top.Count -eq 0) { throw 'The downloaded archive is empty' }
@@ -961,11 +970,11 @@ function Get-Version([object[]]$jobs) {
         if ($m.Success) { return ($m.Value -replace '_', '.') }
     }
     foreach ($job in $jobs) {
-        if (-not $Extract -and $job.Target -like '*.msi') {
+        if (-not ($Extract -or $Paf) -and $job.Target -like '*.msi') {
             $v = Get-MsiVersion $job.Target
             if ($v) { return $v }
         }
-        if (-not $Extract -and $job.Target -like '*.exe') {
+        if (-not ($Extract -or $Paf) -and $job.Target -like '*.exe') {
             $v = (Get-Item -LiteralPath $job.Target).VersionInfo.FileVersionRaw
             if ($v -and $v.ToString() -ne '0.0.0.0') { return $v.ToString() }
         }
@@ -1024,7 +1033,7 @@ function Get-BuildDate([object[]]$jobs) {
     # 3. single files: the server's Last-Modified date
     if ($job.ServerDate) { return $job.ServerDate }
     # 4. the exe's own build timestamp
-    if (-not $Extract -and $job.Target -and (Test-Path -LiteralPath $job.Target)) {
+    if (-not ($Extract -or $Paf) -and $job.Target -and (Test-Path -LiteralPath $job.Target)) {
         $peDate = Get-PeDate $job.Target
         if ($peDate) { return $peDate }
     }

@@ -1,6 +1,6 @@
 @echo off
 
-title Updating MiniTool Partition Wizard
+title Updating Defraggler
 
 rem Updates this app with the shared helper _Data\Apps\_Update-App.ps1 (see that file for the options)
 rem Run it on its own, or let Update-Tool.cmd run it for every app
@@ -11,16 +11,13 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
-rem Installer
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" -MoveFrom "%~dp0." ^
-    -Name "MiniTool Partition Wizard" ^
-    -Page "https://www.partitionwizard.com/free-partition-manager.html" ^
-    -Winget "MiniTool.PartitionWizard.Free" -Into "x86" ^
+rem Installer (last updated in 2020)
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+    -Name "Defraggler" ^
+    -Page "https://www.ccleaner.com/defraggler" ^
+    -Winget "Piriform.Defraggler" -Into "x86" ^
     -Clean
 call :result
-
-rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)
-if exist "%~dp0run.cmd" del "%~dp0run.cmd"
 
 if /i not "%~1" == "/nopause" pause
 exit /b %result%

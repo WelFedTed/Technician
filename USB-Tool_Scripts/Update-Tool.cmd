@@ -201,6 +201,7 @@ rem ----------------------------------------------------------------------------
 	call :moveFolder "_Data\Apps\Microsoft Security Essentials" "_Data\Apps\Microsoft\Security Essentials"
 	call :moveFolder "_Data\Apps\Microsoft Visual C++ (VC++) Redistributables" "_Data\Apps\Microsoft\Visual C++ Redistributables (VC++)"
 	call :moveFolder "_Data\Apps\Microsoft Windows and Office ISO Download Tool" "_Data\Apps\HeiDoc.net\Microsoft Windows and Office ISO Download Tool"
+	call :moveFolder "_Data\Apps\MiniTool Partition Wizard" "_Data\Apps\MiniTool\Partition Wizard"
 	call :moveFolder "_Data\Apps\PassMark KeyboardTest" "_Data\Apps\PassMark\KeyboardTest"
 	call :moveFolder "_Data\Apps\PassMark PerformanceTest" "_Data\Apps\PassMark\PerformanceTest"
 	call :moveFolder "_Data\Apps\O&O ShutUp10++" "_Data\Apps\O&O\ShutUp10++"
