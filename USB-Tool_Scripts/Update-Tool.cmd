@@ -203,6 +203,10 @@ rem ----------------------------------------------------------------------------
 	call :moveFolder "_Data\Apps\Microsoft Windows and Office ISO Download Tool" "_Data\Apps\HeiDoc.net\Microsoft Windows and Office ISO Download Tool"
 	call :moveFolder "_Data\Apps\PassMark KeyboardTest" "_Data\Apps\PassMark\KeyboardTest"
 	call :moveFolder "_Data\Apps\PassMark PerformanceTest" "_Data\Apps\PassMark\PerformanceTest"
+	call :moveFolder "_Data\Apps\Roadkil's Monitor Test" "_Data\Apps\Roadkil.net\Roadkil's Monitor Test"
+	call :moveFolder "_Data\Apps\Roadkil's Unstoppable Copier" "_Data\Apps\Roadkil.net\Roadkil's Unstoppable Copier"
+	call :moveFolder "_Data\Apps\Spybot - Anti-Beacon" "_Data\Apps\Spybot\Spybot Anti-Beacon"
+	call :moveFolder "_Data\Apps\Spybot - Search & Destroy" "_Data\Apps\Spybot\Spybot Search & Destroy"
 	call :moveFolder "_Data\Apps\Tweaking.com - Windows Repair" "_Data\Apps\Tweaking.com\Windows Repair"
 	rem the Sysinternals tools, in Microsoft's folder
 	for %%T in (Autoruns Disk2vhd NotMyFault "Process Explorer" "Process Monitor (ProcMon)" RootkitRevealer SDelete TCPView) do (
@@ -267,7 +271,7 @@ rem fixes the capitalisation of a folder's name, eg. Rkill to RKill (no-op if it
 	for /d %%D in ("%root%%~1\*") do if /i "%%~nxD" == "%~2" set "currentName=%%~nxD"
 	if "!currentName!" == "%~2" exit /b 0
 	echo:
-	echo Renaming !currentName! to %~2...
+	echo Renaming "!currentName!" to "%~2"...
 	ren "%root%%~1\!currentName!" "%~2"
 	exit /b 0
 
@@ -275,7 +279,7 @@ rem moves an old folder's contents into its renamed folder (keeping the repo's u
 :moveFolder
 	if not exist "%root%%~1\" exit /b 0
 	echo:
-	echo Moving %~1 to its new name...
+	echo Moving "%~1" to its new name...
 	robocopy "%root%%~1" "%root%%~2" /E /MOVE /XF update.cmd /R:1 /W:1 /NJH /NJS /NDL /NFL /NP >nul
 	if errorlevel 8 (
 		echo Couldn't move everything, so "%~1" was left in place.
@@ -293,7 +297,7 @@ rem (only on a drive in the old layout: the folder still has its own update.cmd,
 	if not exist "%root%%~1\update.cmd" exit /b 0
 	if not exist "%root%%~1\%~2\update.cmd" exit /b 0
 	echo:
-	echo Moving %~1 into %~1\%~2...
+	echo Moving "%~1" into "%~1\%~2"...
 	for %%T in (Installer Portable CLI) do if exist "%root%%~1\%%T\" call :moveDownType "%~1" "%~2" "%%T"
 	rem (the old scripts; the repo's are in the subfolder now)
 	for %%S in (update.cmd install.cmd run.cmd cli.cmd) do if exist "%root%%~1\%%S" del /q "%root%%~1\%%S"
