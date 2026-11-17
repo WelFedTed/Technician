@@ -11,12 +11,13 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
-rem Installer
+rem Installer (Intel's Arc / Iris Xe graphics driver, which comes with Intel Graphics Software)
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Intel Graphics Software" ^
-    -Manual ^
     -Page "https://www.intel.com/content/www/us/en/download/785597.html" ^
-    -Note "Intel's download center doesn't allow automatic downloads. Intel Graphics Software comes with Intel's Arc / Iris Xe graphics driver: save the driver's installer in Installer\x64."
+    -Link "https://downloadmirror\.intel\.com/\d+/gfx_win_[\d.]+\.exe" -Into "x64" ^
+    -UserAgent "curl/8.0" ^
+    -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause

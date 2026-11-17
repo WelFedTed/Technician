@@ -14,8 +14,9 @@ set "resultRank=0"
 rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Installer" -MoveFrom "%~dp0." ^
     -Name "Spybot - Search & Destroy" ^
-    -Manual ^
-    -Page "https://www.safer-networking.org/download/"
+    -Page "https://www.safer-networking.org/products/spybot-free-edition/download-mirror-1/" ^
+    -Link "https://updates\d*\.safer-networking\.org/spybot\d*/spybotsd-[\d.]+\.exe" -Into "x86" ^
+    -Clean
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

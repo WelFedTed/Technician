@@ -11,12 +11,14 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
-rem Installer
+rem Installer (the APO user interface; APO itself also needs Intel Dynamic Tuning Technology, from the PC maker, and a
+rem supported Intel CPU)
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Intel Application Optimization (APO)" ^
-    -Manual ^
-    -Page "https://www.intel.com/content/www/us/en/support/articles/000095419.html" ^
-    -Note "Intel's download center doesn't allow automatic downloads. Save the APO installer in Installer\x64. APO also needs Intel Dynamic Tuning Technology (from the PC maker) and a supported Intel CPU."
+    -Page "https://www.intel.com/content/www/us/en/download/870620.html" ^
+    -Link "https://downloadmirror\.intel\.com/\d+/APO_UI_Installer_[\d.]+\.exe" -Into "x64" ^
+    -UserAgent "curl/8.0" ^
+    -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause
