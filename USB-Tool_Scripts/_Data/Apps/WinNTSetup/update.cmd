@@ -11,12 +11,20 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
-rem Portable (saved by hand: its only official download is on the MSFN forum, which doesn't answer scripts)
+rem Portable (from MajorGeeks' copies of the 64-bit and 32-bit builds: the author's own download is on the MSFN
+rem forum, https://msfn.org/board/topic/149612-winntsetup-v54/, which doesn't answer scripts)
+rem MajorGeeks' mirror page starts a session that its download link needs, hence -Cookies; the link changes each
+rem visit, so each run downloads the .rar files again (about 3 MB), and the same files count as up to date
+rem (antivirus apps often flag WinNTSetup, as it changes Windows installs)
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "WinNTSetup" ^
-    -Manual ^
-    -Page "https://msfn.org/board/topic/149612-winntsetup-v54/" ^
-    -Note "Download the latest WinNTSetup from the first post of its MSFN topic (by JFX), unpack it with 7-Zip and put its files (WinNTSetup.exe, WinNTSetup_x64.exe, Tools\ ...) in Portable\x86_x64, replacing the old ones. Antivirus apps often flag it, as it changes Windows installs."
+    -Page "https://www.majorgeeks.com/mg/getmirror/winntsetup_64_bit,2.html" ^
+    -Link "index\.php\?ct=files&action=download&PHPSESSID=\w+" -Into "x64" ^
+    -Page86 "https://www.majorgeeks.com/mg/getmirror/winntsetup,2.html" ^
+    -Link86 "index\.php\?ct=files&action=download&PHPSESSID=\w+" -Into86 "x86" ^
+    -Cookies ^
+    -Extract -Clean -Keep "WinNTSetup.ini" ^
+    -VersionFrom "x64\WinNTSetup_x64.exe"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title WinNTSetup
 
-set "application=WinNTSetup.exe"
+set "application=WinNTSetup_x64.exe;WinNTSetup_x86.exe"
 set "arguments="
 set "folder=Portable"
 

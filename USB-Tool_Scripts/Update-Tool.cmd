@@ -104,7 +104,10 @@ rem ----------------------------------------------------------------------------
 	mkdir "%runDir%"
 	type nul > "%appsList%"
 	rem (-Begin also starts the hidden watcher that makes the report if this run is stopped early)
-	if exist "%root%_Data\Apps\_Update-Report.ps1" powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -Begin -DataDir "%runDir%" -OutFile "%reportOut%" -Root "%root%." -DoScripts "%doScripts%" -DoApps "%doApps%"
+	rem (only with a report script as new as this Update-Tool.cmd: an older one, eg. on a drive this Update-Tool.cmd
+	rem was just copied onto, doesn't know its settings, so it's started once the scripts are updated, below)
+	set "reportBegun=0"
+	call :beginReport
 
 
 rem Update
@@ -124,6 +127,8 @@ rem ----------------------------------------------------------------------------
 		>>"%runState%" echo scripts=!scriptsResult!
 		>>"%runState%" echo selfUpdate=!selfUpdate!
 	)
+	rem (the drive's report script was too old to start with: it's been updated now)
+	if "!reportBegun!" == "0" call :beginReport
 
 	if "%doApps%" == "1" call :updateApps
 
@@ -272,6 +277,21 @@ rem ----------------------------------------------------------------------------
 
 rem Helpers
 rem ----------------------------------------------------------------------------------------------------
+rem reportReady=1 if the drive has a report script that knows the settings this script gives it (-OutFile is the
+rem newest of them; an older script stops with "A parameter cannot be found that matches parameter name")
+:reportReady
+	set "reportReady=0"
+	if exist "%root%_Data\Apps\_Update-Report.ps1" findstr /l /c:"[string]$OutFile" "%root%_Data\Apps\_Update-Report.ps1" >nul 2>&1 && set "reportReady=1"
+	exit /b 0
+
+rem starts this run's report (its start time and free space, and the watcher), once the report script is new enough
+:beginReport
+	call :reportReady
+	if not "!reportReady!" == "1" exit /b 0
+	powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -Begin -DataDir "%runDir%" -OutFile "%reportOut%" -Root "%root%." -DoScripts "%doScripts%" -DoApps "%doApps%"
+	set "reportBegun=1"
+	exit /b 0
+
 rem fixes the capitalisation of a folder's name, eg. Rkill to RKill (no-op if it's already right)
 :renameCase
 	if not exist "%root%%~1\%~2\" exit /b 0
@@ -383,8 +403,13 @@ rem ----------------------------------------------------------------------------
 
 	rem the HTML report (opened at the end, once the run has let go of running.lock)
 	>>"%runState%" echo step=report
-	if exist "%root%_Data\Apps\_Update-Report.ps1" (
+	call :reportReady
+	if "!reportReady!" == "1" (
 		powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -DataDir "%runDir%" -OutFile "%reportOut%" -Root "%root%." -Scripts "%scriptsResult%" -SelfUpdate "%selfUpdate%" -DoApps "%doApps%" -Stamp "!stampName!"
+		echo:
+	) else (
+		echo No report was made: the drive's _Data\Apps\_Update-Report.ps1 is missing or older than this
+		echo Update-Tool.cmd. Run Update-Tool.cmd /scripts to update it.
 		echo:
 	)
 	exit /b 0

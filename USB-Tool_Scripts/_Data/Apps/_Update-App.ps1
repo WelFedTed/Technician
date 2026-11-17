@@ -64,7 +64,7 @@
 #
 # What to do with it:
 #   -SaveAs, -SaveAs86, -SaveAsArm    save a single file under this name (default: name from the link)
-#   -Extract                          unzip it (.zip or .7z)
+#   -Extract                          unzip it (.zip, .7z or .rar)
 #     -Sfx                            with -Extract: the download is a self-extracting 7-Zip .exe (eg. Kdenlive's
 #                                     standalone build), unpacked like a .7z instead of being run
 #   -Paf                              a PortableApps.com installer (.paf.exe): unpack the ready-to-run app
@@ -93,6 +93,9 @@
 #                                     cleaning; apps such as VS Code (data) and Sublime Text (Data) only run in
 #                                     portable mode, with their settings on the USB, when it exists
 #   -Referer <url>                    some sites only allow downloads from their own pages
+#   -Cookies                          keep the cookies -Page (or -Page86 / -PageArm) sets and send them with the download
+#                                     found on it, for sites whose link only works in the same visit (eg. MajorGeeks'
+#                                     mirror pages, whose index.php?ct=files&action=download link needs the session)
 #   -Password <text>                  password for a protected .zip (extracted with 7-Zip's 7za.exe)
 #   -UserAgent <text>                 send this instead of a browser user agent (eg. "curl" for SourceForge)
 #   -Inner, -Inner86, -InnerArm       take this folder from inside the archive instead of all of it
@@ -117,7 +120,7 @@ param(
     [string]$SaveAs, [string]$SaveAs86, [string]$SaveAsArm,
     [switch]$Extract, [switch]$Sfx, [switch]$Paf, [string]$Into, [string]$Into86, [string]$IntoArm,
     [switch]$Flatten, [switch]$Clean, [string]$Keep, [string]$DataFolder,
-    [string]$Referer, [string]$Password, [string]$UserAgent, [string]$ExtraAsset,
+    [string]$Referer, [switch]$Cookies, [string]$Password, [string]$UserAgent, [string]$ExtraAsset,
     [string]$Inner, [string]$Inner86, [string]$InnerArm,
     [string]$VersionFrom, [string]$VersionMatch, [switch]$VersionFromUrl,
     [string]$Site,
@@ -204,8 +207,9 @@ function Get-Sha256([string]$path) {
 # Finding the download link
 # ---------------------------------------------------------------------------------------------
 
-function Get-Text([string]$address) {
-    $text = & $curl -sSL --fail --retry 2 --connect-timeout 20 -A $userAgent $address | Out-String
+function Get-Text([string]$address, [string]$cookieJar) {
+    $jarArgs = if ($cookieJar) { @('-c', $cookieJar) } else { @() }
+    $text = & $curl -sSL --fail --retry 2 --connect-timeout 20 -A $userAgent @jarArgs $address | Out-String
     if ($LASTEXITCODE -ne 0) { throw "Couldn't load $address (curl exit code $LASTEXITCODE)" }
     return $text
 }
@@ -232,8 +236,15 @@ function Select-Highest([string[]]$candidates) {
 }
 
 $script:pageVersion = $null
+# -Cookies: each page's cookies, kept in a file for the download found on it (link -> cookie file)
+$script:cookieJars = @{}
+function Get-CookieArgs([string]$address) {
+    if ($script:cookieJars.ContainsKey($address)) { return @('-b', $script:cookieJars[$address]) }
+    return @()
+}
 function Find-PageLink([string]$pattern, [string]$pageUrl = $Page, [string]$format = $UrlFormat) {
-    $html = Get-Text $pageUrl
+    $jar = if ($Cookies) { New-StagingPath cookies } else { $null }
+    $html = Get-Text $pageUrl $jar
     $found = [regex]::Matches($html, $pattern, 'IgnoreCase') | ForEach-Object {
         if ($format) { $format -f $_.Groups[1].Value } else { $_.Value }
     } | Select-Object -Unique
@@ -245,7 +256,9 @@ function Find-PageLink([string]$pattern, [string]$pageUrl = $Page, [string]$form
             Where-Object { ($format -f $_.Groups[1].Value) -eq $best } |
             Select-Object -First 1 | ForEach-Object { $_.Groups[1].Value }
     }
-    return ([Uri]::new([Uri]$pageUrl, $best)).AbsoluteUri
+    $resolved = ([Uri]::new([Uri]$pageUrl, $best)).AbsoluteUri
+    if ($jar) { $script:cookieJars[$resolved] = $jar }
+    return $resolved
 }
 
 # GitHub releases. The API allows only 60 requests an hour without signing in, which a full Update-Tool run
@@ -475,6 +488,7 @@ function Get-Download([string]$address, [string]$outFile) {
     # (--globoff: links can contain [ ], eg. Guru3D's "[Guru3D]-MSIAfterburnerSetup.zip")
     $curlArgs = @('-L', '-R', '--fail', '--globoff', '--retry', '2', '--connect-timeout', '20', '--progress-bar', '-A', $userAgent, '-o', $outFile, '-w', '%{url_effective}')
     if ($Referer) { $curlArgs += @('-e', $Referer) }
+    $curlArgs += Get-CookieArgs $address
     $finalUrl = & $curl @curlArgs $address
     if ($LASTEXITCODE -ne 0) { throw "Download failed (curl exit code $LASTEXITCODE): $address" }
     return [Uri]::UnescapeDataString(($finalUrl | Select-Object -Last 1).Split('?')[0])
@@ -633,7 +647,7 @@ function Get-DownloadName([string]$link, [string]$finalUrl, [string]$kind) {
     $fromFinal = Split-Path -Leaf $finalUrl
     # extensions can be long, eg. .msixbundle
     $name = if ($fromLink -match '\.[A-Za-z0-9]{2,12}$') { $fromLink } else { $fromFinal }
-    if ($name -notmatch '\.[A-Za-z0-9]{2,12}$' -and $kind -in @('exe', 'msi', 'zip', '7z')) { $name += ".$kind" }
+    if ($name -notmatch '\.[A-Za-z0-9]{2,12}$' -and $kind -in @('exe', 'msi', 'zip', '7z', 'rar')) { $name += ".$kind" }
     foreach ($bad in [IO.Path]::GetInvalidFileNameChars()) { $name = $name.Replace([string]$bad, '_') }
     return $name
 }
@@ -676,6 +690,8 @@ function Get-FileKind([string]$path) {
     if ($bytes[0] -eq 0x4D -and $bytes[1] -eq 0x5A) { return 'exe' }
     if ($bytes[0] -eq 0x50 -and $bytes[1] -eq 0x4B) { return 'zip' }
     if ($bytes[0] -eq 0x37 -and $bytes[1] -eq 0x7A -and $bytes[2] -eq 0xBC) { return '7z' }
+    # "Rar!"
+    if ($bytes[0] -eq 0x52 -and $bytes[1] -eq 0x61 -and $bytes[2] -eq 0x72 -and $bytes[3] -eq 0x21) { return 'rar' }
     if ($bytes[0] -eq 0xD0 -and $bytes[1] -eq 0xCF -and $bytes[2] -eq 0x11) { return 'msi' }
     $start = [Text.Encoding]::ASCII.GetString($bytes).TrimStart()
     # an error or landing page, not a script that happens to start with < (eg. a PowerShell <# comment)
@@ -687,12 +703,12 @@ function Test-Download([string]$path, [string]$address, [switch]$AllowPlain) {
     $size = (Get-Item -LiteralPath $path).Length
     $kind = Get-FileKind $path
     # (a small file is likely an error page, unless it's plainly a zip, exe or msi, eg. a browser extension's .xpi)
-    if ($size -lt 10KB -and $kind -notin @('zip', '7z', 'exe', 'msi')) { throw "Download is only $size bytes, probably an error page: $address" }
+    if ($size -lt 10KB -and $kind -notin @('zip', '7z', 'rar', 'exe', 'msi')) { throw "Download is only $size bytes, probably an error page: $address" }
     if ($kind -eq 'html') { throw "Download is a web page, not the app (the link may have changed): $address" }
     # (a self-extracting 7-Zip .exe is unpacked like a .7z; 7-Zip finds the archive after the exe's stub)
     if ($Sfx -and $kind -eq 'exe' -and -not $AllowPlain) { $kind = '7z' }
     # (-Extra files may be plain files next to the unzipped app, eg. 7zr.exe next to 7-Zip Extra)
-    if ($Extract -and -not $AllowPlain -and $kind -notin @('zip', '7z')) { throw "Expected a .zip or .7z but got a $kind file: $address" }
+    if ($Extract -and -not $AllowPlain -and $kind -notin @('zip', '7z', 'rar')) { throw "Expected a .zip, .7z or .rar but got a $kind file: $address" }
     return $kind
 }
 
@@ -866,6 +882,12 @@ function Expand-ToStaging([string]$archive, [string]$kind, [string]$staging, [st
         $sevenZipA = Get-SevenZipA
         & $sevenZipA x $archive "-p$Password" "-o$staging" -y | Out-Null
         if ($LASTEXITCODE -ne 0) { throw "Couldn't extract the password-protected download (7za exit code $LASTEXITCODE)" }
+    }
+    elseif ($kind -eq 'rar') {
+        # (7zr.exe and 7za.exe don't know .rar; the full 7-Zip does)
+        $sevenZip = Get-SevenZipFull
+        & $sevenZip x $archive "-o$staging" -y | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "Couldn't extract the download (7z exit code $LASTEXITCODE)" }
     }
     elseif ($kind -eq '7z') {
         $sevenZip = Get-Tool '7zr.exe' 'https://www.7-zip.org/a/7zr.exe'
@@ -1366,13 +1388,14 @@ try {
             # (no -S: its error message would stop the whole check here, rather than this link showing as failed)
             $curlArgs = @('-sL', '--fail', '--connect-timeout', '20', '--max-time', '60', '-r', '0-1023', '-A', $userAgent, '-o', $sample, '-D', '-', '-w', '%{url_effective}')
             if ($Referer) { $curlArgs += @('-e', $Referer) }
+            $curlArgs += Get-CookieArgs $job.Link
             $out = @(& $curl @curlArgs $job.Link 2>&1 | ForEach-Object { "$_" })
             $ok = $LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $sample)
             $kind = if ($ok) { Get-FileKind $sample } else { 'failed' }
             $size = ($out | Where-Object { $_ -match '^content-range: bytes \d+-\d+/(\d+)' } | Select-Object -Last 1) -replace '^content-range: bytes \d+-\d+/(\d+).*$', '$1'
             if (-not $size) { $size = ($out | Where-Object { $_ -match '^content-length: (\d+)' } | Select-Object -Last 1) -replace '^content-length: (\d+).*$', '$1' }
             $sizeText = if ($size -match '^\d+$') { '{0:N1} MB' -f ([double]$size / 1MB) } else { '? MB' }
-            if ($kind -notin @('exe', 'msi', 'zip', '7z', 'other')) { $bad++ }
+            if ($kind -notin @('exe', 'msi', 'zip', '7z', 'rar', 'other')) { $bad++ }
             Say ("CHECK {0,-6} {1,-9} {2,-6} {3}" -f $kind, $sizeText, $(if ($job.Into) { $job.Into } else { '.' }), ($out | Select-Object -Last 1))
             Remove-Item -LiteralPath $sample -Force -ErrorAction SilentlyContinue
         }
@@ -1504,7 +1527,7 @@ try {
             if ($job.IsSite) { continue }
             $staging = New-StagingPath extract
             $downloads += $staging
-            if ($job.Kind -notin @('zip', '7z')) {
+            if ($job.Kind -notin @('zip', '7z', 'rar')) {
                 # a plain -Extra file: staged as-is, so it's copied next to the unzipped app
                 New-Item -ItemType Directory -Path $staging | Out-Null
                 Copy-Item -LiteralPath $job.Temp -Destination (Join-Path $staging (Split-Path -Leaf $job.Target))
@@ -1616,4 +1639,5 @@ finally {
         Write-Report 'cancelled' @{ partWay = [bool]$script:applying }
     }
     foreach ($d in $downloads) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }
+    foreach ($jar in $script:cookieJars.Values) { Remove-Item -LiteralPath $jar -Force -ErrorAction SilentlyContinue }
 }
