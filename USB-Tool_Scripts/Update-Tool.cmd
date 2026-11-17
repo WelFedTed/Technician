@@ -41,16 +41,22 @@ rem ----------------------------------------------------------------------------
 	set "repo=WelFedTed/Technician"
 	set "branch=main"
 	set "root=%~dp0"
-	set "work=%TEMP%\USB-Tool-Update"
-	set "src=%work%\Technician-%branch%\USB-Tool_Scripts"
 	set "curl=%SystemRoot%\System32\curl.exe"
 	set "tar=%SystemRoot%\System32\tar.exe"
 	rem the report, next to this script (replaced each run)
 	set "reportOut=%root%Update-Report.html"
-	rem this run's details for its report (in Run, replaced each run; older versions of this script also kept each
-	rem run's report next to it, and USB-Tool-Report is deleted by even older ones as they start)
+	rem this run's details for its report, and the scripts it downloads, in a folder of its own (Run-<id>), so two
+	rem runs at once (eg. two drives updated together) don't clear each other's; earlier runs' folders are removed
+	rem as each run starts (older versions of this script shared one Run folder, and USB-Tool-Update for the
+	rem download)
+	rem (a GUID, not %RANDOM%, which is the same in two windows started in the same second)
 	set "reportDir=%TEMP%\USB-Tool-Reports"
-	set "runDir=%reportDir%\Run"
+	set "runId="
+	for /f %%G in ('powershell -NoProfile -Command "[guid]::NewGuid().ToString('N').Substring(0, 12)"') do set "runId=%%G"
+	if not defined runId set "runId=%RANDOM%%RANDOM%%RANDOM%"
+	set "runDir=%reportDir%\Run-%runId%"
+	set "work=%runDir%\download"
+	set "src=%work%\Technician-%branch%\USB-Tool_Scripts"
 	set "USB_TOOL_REPORT=%runDir%\results.jsonl"
 	set "appsList=%runDir%\apps.txt"
 	rem every app folder this run will try, and how far it got (for the report if it's stopped early)
@@ -99,8 +105,8 @@ rem ----------------------------------------------------------------------------
 	)
 	echo Connected
 
-	rem a fresh folder for this run's details (the reports next to it are kept)
-	if exist "%runDir%" rmdir /s /q "%runDir%"
+	rem a new folder for this run's details (and earlier runs' folders removed, unless they're still in use)
+	call :cleanRuns
 	mkdir "%runDir%"
 	type nul > "%appsList%"
 	rem (-Begin also starts the hidden watcher that makes the report if this run is stopped early)
@@ -282,6 +288,14 @@ rem newest of them; an older script stops with "A parameter cannot be found that
 :reportReady
 	set "reportReady=0"
 	if exist "%root%_Data\Apps\_Update-Report.ps1" findstr /l /c:"[string]$OutFile" "%root%_Data\Apps\_Update-Report.ps1" >nul 2>&1 && set "reportReady=1"
+	exit /b 0
+
+rem removes earlier runs' folders from %reportDir%, except those still in use: a run keeps its running.lock open
+rem until it's done, and one that's only just started (before its lock is open) or just been stopped (its
+rem watcher is making its report) has had files written in the last 10 minutes
+:cleanRuns
+	if not exist "%reportDir%\" exit /b 0
+	powershell -NoProfile -Command "$recent = (Get-Date).AddMinutes(-10); Get-ChildItem -LiteralPath $env:reportDir -Directory -Filter 'Run*' -ErrorAction SilentlyContinue | ForEach-Object { $lock = Join-Path $_.FullName 'running.lock'; if (Test-Path -LiteralPath $lock) { try { $f = [IO.File]::Open($lock, 'Open', 'ReadWrite', 'None'); $f.Close() } catch { return } }; $newest = Get-ChildItem -LiteralPath $_.FullName -Recurse -Force -ErrorAction SilentlyContinue | Sort-Object LastWriteTime | Select-Object -Last 1; if ($_.LastWriteTime -gt $recent -or ($newest -and $newest.LastWriteTime -gt $recent)) { return }; Remove-Item -LiteralPath $_.FullName -Recurse -Force -ErrorAction SilentlyContinue }"
 	exit /b 0
 
 rem starts this run's report (its start time and free space, and the watcher), once the report script is new enough
