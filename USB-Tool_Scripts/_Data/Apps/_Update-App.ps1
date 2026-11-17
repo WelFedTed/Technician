@@ -23,7 +23,8 @@
 #                                     one, eg. DevToys 2): the newest release that has the asset, whether or not
 #                                     it's marked as a pre-release (also for repos that publish other platforms'
 #                                     releases in between, eg. Mole's -windows releases)
-#       [-SkipPreReleases]            with -PreRelease: ... but not a pre-release (a beta, rc, ...), for repos that
+#       [-SkipPreReleases]            with -PreRelease: ... but not a pre-release (a beta, rc, ..., or a tag with no
+#                                     version number, eg. FxSound's "beta" and "latest"), for repos that
 #                                     publish other things' releases in between, eg. Bitwarden's desktop releases
 #                                     among its browser, web and CLI ones
 #   -Winget <package id>              the installers listed for a winget package, eg. "Canva.Affinity" (as in
@@ -299,8 +300,10 @@ function Find-GitHubAsset([string]$pattern) {
             if (-not $script:releases) { throw "No releases found for $GitHub" }
         }
         for ($i = 0; $i -lt $script:releases.Count; $i++) {
-            # (-SkipPreReleases: GitHub's pre-release flag, or the tag when it's read from the releases page)
-            if ($SkipPreReleases -and ($script:releases[$i].prerelease -or "$($script:releases[$i].tag_name)" -match '(?i)[-.](alpha|beta|rc|pre|preview)')) { continue }
+            # (-SkipPreReleases: GitHub's pre-release flag, or the tag when it's read from the releases page; also tags
+            # with no version number, eg. FxSound's "beta" and "latest" releases)
+            $tagName = "$($script:releases[$i].tag_name)"
+            if ($SkipPreReleases -and ($script:releases[$i].prerelease -or $tagName -match '(?i)(^|[-._])(alpha|beta|rc|pre|preview|nightly|canary)' -or $tagName -notmatch '\d')) { continue }
             if ($script:releases[$i].fromPage) { $script:releases[$i] = Get-GitHubReleaseFromPage $GitHub $script:releases[$i].tag_name }
             $candidate = $script:releases[$i]
             $match = $candidate.assets | Where-Object { $_.name -match $pattern } | Select-Object -First 1

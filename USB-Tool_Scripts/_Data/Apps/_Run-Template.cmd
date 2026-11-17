@@ -12,6 +12,8 @@ set "runHere=0"
 set "openAfter="
 set "openPrompt=0"
 set "runAtStart=0"
+set "web="
+set "webArguments="
 
 
 rem Notes
@@ -34,6 +36,10 @@ rem ----------------------------------------------------------------------------
 		rem openAfter: a folder to open in Explorer after starting the application (optional)
 		rem openPrompt: 1 to open a command prompt in the application's folder, with it on the PATH (cli.cmd)
 		rem runAtStart: with openPrompt, 1 to run the application (with arguments) as the prompt opens
+		rem web: for tools with an "irm <address> | iex" command (eg. MAS's irm https://get.activated.win | iex),
+			rem that address: with internet, the latest version is run straight from it (see _Data\Apps\_Run-Web.ps1),
+			rem and the copy on the USB only when that doesn't work (no internet, or Windows blocks it)
+		rem webArguments: anything to pass to the web version (eg. "-UseMSI")
 		rem Arguments given to this script are passed to the application (with openPrompt, they're run in
 		rem the prompt, eg. "cli.cmd -s" runs "iperf3.exe -s")
 	rem Build folders, inside the Installer / Portable / CLI folder:
@@ -65,6 +71,32 @@ rem ----------------------------------------------------------------------------
 	echo Running as Administrator
 
 	:skipCheckElevated
+
+
+rem Run From The Web
+rem ----------------------------------------------------------------------------------------------------
+	if not defined web goto skipWeb
+
+	rem _Run-Web.ps1 is in _Data\Apps, one or two folders up (two for apps in a group, eg. Microsoft\PowerShell)
+	set "webRunner="
+	for %%D in ("%~dp0.." "%~dp0..\..") do if not defined webRunner if exist "%%~fD\_Run-Web.ps1" set "webRunner=%%~fD\_Run-Web.ps1"
+	if not defined webRunner goto skipWeb
+
+	if not "%~1" == "" set "webArguments=%*"
+	powershell -NoProfile -ExecutionPolicy Bypass -File "%webRunner%" -Web "%web%" -Arguments "%webArguments%"
+	rem 10: it couldn't be run from the web, so run the copy on the USB below
+	if not errorlevel 10 goto webDone
+	if errorlevel 11 goto webDone
+	echo Running the copy on the USB instead...
+	echo:
+	goto skipWeb
+
+	:webDone
+	echo:
+	pause
+	exit /b
+
+	:skipWeb
 
 
 rem Find Application
