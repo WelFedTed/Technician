@@ -23,8 +23,8 @@ rem ----------------------------------------------------------------------------
 	rem      a record of when the drive was last updated (skipped if the scripts couldn't be updated)
 	rem   4. Report: makes an HTML report and opens it: the run's numbers, what each app did, and what needs
 	rem      doing by hand (download links, scripts to run such as Aseprite's build.cmd)
-	rem      Each run's report is kept, named for when the run started, eg.
-	rem      %TEMP%\USB-Tool-Reports\Update-Report_2026-11-15_18-37-29.html
+	rem      It's saved next to this script as Update-Report.html, replaced by each run (it has everything in it,
+	rem      including the logs it shows; if the drive can't be written to, it's saved in the run's folder in %TEMP%)
 	rem      (made by _Data\Apps\_Update-Report.ps1, from what each app's update writes to %USB_TOOL_REPORT%)
 	rem      If the update is stopped early (Ctrl+C, or closing the window), the report is still made, saying
 	rem      where it stopped and which apps weren't tried: a batch file can't run anything once it's stopped,
@@ -45,8 +45,10 @@ rem ----------------------------------------------------------------------------
 	set "src=%work%\Technician-%branch%\USB-Tool_Scripts"
 	set "curl=%SystemRoot%\System32\curl.exe"
 	set "tar=%SystemRoot%\System32\tar.exe"
-	rem the reports (one per run, kept), and this run's details for its report (in Run, replaced each run)
-	rem (not USB-Tool-Report, which older versions of this script delete as they start)
+	rem the report, next to this script (replaced each run)
+	set "reportOut=%root%Update-Report.html"
+	rem this run's details for its report (in Run, replaced each run; older versions of this script also kept each
+	rem run's report next to it, and USB-Tool-Report is deleted by even older ones as they start)
 	set "reportDir=%TEMP%\USB-Tool-Reports"
 	set "runDir=%reportDir%\Run"
 	set "USB_TOOL_REPORT=%runDir%\results.jsonl"
@@ -102,7 +104,7 @@ rem ----------------------------------------------------------------------------
 	mkdir "%runDir%"
 	type nul > "%appsList%"
 	rem (-Begin also starts the hidden watcher that makes the report if this run is stopped early)
-	if exist "%root%_Data\Apps\_Update-Report.ps1" powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -Begin -DataDir "%runDir%" -OutDir "%reportDir%" -Root "%root%." -DoScripts "%doScripts%" -DoApps "%doApps%"
+	if exist "%root%_Data\Apps\_Update-Report.ps1" powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -Begin -DataDir "%runDir%" -OutFile "%reportOut%" -Root "%root%." -DoScripts "%doScripts%" -DoApps "%doApps%"
 
 
 rem Update
@@ -382,7 +384,7 @@ rem ----------------------------------------------------------------------------
 	rem the HTML report (opened at the end, once the run has let go of running.lock)
 	>>"%runState%" echo step=report
 	if exist "%root%_Data\Apps\_Update-Report.ps1" (
-		powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -DataDir "%runDir%" -OutDir "%reportDir%" -Root "%root%." -Scripts "%scriptsResult%" -SelfUpdate "%selfUpdate%" -DoApps "%doApps%" -Stamp "!stampName!"
+		powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Report.ps1" -DataDir "%runDir%" -OutFile "%reportOut%" -Root "%root%." -Scripts "%scriptsResult%" -SelfUpdate "%selfUpdate%" -DoApps "%doApps%" -Stamp "!stampName!"
 		echo:
 	)
 	exit /b 0

@@ -1,7 +1,8 @@
 # Update-Apps - runs every app's update.cmd for Update-Tool.cmd, several at once
 # --------------------------------------------------
 # Most of an app's check is waiting for its website, so running a few at a time makes the whole update much
-# quicker. Each app's output goes to its own log (-RunDir\logs), and a line is shown as each one finishes.
+# quicker. Each app's output goes to its own log (-RunDir\logs), and a line is shown as each one finishes; under
+# those lines, a block redrawn as they work shows the apps updating now, what each is doing and its download's progress.
 # Writes to -RunDir, for Update-Tool's summary and its report (_Update-Report.ps1):
 #   plan.txt     every app folder it will try, in order (folders starting with _ are notes, not apps)
 #   apps.txt     a line per app as it finishes: <update.cmd's exit code, or skip>*<name>
@@ -105,7 +106,91 @@ function Read-NewResults {
 
 $width = [Math]::Min(42, ($apps | ForEach-Object { $_.Show.Length } | Measure-Object -Maximum).Maximum)
 $done = 0
+
+# The live block under the finished apps' lines: a spinner and the count, then a line per app updating with what
+# it's doing (the last thing in its log), a bar while it downloads (curl's percentage) and how long it's taken.
+# It's redrawn in place each time round the loop; a finished app's line is written where the block was, and the
+# block is drawn again under it. Only in a console window (not when the output goes to a file or a pipe).
+$live = $true
+try { if ([Console]::IsOutputRedirected) { $live = $false } } catch { $live = $false }
+$blockTop = -1
+$blockCount = 0
+$frame = 0
+function Get-Short([string]$text, [int]$size) { if ($text.Length -gt $size) { $text.Substring(0, $size - 1) + '~' } else { $text.PadRight($size) } }
+# what an app's update is doing now, from the end of its log (which cmd is still writing, so it's opened shared)
+function Get-Activity([object]$run) {
+    $tail = ''
+    try {
+        $stream = [IO.File]::Open($run.Log, 'Open', 'Read', 'ReadWrite')
+        try {
+            $stream.Position = [Math]::Max(0, $stream.Length - 4096)
+            $bytes = New-Object byte[] ($stream.Length - $stream.Position)
+            [void]$stream.Read($bytes, 0, $bytes.Length)
+            $tail = $encoding.GetString($bytes)
+        }
+        finally { $stream.Close() }
+    }
+    catch { }
+    # (curl's progress bar redraws itself with carriage returns, so each piece between them is a step too; lines of
+    # dashes are the helper's dividers)
+    $last = $tail -split "[`r`n]" | Where-Object { $_.Trim() -and $_ -notmatch '^\s*-+\s*$' } | Select-Object -Last 1
+    if (-not $last) { return [pscustomobject]@{ Percent = -1; Text = 'Starting' } }
+    if ($last -match '^[#\s]*(\d{1,3}(?:[.,]\d)?)%\s*$') { return [pscustomobject]@{ Percent = [double]($Matches[1] -replace ',', '.'); Text = 'Downloading' } }
+    if ($last -match '^\s*Downloading\s') { return [pscustomobject]@{ Percent = 0; Text = 'Downloading' } }
+    return [pscustomobject]@{ Percent = -1; Text = $last.Trim() }
+}
+function Clear-Block {
+    if (-not $live -or $script:blockTop -lt 0) { return }
+    try {
+        $blank = ' ' * ([Console]::WindowWidth - 1)
+        [Console]::SetCursorPosition(0, $script:blockTop)
+        for ($i = 0; $i -lt $script:blockCount; $i++) { [Console]::WriteLine($blank) }
+        [Console]::SetCursorPosition(0, $script:blockTop)
+    }
+    catch { $script:live = $false }
+    $script:blockTop = -1
+    $script:blockCount = 0
+}
+function Show-Block([object[]]$runs) {
+    if (-not $live) { return }
+    try {
+        $cols = [Console]::WindowWidth - 1
+        $script:frame++
+        $spin = '|/-\'[$script:frame % 4]
+        $lines = @('', " $spin Updating $($runs.Count) app$(if ($runs.Count -ne 1) { 's' }) - $script:done of $total done")
+        $nameSize = [Math]::Min(26, $width)
+        foreach ($run in $runs) {
+            $act = Get-Activity $run
+            $span = (Get-Date) - $run.Started
+            $time = '{0}:{1:D2}' -f [int][Math]::Floor($span.TotalMinutes), $span.Seconds
+            $doing = if ($act.Percent -ge 0) {
+                $filled = [int][Math]::Round([Math]::Min(100, $act.Percent) / 5)
+                '[{0}{1}] {2,3:N0}%  {3}' -f ('#' * $filled), ('-' * (20 - $filled)), $act.Percent, $act.Text
+            } else { $act.Text }
+            # (the time just after what it's doing, not far over on a wide window)
+            $room = [Math]::Max(10, [Math]::Min(48, $cols - $nameSize - 12))
+            $lines += '   {0} {1} {2,6}' -f (Get-Short $run.App.Show $nameSize), (Get-Short $doing $room), $time
+        }
+        # (blank lines over any left from a bigger block, eg. when fewer apps are left to update)
+        $count = [Math]::Max($lines.Count, $script:blockCount)
+        if ($script:blockTop -ge 0) { [Console]::SetCursorPosition(0, $script:blockTop) }
+        $before = [Console]::ForegroundColor
+        for ($i = 0; $i -lt $count; $i++) {
+            $text = if ($i -lt $lines.Count) { $lines[$i] } else { '' }
+            if ($text.Length -gt $cols) { $text = $text.Substring(0, $cols) }
+            [Console]::ForegroundColor = if ($i -eq 1) { 'Cyan' } else { 'DarkGray' }
+            [Console]::WriteLine($text.PadRight($cols))
+        }
+        [Console]::ForegroundColor = $before
+        # (from where the cursor ended up, as writing at the bottom of the window scrolls it)
+        $script:blockTop = [Console]::CursorTop - $count
+        $script:blockCount = $count
+    }
+    catch { $script:live = $false }
+}
+
 function Show-Line([object]$app, [string]$text, [string]$colour, [double]$seconds = -1) {
+    Clear-Block
     $name = if ($app.Show.Length -gt $width) { $app.Show.Substring(0, $width - 1) + '~' } else { $app.Show }
     $time = if ($seconds -ge 0) { ' ({0:N0} s)' -f $seconds } else { '' }
     Write-Host ("[{0,3}/{1}] {2} " -f $script:done, $total, $name.PadRight($width)) -NoNewline
@@ -183,11 +268,14 @@ try {
             }
         }
         $Host.UI.RawUI.WindowTitle = "USB Tool Updater - apps $done of $total done, $($running.Count) updating"
+        # (as an array: Windows PowerShell can't pass @($running) to the function, as its items hold processes)
+        if ($running.Count) { Show-Block $running.ToArray() }
         Start-Sleep -Milliseconds 150
     }
     $finished = $true
 }
 finally {
+    Clear-Block
     if (-not $finished) {
         # stopped early (Ctrl+C): the apps' updates got it too, and stop tidily; give them a moment, then end
         # any still going (eg. on to their next download) and everything they started
