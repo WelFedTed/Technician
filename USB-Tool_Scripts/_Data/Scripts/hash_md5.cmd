@@ -8,23 +8,23 @@ rem Pass all arguments to and launch hash_create.ps1
 for %%x in (%*) do (
 rem	powershell.exe -NoProfile -ExecutionPolicy bypass -Command "& '%~dpn0.ps1' "%%x""
 
-	rem Check if argument is file or folder
-	for /f "tokens=1,2 delims=d" %%A in ("-%~a1") do if "%%B" neq "" (
-		rem echo %1 is a folder
-		echo Recursively processing folder "%~n1"...
-		for /d %%d in (%1\*) do (
+	rem Check if argument is file or folder (each one in turn: %%x, not %1, which is always the first)
+	for /f "tokens=1,2 delims=d" %%A in ("-%%~ax") do if "%%B" neq "" (
+		rem echo %%x is a folder
+		echo Recursively processing folder "%%~nx"...
+		for /d %%d in ("%%~x\*") do (
 			rem echo %%d
 			start /wait /b cmd /k call "%~f0" "%%d"
 		)
-		for %%f in (%1\*) do (
+		for %%f in ("%%~x\*") do (
 			rem echo %%f
 			start /wait /b cmd /k call "%~f0" "%%f"
 		)
 	) else if "%%A" neq "-" (
-		rem echo %1 is a file
-		py "%~dpn0.py" %%x
+		rem echo %%x is a file
+		py "%~dpn0.py" "%%~x"
 	) else (
-		echo %1 does not exist
+		echo %%x does not exist
 	)
 	echo:
 )

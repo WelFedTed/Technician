@@ -1,0 +1,5 @@
+# Batch files need Windows (CRLF) line endings: cmd.exe misreads LF-only ones (eg. goto / call :label can fail
+# to find a label). Git stores them with LF; this makes every checkout, and the GitHub zip Update-Tool.cmd
+# downloads, give them CRLF whatever the git settings of the PC.
+*.cmd text eol=crlf
+*.bat text eol=crlf

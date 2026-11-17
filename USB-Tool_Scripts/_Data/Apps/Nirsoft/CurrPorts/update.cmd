@@ -15,7 +15,7 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "NirSoft CurrPorts" ^
     -Url "https://www.nirsoft.net/utils/cports-x64.zip" -Into "x64" ^
-    -Url86 "http://www.nirsoft.net/utils/ipnetinfo.zip" -Into86 "x86" ^
+    -Url86 "https://www.nirsoft.net/utils/cports.zip" -Into86 "x86" ^
     -Extract -Clean -Keep "*.cfg"
 call :result
 

@@ -286,7 +286,9 @@ finally {
         while (($running | Where-Object { -not $_.Process.HasExited }) -and (Get-Date) -lt $until) { Start-Sleep -Milliseconds 200 }
         foreach ($run in @($running)) {
             if ($run.Process.HasExited) { Complete-App $run; continue }
-            & "$env:SystemRoot\System32\taskkill.exe" /PID $run.Process.Id /T /F 2>&1 | Out-Null
+            # (taskkill writes to stderr when part of the tree has already ended, which Windows PowerShell turns
+            # into an error with 'Stop'; the rest of the apps still need stopping)
+            try { & "$env:SystemRoot\System32\taskkill.exe" /PID $run.Process.Id /T /F 2>&1 | Out-Null } catch { }
             Show-Line $run.App 'stopped' Red ((Get-Date) - $run.Started).TotalSeconds
         }
         Write-Host "$($queue.Count) app$(if ($queue.Count -ne 1) { 's' }) weren't started." -ForegroundColor Yellow

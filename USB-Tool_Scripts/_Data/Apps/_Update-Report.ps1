@@ -107,13 +107,15 @@ if ($Watch) {
     }
     # (no lock: Update-Tool couldn't make it, and runs without this)
     if (-not (Test-Path -LiteralPath $lock)) { exit 0 }
+    # a run that finishes makes the report while it still has the lock, then writes report.txt (in this run's
+    # folder, which is new each run; not the report itself, which -OutFile keeps from the last run)
+    $made = Join-Path $DataDir 'report.txt'
     while (Test-Running) {
-        # a run that finishes makes the report while it still has the lock
-        if (Test-Path -LiteralPath $report) { exit 0 }
+        if (Test-Path -LiteralPath $made) { exit 0 }
         Start-Sleep -Milliseconds 500
     }
     Start-Sleep -Seconds 2
-    if (Test-Path -LiteralPath $report) { exit 0 }
+    if (Test-Path -LiteralPath $made) { exit 0 }
     $Cancelled = $true
 }
 

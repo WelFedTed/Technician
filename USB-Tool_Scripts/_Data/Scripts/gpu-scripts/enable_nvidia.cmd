@@ -19,7 +19,7 @@ if %errorLevel% neq 0 (
 set "GPU_ID=PCI\VEN_10DE&DEV_1C81&SUBSYS_11C010DE&REV_A1\4&2db3ecda&0&0008"
 :: ---------------------
 
-echo Disabling GPU...
+echo Enabling GPU...
 pnputil /enable-device "%GPU_ID%"
 
 echo Done.

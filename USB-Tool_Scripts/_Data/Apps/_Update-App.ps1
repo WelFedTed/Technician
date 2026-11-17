@@ -512,14 +512,20 @@ function Save-Site([string]$page, [string]$folder) {
             "output = `"$((Join-Path $folder ($rel -replace '/', '\')) -replace '\\', '/')`""
         }
         [IO.File]::WriteAllLines($list, [string[]]$lines)
+        # (no -S, and 'Continue' while curl runs: with this script's stop-on-error setting, Windows PowerShell treats
+        # anything curl says (about a missing file, or an older curl not knowing --parallel) as a failure, even when
+        # it's sent to $null; missing files are noted below instead)
+        $savedPreference = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
         try {
-            # (no -S: with this script's stop-on-error setting, Windows PowerShell treats anything curl says about a
-            # missing file as a failure, even when it's sent to $null; missing files are noted below instead)
             & $curl -sL -R --fail --retry 2 --connect-timeout 20 --create-dirs --parallel --parallel-max 8 -A $userAgent -K $list 2>$null
             # (an older curl, before --parallel: the same, a file at a time)
             if ($LASTEXITCODE -eq 2) { & $curl -sL -R --fail --retry 2 --connect-timeout 20 --create-dirs -A $userAgent -K $list 2>$null }
         }
-        finally { Remove-Item -LiteralPath $list -Force -ErrorAction SilentlyContinue }
+        finally {
+            $ErrorActionPreference = $savedPreference
+            Remove-Item -LiteralPath $list -Force -ErrorAction SilentlyContinue
+        }
         $next = New-Object Collections.Generic.List[string]
         foreach ($rel in $round) {
             $target = Join-Path $folder ($rel -replace '/', '\')
@@ -636,7 +642,12 @@ function Get-DownloadName([string]$link, [string]$finalUrl, [string]$kind) {
 function Get-RemoteStamp([string]$address) {
     $curlArgs = @('-sIL', '--fail', '--connect-timeout', '20', '-A', $userAgent, '-o', 'NUL', '-w', '%header{etag}|%header{last-modified}|%header{content-length}')
     if ($Referer) { $curlArgs += @('-e', $Referer) }
-    $out = & $curl @curlArgs $address 2>$null
+    # ('Continue' while curl runs: an older curl, before %header{}, warns about it, which with 'Stop' would end the
+    # update; its stamp just comes back empty, and the download is checked as usual)
+    $savedPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try { $out = & $curl @curlArgs $address 2>$null }
+    finally { $ErrorActionPreference = $savedPreference }
     if ($LASTEXITCODE -ne 0) { return '' }
     $stamp = ($out | Out-String).Trim()
     if (($stamp -replace '\|', '').Trim()) { return $stamp }
@@ -1273,7 +1284,9 @@ if ($Manual) {
     # made with Aseprite's build.cmd); this reads the /releases/latest redirect, not GitHub's limited API
     $latest = ''
     if ($GitHub) {
-        $final = & $curl -sSIL --fail --retry 2 --connect-timeout 20 -A $userAgent -o NUL -w '%{url_effective}' "https://github.com/$GitHub/releases/latest" 2>$null
+        # (no -S: with 'Stop', Windows PowerShell treats curl's error message as a failure even when it's sent to $null;
+        # offline, or GitHub refusing, just leaves $latest empty)
+        $final = & $curl -sIL --fail --retry 2 --connect-timeout 20 -A $userAgent -o NUL -w '%{url_effective}' "https://github.com/$GitHub/releases/latest" 2>$null
         if ($LASTEXITCODE -eq 0 -and "$final" -match '/releases/tag/(.+)$') { $latest = [regex]::Match([Uri]::UnescapeDataString($Matches[1]), '\d+(\.\d+)+').Value }
         $have = (Get-VersionFromName $script:oldVersionName).Version
         if ($latest -and $have -eq $latest) {
@@ -1350,7 +1363,8 @@ try {
         $bad = 0
         foreach ($job in $jobs) {
             $sample = New-StagingPath check
-            $curlArgs = @('-sSL', '--fail', '--connect-timeout', '20', '--max-time', '60', '-r', '0-1023', '-A', $userAgent, '-o', $sample, '-D', '-', '-w', '%{url_effective}')
+            # (no -S: its error message would stop the whole check here, rather than this link showing as failed)
+            $curlArgs = @('-sL', '--fail', '--connect-timeout', '20', '--max-time', '60', '-r', '0-1023', '-A', $userAgent, '-o', $sample, '-D', '-', '-w', '%{url_effective}')
             if ($Referer) { $curlArgs += @('-e', $Referer) }
             $out = @(& $curl @curlArgs $job.Link 2>&1 | ForEach-Object { "$_" })
             $ok = $LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $sample)

@@ -4,7 +4,7 @@ setlocal enableDelayedExpansion
 title Copy File By EXT
 
 rem change back in to current directory (in case run as admin)
-cd /d %~dp0
+cd /d "%~dp0"
 
 set "source=C:\Temp"
 
@@ -37,10 +37,10 @@ for %%e in (%extensions%) do (
 
 echo Removing empty directories...
 for /d /r %%d in (*) do (
-	dir /b %%d | findstr . >nul
+	dir /b "%%d" | findstr . >nul
 	if errorlevel 1 (
 	    rem echo %%d Folder is empty.
-	    rmdir %%d
+	    rmdir "%%d"
 	) else (
 	    rem echo %%d Folder is NOT empty.
 	)
