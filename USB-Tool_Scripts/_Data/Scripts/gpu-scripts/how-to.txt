@@ -1,0 +1,39 @@
+from AI
+------------------------
+
+
+To disable a graphics card using a batch file, you can utilize the built-in Windows pnputil command utility. Because this script alters hardware states, the batch file must be executed with Administrator privileges to function.Step 1: Find Your GPU Instance IDBefore creating the script, you need the unique ID of your graphics card.Open the Windows Start menu, type cmd, right-click Command Prompt, and select Run as administrator.Run the following command:cmdpnputil /enum-devices /class "display"
+Use code with caution.Look for your target GPU in the output list.Copy the entire line next to Device Instance ID (it will look something like PCI\VEN_10DE&DEV_1C03&...).Step 2: Create the "Disable GPU" Batch FileOpen Notepad.Paste the script below into the document. Make sure to replace the placeholder ID with the exact Instance ID you copied in Step 1.
+
+batch@echo off
+:: Check for administrative rights
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo Requesting administrative privileges...
+    goto UACPrompt
+) else ( goto gotAdmin )
+
+:UACPrompt
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+    echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
+    "%temp%\getadmin.vbs"
+    del "%temp%\getadmin.vbs"
+    exit /B
+
+:gotAdmin
+:: --- CONFIGURATION ---
+:: Replace the text inside the quotes with your actual GPU Device Instance ID
+set "GPU_ID=PCI\VEN_10DE&DEV_1C03&SUBSYS_11B810DE&REV_A1\4&214C7A53&0&0010"
+:: ---------------------
+
+echo Disabling GPU...
+pnputil /disable-device "%GPU_ID%"
+
+echo Done.
+pause
+
+
+Use code with caution.Click File > Save As.Change Save as type to All Files (.).Name the file DisableGPU.bat and click Save.Step 3: Create an "Enable GPU" Batch File (Highly Recommended)It is critical to have an easy way to reverse this change so you don't get stuck using basic software rendering. Repeat the same steps as above, but swap out the bottom section command:batch:: Use the exact same script structure as above, but change the execution line to:
+echo Enabling GPU...
+pnputil /enable-device "%GPU_ID%"
+Use code with caution.Save this second file as EnableGPU.bat. To use either script, simply double-click the .bat file and grant the administrator prompt.
