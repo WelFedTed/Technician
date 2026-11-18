@@ -15,7 +15,7 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Why Did I Reboot" ^
     -GitHub "WelFedTed/why-did-i-reboot-releases" ^
-    -Asset "^WhyDidIReboot\.exe$" -Into "x64" ^
+    -Asset "^why-did-i-reboot\.exe$" -Into "x64" ^
     -Clean
 call :result
 

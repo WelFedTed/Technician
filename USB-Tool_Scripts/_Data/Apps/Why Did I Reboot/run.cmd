@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title Why Did I Reboot
 
-set "application=WhyDidIReboot.exe"
+set "application=why-did-i-reboot.exe;WhyDidIReboot.exe"
 set "arguments="
 set "folder=Portable"
 
