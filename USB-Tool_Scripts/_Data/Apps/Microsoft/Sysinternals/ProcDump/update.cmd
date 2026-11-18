@@ -15,7 +15,8 @@ rem CLI
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\_Update-App.ps1" -AppDir "%~dp0CLI" ^
     -Name "ProcDump" ^
     -Url "https://download.sysinternals.com/files/Procdump.zip" ^
-    -Extract -Into "x86_x64_ARM64" -Clean
+    -Extract -Into "x86_x64_ARM64" -Clean ^
+    -MajorGeeks "microsoft_procdump:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

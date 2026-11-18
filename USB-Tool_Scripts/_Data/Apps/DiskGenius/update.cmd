@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "DiskGenius (installer)" ^
     -Page "https://www.diskgenius.com/download.php" ^
     -Link "/dyna_download/\?software=DGEngSetup(\d+)\.exe" -UrlFormat "https://download.diskgenius.com/DGEngSetup{0}.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "diskgenius"
 call :result
 
 rem Portable (the free edition)

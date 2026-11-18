@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Page "https://www.cpuid.com/softwares/cpu-z.html" ^
     -Link "cpu-z_([\d.]+)-en\.exe" ^
     -UrlFormat "https://download.cpuid.com/cpu-z/cpu-z_{0}-en.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "cpu_z:EXE"
 call :result
 
 rem Portable
@@ -26,7 +27,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Page "https://www.cpuid.com/softwares/cpu-z.html" ^
     -Link "cpu-z_([\d.]+)-en\.zip" ^
     -UrlFormat "https://download.cpuid.com/cpu-z/cpu-z_{0}-en.zip" ^
-    -Extract -Into "x86_x64" -Clean
+    -Extract -Into "x86_x64" -Clean ^
+    -MajorGeeks "cpu_z:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

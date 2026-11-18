@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "UltraViewer" ^
     -Page "https://www.ultraviewer.net/en/download.html" ^
     -Link "UltraViewer_setup_[\d.]+_en\.exe" ^
-    -Into "x86" -Clean
+    -Into "x86" -Clean ^
+    -MajorGeeks "ultraviewer"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

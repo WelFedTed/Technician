@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "PassMark Rebooter" ^
     -Page "https://www.passmark.com/products/rebooter/index.php" ^
     -Url "https://www.passmark.com/downloads/rebooter.zip" -Into "x86" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks "passmark_rebooter:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "K-Lite Codec Pack Standard" ^
     -Page "https://www.codecguide.com/download_k-lite_codec_pack_standard.htm" ^
     -Link "https://files2\.codecguide\.com/K-Lite_Codec_Pack_\d+_Standard\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "k_lite_codec_pack_standard"
 call :result
 
 if /i not "%~1" == "/nopause" pause

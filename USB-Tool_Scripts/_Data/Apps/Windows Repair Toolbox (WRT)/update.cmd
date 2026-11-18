@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Windows Repair Toolbox (WRT)" ^
     -Url "https://windows-repair-toolbox.com/files/Windows_Repair_Toolbox.zip" ^
-    -Extract -Into "x86" -Clean -Keep "Downloads,custom"
+    -Extract -Into "x86" -Clean -Keep "Downloads,custom" ^
+    -MajorGeeks "windows_repair_toolbox"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://download.blender.org/release/Blender{0}/" ^
     -Link "blender-[\d.]+-windows-x64\.msi" -Into "x64" ^
     -LinkArm "blender-[\d.]+-windows-arm64\.msi" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "blender:64-Bit"
 call :result
 
 rem Portable
@@ -28,7 +29,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://download.blender.org/release/Blender{0}/" ^
     -Link "blender-[\d.]+-windows-x64\.zip" -Into "x64" ^
     -LinkArm "blender-[\d.]+-windows-arm64\.zip" -IntoArm "ARM64" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks "blender:64-Bit Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft RouterPassView" ^
     -Url "https://www.nirsoft.net/toolsdownload/routerpassview.zip" -Into "x86" ^
     -Referer "https://www.nirsoft.net/utils/router_password_recovery.html" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "routerpassview"
 call :result
 
 if /i not "%~1" == "/nopause" pause

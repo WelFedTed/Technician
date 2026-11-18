@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "MiniTool Partition Wizard" ^
     -Page "https://www.partitionwizard.com/free-partition-manager.html" ^
     -Winget "MiniTool.PartitionWizard.Free" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "minitool_partition_wizard_home_edition"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

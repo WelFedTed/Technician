@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Link "https://the\.earth\.li/~sgtatham/putty/latest/w64/putty-64bit-[\d.]+-installer\.msi" -Into "x64" ^
     -Link86 "https://the\.earth\.li/~sgtatham/putty/latest/w32/putty-[\d.]+-installer\.msi" -Into86 "x86" ^
     -LinkArm "https://the\.earth\.li/~sgtatham/putty/latest/wa64/putty-arm64-[\d.]+-installer\.msi" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "putty:64-Bit" -MajorGeeks86 "putty"
 call :result
 
 rem Portable

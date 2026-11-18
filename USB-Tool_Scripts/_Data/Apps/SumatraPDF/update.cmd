@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Link "/dl/rel/[\d.]+/SumatraPDF-[\d.]+-64-install\.exe" -Into "x64" ^
     -Link86 "/dl/rel/[\d.]+/SumatraPDF-[\d.]+-install\.exe" -Into86 "x86" ^
     -LinkArm "/dl/rel/[\d.]+/SumatraPDF-[\d.]+-arm64-install\.exe" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "sumatra_pdf:64-Bit" -MajorGeeks86 "sumatra_pdf"
 call :result
 
 rem Portable

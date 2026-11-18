@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Fat32 Formatter GUI" ^
     -Page "http://ridgecrop.co.uk/index.htm?guiformat.htm" ^
     -Winget "Ridgecrop.guiformat" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "fat32format"
 call :result
 
 if /i not "%~1" == "/nopause" pause

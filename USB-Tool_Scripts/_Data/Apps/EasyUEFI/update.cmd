@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "EasyUEFI trial (installer)" ^
     -Page "https://www.easyuefi.com/" ^
     -Url "https://www.easyuefi.com/downloads/EasyUEFI_Trial.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "easyuefi"
 call :result
 
 if /i not "%~1" == "/nopause" pause

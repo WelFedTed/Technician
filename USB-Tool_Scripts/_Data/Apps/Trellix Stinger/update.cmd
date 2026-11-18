@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Url "https://downloadcenter.trellix.com/products/mcafee-avert/Stinger/stinger64.exe" ^
     -SaveAs "Stinger.exe" -Into "x64" ^
     -Url86 "https://downloadcenter.trellix.com/products/mcafee-avert/Stinger/stinger32.exe" ^
-    -SaveAs86 "Stinger.exe" -Into86 "x86"
+    -SaveAs86 "Stinger.exe" -Into86 "x86" ^
+    -MajorGeeks "mcafee_stinger:64-Bit" -MajorGeeks86 "mcafee_stinger"
 call :result
 
 if /i not "%~1" == "/nopause" pause

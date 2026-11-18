@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Url "https://www.nirsoft.net/toolsdownload/iepv.zip" -Into "x86" ^
     -Referer "https://www.nirsoft.net/utils/internet_explorer_password.html" ^
     -Password "iepv68861$" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "ie_passview_2b4b:Download@Authors Site (Portable)"
 call :result
 
 if /i not "%~1" == "/nopause" pause

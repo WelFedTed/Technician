@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://dmde.com/download.html" ^
     -Link "/download/dmde-[\d-]+-win64-gui\.zip" -Into "x64" ^
     -Link86 "/download/dmde-[\d-]+-win32-gui\.zip" -Into86 "x86" ^
-    -Extract -Clean -VersionFrom "x64\dmde.exe"
+    -Extract -Clean -VersionFrom "x64\dmde.exe" ^
+    -MajorGeeks86 "dmde_dm_disk_editor_and_data_recovery_software:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

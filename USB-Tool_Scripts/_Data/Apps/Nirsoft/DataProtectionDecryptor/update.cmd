@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Url "https://www.nirsoft.net/toolsdownload/dataprotectiondecryptor-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/toolsdownload/dataprotectiondecryptor.zip" -Into86 "x86" ^
     -Referer "https://www.nirsoft.net/utils/dpapi_data_decryptor.html" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "dataprotectiondecryptor:64-Bit" -MajorGeeks86 "dataprotectiondecryptor:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

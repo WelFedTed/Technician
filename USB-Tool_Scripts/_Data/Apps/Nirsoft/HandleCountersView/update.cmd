@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft HandleCountersView" ^
     -Url "https://www.nirsoft.net/utils/handlecountersview-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/handlecountersview.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "handlecountersview:64-Bit" -MajorGeeks86 "handlecountersview:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

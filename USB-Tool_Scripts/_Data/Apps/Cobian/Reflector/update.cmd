@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "Cobian Reflector" ^
     -Page "https://www.cobiansoft.com/cobianbackup.html" ^
     -Link "https://files\.cobiansoft\.com/programs/crSetup-[\d.]+\.exe" -Into "x86" ^
-    -VersionFromUrl -Clean
+    -VersionFromUrl -Clean ^
+    -MajorGeeks "cobian_reflector:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

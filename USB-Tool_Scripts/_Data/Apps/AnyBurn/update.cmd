@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "AnyBurn (installer)" ^
     -Url "https://www.anyburn.com/anyburn_setup.exe" -Into "x86" ^
     -UrlArm "https://www.anyburn.com/anyburn_setup_arm64.exe" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "free_any_burn:EXE" -MajorGeeksArm "free_any_burn:ARM64"
 call :result
 
 rem Portable
@@ -24,7 +25,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "AnyBurn Portable" ^
     -Url "https://www.anyburn.com/anyburn.zip" -Inner "AnyBurn(64-bit)" -Into "x64" ^
     -Url86 "https://www.anyburn.com/anyburn.zip" -Inner86 "AnyBurn(32-bit)" -Into86 "x86" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "free_any_burn:Portable" -MajorGeeks86 "free_any_burn:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

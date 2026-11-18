@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://sourceforge.net/projects/clamwin/rss?path=/clamwin" ^
     -Link "https://sourceforge\.net/projects/clamwin/files/clamwin/[\d.]+/clamwin-[\d.]+-setup\.exe/download" ^
     -UserAgent "curl/8.0" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "clamwin_free_antivirus"
 call :result
 
 rem Portable

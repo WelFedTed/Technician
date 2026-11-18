@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "LatencyMon" ^
     -Page "https://www.resplendence.com/latencymon" ^
     -Url "https://www.resplendence.com/download/LatencyMon.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "latencymon:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://github.com/microsoft/winget-pkgs/tree/master/manifests/p/PrimateLabs/Geekbench/6" ^
     -Link "name.:\s*.(6\.\d+\.\d+)." ^
     -UrlFormat "https://cdn.geekbench.com/Geekbench-{0}-WindowsSetup.exe" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "geekbench:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

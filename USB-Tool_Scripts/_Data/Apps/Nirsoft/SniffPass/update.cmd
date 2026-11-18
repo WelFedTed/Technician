@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Url "https://www.nirsoft.net/toolsdownload/sniffpass-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/toolsdownload/sniffpass.zip" -Into86 "x86" ^
     -Referer "https://www.nirsoft.net/utils/password_sniffer.html" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks86 "sniffpass:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

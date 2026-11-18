@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Kdenlive (installer)" ^
     -Page "https://kdenlive.org/download/" ^
     -Link "https://download\.kde\.org/stable/kdenlive/[\d.]+/windows/kdenlive-[\d.]+\.exe" -Into "x64" ^
-    -VersionFromUrl -Clean
+    -VersionFromUrl -Clean ^
+    -MajorGeeks "kdenlive:EXE"
 call :result
 
 rem Portable (the standalone build: a self-extracting .exe, unpacked here so it runs from the USB)
@@ -24,7 +25,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Kdenlive (portable)" ^
     -Page "https://kdenlive.org/download/" ^
     -Link "https://download\.kde\.org/stable/kdenlive/[\d.]+/windows/kdenlive-[\d.]+_standalone\.exe" -Into "x64" ^
-    -Extract -Sfx -Flatten -Clean
+    -Extract -Sfx -Flatten -Clean ^
+    -MajorGeeks "kdenlive:Portable"
 call :result
 if /i not "%~1" == "/nopause" pause
 exit /b %result%

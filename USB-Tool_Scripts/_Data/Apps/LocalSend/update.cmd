@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://localsend.org/" ^
     -GitHub "localsend/localsend" ^
     -Asset "^LocalSend-[\d.]+-windows-x86-64\.exe$" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "localsend"
 call :result
 
 rem Portable
@@ -27,7 +28,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "localsend/localsend" ^
     -Asset "^LocalSend-[\d.]+-windows-x86-64\.zip$" -Into "x64" ^
     -AssetArm "^LocalSend-[\d.]+-windows-arm-64\.zip$" -IntoArm "ARM64" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "localsend:Portable"
 call :result
 
 rem CLI

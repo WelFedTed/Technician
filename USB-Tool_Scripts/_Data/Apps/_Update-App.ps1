@@ -48,6 +48,15 @@
 #                                     index ("slug": ...) are copied too. Copied again each run, and replaced
 #                                     only when something changed. A site that needs a web server (eg. the
 #                                     COPS Manual's Quartz site) is shown with _Serve-Site.ps1.
+#   [-MajorGeeks <page>[:<button>]]   a backup source, used only when the one above fails (its link can't be found,
+#                                     or the download fails or isn't the app): the app's page on majorgeeks.com,
+#                                     named as in its address (eg. "crystaldiskinfo" for
+#                                     majorgeeks.com/files/details/crystaldiskinfo.html), and the download button to
+#                                     use when the page has several (eg. "notepad:64-Bit Portable" for its
+#                                     "Download (64-Bit Portable)" button; by default MajorGeeks' own copy, or
+#                                     "Download Now"). -MajorGeeks86 / -MajorGeeksArm: the same for the 32-bit and
+#                                     ARM64 builds. An installer MajorGeeks has in a .zip is taken out of it. The
+#                                     report notes when it was used, and why. (Not for -Paf or -Site apps)
 #   -Manual [-Page <url>] [-Note <text>]  can't be downloaded automatically; prints where to get it
 #       [-Action <script> -ActionText <text>]   a script in the app folder that gets it instead (eg. Aseprite's
 #                                     build.cmd), offered in Update-Tool's report
@@ -127,7 +136,8 @@ param(
     [string]$MoveFrom,
     [switch]$CheckOnly,
     [string]$PageIndex, [string]$PageIndexLink,
-    [switch]$PreRelease, [switch]$SkipPreReleases
+    [switch]$PreRelease, [switch]$SkipPreReleases,
+    [string]$MajorGeeks, [string]$MajorGeeks86, [string]$MajorGeeksArm
 )
 
 $ErrorActionPreference = 'Stop'
@@ -350,6 +360,133 @@ function Resolve-Link([string]$direct, [string]$pageLink, [string]$asset) {
     if ($Page -and $pageLink) { return Find-PageLink $pageLink }
     if ($GitHub -and $asset) { return Find-GitHubAsset $asset }
     return $null
+}
+
+# ---------------------------------------------------------------------------------------------
+# The backup source: MajorGeeks (-MajorGeeks), only used when the original source fails
+# ---------------------------------------------------------------------------------------------
+
+# (a PortableApps installer or a copied site has no equivalent on MajorGeeks)
+$script:mirrors = if ($Paf -or $Site) { @{} } else { @{ main = $MajorGeeks; x86 = $MajorGeeks86; arm = $MajorGeeksArm } }
+# what was got from MajorGeeks instead, and why, for the report
+$script:mirrorNotes = @()
+
+# the MajorGeeks page for the download that goes in this build folder
+function Get-MirrorFor([string]$folder) {
+    if (-not $folder) { return $null }
+    if ($folder -eq $Into) { return $script:mirrors.main }
+    if ($folder -eq $Into86) { return $script:mirrors.x86 }
+    if ($folder -eq $IntoArm) { return $script:mirrors.arm }
+    return $null
+}
+
+# finds a download's link with $find. If that fails (or finds nothing for a build that has a source of its own)
+# and there's a MajorGeeks page for it, returns nothing, with the reason in $script:originalWhy, so the download
+# is got from MajorGeeks instead
+function Find-Original([scriptblock]$find, [string]$mirror, [bool]$expected = $true) {
+    $script:originalWhy = $null
+    $found = $null
+    try { $found = & $find }
+    catch {
+        if (-not $mirror) { throw }
+        $script:originalWhy = $_.Exception.Message
+        return $null
+    }
+    if (-not $found -and $expected -and $mirror) { $script:originalWhy = "its link couldn't be worked out" }
+    return $found
+}
+
+# a download, from its link or (when Find-Original couldn't find one) from MajorGeeks
+function New-DownloadJob([string]$found, [string]$mirror, [hashtable]$details) {
+    if (-not $found -and -not $script:originalWhy) { return $null }
+    if (-not $found) { Say "Couldn't find the $(if ($details.Into) { "$($details.Into) " })download: $($script:originalWhy)" }
+    $job = [pscustomobject]$details
+    $job | Add-Member -NotePropertyMembers @{ Link = $found; Mirror = $mirror; MirrorWhy = $script:originalWhy }
+    return $job
+}
+
+# the download link on an app's MajorGeeks page ("<page>" or "<page>:<button>"); its download links only work in
+# the visit the button's page starts, so that page's cookies are kept for it (as -Cookies does)
+function Resolve-MajorGeeksLink([string]$spec) {
+    $pageName, $button = $spec -split ':', 2
+    $site = 'https://www.majorgeeks.com/'
+    $html = Get-Text "${site}files/details/$pageName.html"
+    # (a page that doesn't exist is still a page, titled just "Download MajorGeeks.Com")
+    $title = [regex]::Match($html, '<title>\s*Download\s+(.*?)\s+-\s+MajorGeeks\s*</title>').Groups[1].Value
+    if (-not $title -or $title -eq 'MajorGeeks.Com') { throw "MajorGeeks has no page named '$pageName' (any more)" }
+    $buttons = @([regex]::Matches($html, '<a[^>]+href="(mg/(?:getmirror|get)/[^"]+)"[^>]*>(.*?)</a>', 'Singleline') | ForEach-Object {
+            [pscustomobject]@{ Href = $_.Groups[1].Value; Text = (($_.Groups[2].Value -replace '<[^>]+>', ' ') -replace '\s+', ' ').Trim() }
+        })
+    # (the button's whole name, eg. "64-Bit Portable" for "Download (64-Bit Portable)", so "64-Bit" isn't it too)
+    $picked = if ($button) { @($buttons | Where-Object { $_.Text -eq $button -or $_.Text -eq "Download ($button)" }) }
+    else { @($buttons | Where-Object { $_.Text -eq 'Download@MajorGeeks' }) + @($buttons | Where-Object { $_.Text -eq 'Download Now' }) }
+    $hrefs = @($picked | ForEach-Object { $_.Href } | Select-Object -Unique)
+    if (-not $hrefs) { throw "MajorGeeks' $title page has no '$(if ($button) { $button } else { 'Download' })' button" }
+    foreach ($href in $hrefs) {
+        $jar = New-StagingPath cookies
+        try {
+            $m = [regex]::Match((Get-Text "$site$href" $jar), 'index\.php\?ct=files&action=download&PHPSESSID=\w+')
+            if ($m.Success) {
+                $link = "$site$($m.Value)"
+                $script:cookieJars[$link] = $jar
+                Say "MajorGeeks: $title"
+                return $link
+            }
+        }
+        catch { }
+        Remove-Item -LiteralPath $jar -Force -ErrorAction SilentlyContinue
+    }
+    throw "MajorGeeks' $title page didn't give a download link"
+}
+
+# gets a download from MajorGeeks into $temp, after its original source failed; returns its final address and kind
+function Get-MirrorDownload($job, [string]$temp) {
+    Say "That didn't work ($($job.MirrorWhy)), so getting it from MajorGeeks instead..."
+    try {
+        $link = Resolve-MajorGeeksLink $job.Mirror
+        # where MajorGeeks sends it: its own copy, or the maker's link, which has the file's name in it even when
+        # the maker sends it on to an address without one (eg. GitHub's release downloads)
+        $jarArgs = Get-CookieArgs $link
+        $sentTo = & $curl -s --connect-timeout 20 -A $userAgent @jarArgs -o NUL -w '%{redirect_url}' $link
+        if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp -Force }
+        Say "Downloading $link"
+        $finalUrl = Get-Download $link $temp
+        if ((Split-Path -Leaf $finalUrl) -notmatch '\.[A-Za-z0-9]{2,5}$' -and "$sentTo" -match '^https?://') {
+            $finalUrl = [Uri]::UnescapeDataString(("$sentTo").Split('?')[0])
+        }
+        $kind = Get-FileKind $temp
+        # an installer the original gives as it is, which MajorGeeks has in an archive: the one program in it
+        if (-not $Extract -and $kind -in @('zip', '7z', 'rar')) {
+            $unpacked = New-StagingPath mirror
+            $script:downloads += $unpacked
+            $null = Expand-ToStaging $temp $kind $unpacked $null
+            $programs = @(Get-ChildItem -LiteralPath $unpacked -Recurse -File | Where-Object { $_.Extension -in @('.exe', '.msi') })
+            if ($programs.Count -ne 1) { throw "its download is a .$kind holding $($programs.Count) programs, not the one installer expected" }
+            Copy-Item -LiteralPath $programs[0].FullName -Destination $temp -Force
+            $finalUrl = $finalUrl.Substring(0, $finalUrl.LastIndexOf('/') + 1) + $programs[0].Name
+        }
+        $kind = Test-Download $temp $link
+        # MajorGeeks can be behind the maker: never swap the copy here for an older one (versions compared as far as
+        # both go, eg. "7.1.2" in the file's name against "7.1.2-35"; a name without a version can't be compared)
+        $have = (Get-VersionFromName $script:oldVersionName).Version
+        $named = [regex]::Match((Split-Path -Leaf $finalUrl), '\d+(?:[._]\d+)+').Value
+        if ($have -and $named) {
+            $a = Get-VersionKey $named; $b = Get-VersionKey $have
+            for ($i = 0; $i -lt [Math]::Min($a.Count, $b.Count); $i++) {
+                if ($a[$i] -gt $b[$i]) { break }
+                if ($a[$i] -lt $b[$i]) { throw "it only has version $($named -replace '_', '.'), older than the $have here" }
+            }
+        }
+    }
+    catch { throw "The original download failed ($($job.MirrorWhy)), and so did MajorGeeks' copy ($($_.Exception.Message))" }
+    $job.Link = $link
+    $job | Add-Member -NotePropertyName MirrorUsed -NotePropertyValue $true -Force
+    # (MajorGeeks' file isn't the one winget lists, or one to take a file out of)
+    if ($job.PSObject.Properties['Sha256']) { $job.Sha256 = $null }
+    if ($job.PSObject.Properties['TakeOnly']) { $job.TakeOnly = $null }
+    $script:mirrorNotes += "$(if ($job.Into) { "$($job.Into): " })$($job.MirrorWhy)"
+    Say "Got it from MajorGeeks: $finalUrl"
+    return $finalUrl, $kind
 }
 
 # winget packages: read from their manifests in github.com/microsoft/winget-pkgs (what winget itself installs
@@ -1275,6 +1412,7 @@ function Write-Report([string]$status, [hashtable]$more = @{}) {
             version = $now.Version; built = $now.Built; oldVersion = $before.Version; oldBuilt = $before.Built
             seconds = [Math]::Round(((Get-Date) - $script:startTime).TotalSeconds, 1); downloaded = $script:downloadedBytes
             source = $source; note = $Note; action = $Action; actionText = $ActionText; message = ''; blocked = @()
+            mirror = @($script:mirrorNotes)
         }
         foreach ($key in $more.Keys) { $record[$key] = $more[$key] }
         $line = ([pscustomobject]$record | ConvertTo-Json -Compress -Depth 3) + "`r`n"
@@ -1354,18 +1492,33 @@ try {
         if ($PageArm) { $PageArm = $PageArm -f $release }
     }
     $jobs = @()
-    if ($Winget) { $jobs = @(Get-WingetJobs) }
+    if ($Winget) {
+        try { $jobs = @(Get-WingetJobs) }
+        catch {
+            # (winget's listing couldn't be read: each build from MajorGeeks instead, where it has a page)
+            if (-not ($script:mirrors.main -or $script:mirrors.x86 -or $script:mirrors.arm)) { throw }
+            $script:originalWhy = $_.Exception.Message
+            foreach ($build in @(@($Into, $SaveAs), @($Into86, $SaveAs86), @($IntoArm, $SaveAsArm))) {
+                $mirror = Get-MirrorFor $build[0]
+                if ($mirror) { $jobs += New-DownloadJob $null $mirror @{ SaveAs = $build[1]; Into = $build[0]; Inner = $null } }
+            }
+        }
+        foreach ($job in $jobs) { if (-not $job.PSObject.Properties['Mirror']) { $job | Add-Member -NotePropertyName Mirror -NotePropertyValue (Get-MirrorFor $job.Into) } }
+    }
     elseif ($Site) {
         # (copied into a folder like an unzipped download, so it's applied the same way)
         $jobs = @([pscustomobject]@{ Link = $Site; SaveAs = $null; Into = $Into; Inner = $null; IsSite = $true })
         $Extract = $true
     }
     else {
-        $link = Resolve-Link $Url $Link $Asset
-        if (-not $link) { throw 'No download source given (use -Url, -Page/-Link, -GitHub/-Asset or -Winget)' }
-        $jobs += [pscustomobject]@{ Link = $link; SaveAs = $SaveAs; Into = $Into; Inner = $Inner }
-        $link86 = Resolve-AltLink $Url86 $Link86 $Asset86 $Page86 $UrlFormat86
-        $linkArm = Resolve-AltLink $UrlArm $LinkArm $AssetArm $PageArm $UrlFormatArm
+        # (each build's link, or, if finding it fails, a note to get it from MajorGeeks instead)
+        $link = Find-Original { Resolve-Link $Url $Link $Asset } $script:mirrors.main
+        if (-not $link -and -not $script:originalWhy) { throw 'No download source given (use -Url, -Page/-Link, -GitHub/-Asset or -Winget)' }
+        $jobs += New-DownloadJob $link $script:mirrors.main @{ SaveAs = $SaveAs; Into = $Into; Inner = $Inner }
+        $link86 = Find-Original { Resolve-AltLink $Url86 $Link86 $Asset86 $Page86 $UrlFormat86 } $script:mirrors.x86 ([bool]($Url86 -or $Link86 -or $Asset86 -or $UrlFormat86))
+        $job86 = New-DownloadJob $link86 $script:mirrors.x86 @{ SaveAs = $SaveAs86; Into = $Into86; Inner = $Inner86 }
+        $linkArm = Find-Original { Resolve-AltLink $UrlArm $LinkArm $AssetArm $PageArm $UrlFormatArm } $script:mirrors.arm ([bool]($UrlArm -or $LinkArm -or $AssetArm -or $UrlFormatArm))
+        $jobArm = New-DownloadJob $linkArm $script:mirrors.arm @{ SaveAs = $SaveAsArm; Into = $IntoArm; Inner = $InnerArm }
         foreach ($extraLink in ($Extra -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ }) {
             $jobs += [pscustomobject]@{ Link = $extraLink; SaveAs = $null; Into = $Into; IsExtra = $true }
         }
@@ -1374,8 +1527,8 @@ try {
                 $jobs += [pscustomobject]@{ Link = $extraFile.browser_download_url; SaveAs = $null; Into = $Into; IsExtra = $true }
             }
         }
-        if ($link86) { $jobs += [pscustomobject]@{ Link = $link86; SaveAs = $SaveAs86; Into = $Into86; Inner = $Inner86 } }
-        if ($linkArm) { $jobs += [pscustomobject]@{ Link = $linkArm; SaveAs = $SaveAsArm; Into = $IntoArm; Inner = $InnerArm } }
+        if ($job86) { $jobs += $job86 }
+        if ($jobArm) { $jobs += $jobArm }
     }
     # (a winget package's version is part of what's recorded, as some vendors' links don't change between versions)
     $wingetKey = if ($Winget) { "winget=$Winget $script:wingetListed" } else { '' }
@@ -1384,20 +1537,31 @@ try {
     if ($CheckOnly) {
         $bad = 0
         foreach ($job in $jobs) {
-            $sample = New-StagingPath check
-            # (no -S: its error message would stop the whole check here, rather than this link showing as failed)
-            $curlArgs = @('-sL', '--fail', '--connect-timeout', '20', '--max-time', '60', '-r', '0-1023', '-A', $userAgent, '-o', $sample, '-D', '-', '-w', '%{url_effective}')
-            if ($Referer) { $curlArgs += @('-e', $Referer) }
-            $curlArgs += Get-CookieArgs $job.Link
-            $out = @(& $curl @curlArgs $job.Link 2>&1 | ForEach-Object { "$_" })
-            $ok = $LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $sample)
-            $kind = if ($ok) { Get-FileKind $sample } else { 'failed' }
-            $size = ($out | Where-Object { $_ -match '^content-range: bytes \d+-\d+/(\d+)' } | Select-Object -Last 1) -replace '^content-range: bytes \d+-\d+/(\d+).*$', '$1'
-            if (-not $size) { $size = ($out | Where-Object { $_ -match '^content-length: (\d+)' } | Select-Object -Last 1) -replace '^content-length: (\d+).*$', '$1' }
-            $sizeText = if ($size -match '^\d+$') { '{0:N1} MB' -f ([double]$size / 1MB) } else { '? MB' }
-            if ($kind -notin @('exe', 'msi', 'zip', '7z', 'rar', 'other')) { $bad++ }
-            Say ("CHECK {0,-6} {1,-9} {2,-6} {3}" -f $kind, $sizeText, $(if ($job.Into) { $job.Into } else { '.' }), ($out | Select-Object -Last 1))
-            Remove-Item -LiteralPath $sample -Force -ErrorAction SilentlyContinue
+            # (the original link, and the MajorGeeks one when there's one; a failed original counts as bad even when
+            # MajorGeeks works, as that's what to fix)
+            $checks = @()
+            if ($job.Link) { $checks += , @($job.Link, '') }
+            else { $bad++; Say ("CHECK {0,-6} {1,-9} {2,-6} {3}" -f 'failed', '', $(if ($job.Into) { $job.Into } else { '.' }), "original: $($job.MirrorWhy)") }
+            if ($job.Mirror) {
+                try { $checks += , @((Resolve-MajorGeeksLink $job.Mirror), ' (MajorGeeks)') }
+                catch { $bad++; Say ("CHECK {0,-6} {1,-9} {2,-6} {3}" -f 'failed', '', $(if ($job.Into) { $job.Into } else { '.' }), "MajorGeeks: $($_.Exception.Message)") }
+            }
+            foreach ($check in $checks) {
+                $sample = New-StagingPath check
+                # (no -S: its error message would stop the whole check here, rather than this link showing as failed)
+                $curlArgs = @('-sL', '--fail', '--connect-timeout', '20', '--max-time', '60', '-r', '0-1023', '-A', $userAgent, '-o', $sample, '-D', '-', '-w', '%{url_effective}')
+                if ($Referer) { $curlArgs += @('-e', $Referer) }
+                $curlArgs += Get-CookieArgs $check[0]
+                $out = @(& $curl @curlArgs $check[0] 2>&1 | ForEach-Object { "$_" })
+                $ok = $LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $sample)
+                $kind = if ($ok) { Get-FileKind $sample } else { 'failed' }
+                $size = ($out | Where-Object { $_ -match '^content-range: bytes \d+-\d+/(\d+)' } | Select-Object -Last 1) -replace '^content-range: bytes \d+-\d+/(\d+).*$', '$1'
+                if (-not $size) { $size = ($out | Where-Object { $_ -match '^content-length: (\d+)' } | Select-Object -Last 1) -replace '^content-length: (\d+).*$', '$1' }
+                $sizeText = if ($size -match '^\d+$') { '{0:N1} MB' -f ([double]$size / 1MB) } else { '? MB' }
+                if ($kind -notin @('exe', 'msi', 'zip', '7z', 'rar', 'other')) { $bad++ }
+                Say ("CHECK {0,-6} {1,-9} {2,-6} {3}{4}" -f $kind, $sizeText, $(if ($job.Into) { $job.Into } else { '.' }), ($out | Select-Object -Last 1), $check[1])
+                Remove-Item -LiteralPath $sample -Force -ErrorAction SilentlyContinue
+            }
         }
         exit $(if ($bad) { 1 } else { 0 })
     }
@@ -1425,7 +1589,8 @@ try {
     $oldKey = (($oldRecord -split "`r?`n") | Where-Object { $_ -and $_ -notlike 'built=*' }) -join "`r`n"
     # (a site's address doesn't change when its files do, so it's always copied and compared)
     if (-not $Url -and -not $Site -and $oldRecord -and (-not $wingetKey -or $oldRecord.Contains($wingetKey))) {
-        $unchanged = @($jobs | Where-Object { $oldRecord.Contains("link=$($_.Link)") }).Count -eq $jobs.Count
+        # (a download whose link couldn't be found is got from MajorGeeks, so it's never unchanged)
+        $unchanged = @($jobs | Where-Object { $_.Link -and $oldRecord.Contains("link=$($_.Link)") }).Count -eq $jobs.Count
         if ($unchanged -and (Test-AppFiles $jobs)) {
             Add-DataFolder $jobs
             Repair-OldVersionName $versionFile
@@ -1436,7 +1601,7 @@ try {
     }
 
     # fixed links don't show the version, so compare the server's file date/size/ETag instead of downloading
-    foreach ($job in $jobs) { $job | Add-Member -NotePropertyName Stamp -NotePropertyValue $(if ($Url) { Get-RemoteStamp $job.Link } else { '' }) }
+    foreach ($job in $jobs) { $job | Add-Member -NotePropertyName Stamp -NotePropertyValue $(if ($Url -and $job.Link) { Get-RemoteStamp $job.Link } else { '' }) }
     if ($Url -and $oldRecord) {
         $unchanged = @($jobs | Where-Object { Test-SameStamp $_.Stamp $oldRecord }).Count -eq $jobs.Count
         if ($unchanged -and (Test-AppFiles $jobs)) {
@@ -1462,14 +1627,27 @@ try {
             }
             continue
         }
-        Say "Downloading $($job.Link)"
         $temp = New-StagingPath download
         $downloads += $temp
-        $finalUrl = Get-Download $job.Link $temp
+        $kind = $null
+        if ($job.Link) {
+            Say "Downloading $($job.Link)"
+            try {
+                $finalUrl = Get-Download $job.Link $temp
+                $kind = Test-Download $temp $job.Link -AllowPlain:([bool]$job.IsExtra)
+            }
+            catch {
+                if (-not $job.Mirror) { throw }
+                $why = $_.Exception.Message
+                $job | Add-Member -NotePropertyName MirrorWhy -NotePropertyValue $why -Force
+            }
+        }
+        # the original failed: its copy on MajorGeeks instead
+        if (-not $kind) { $finalUrl, $kind = Get-MirrorDownload $job $temp }
         $script:downloadedBytes += (Get-Item -LiteralPath $temp).Length
-        $kind = Test-Download $temp $job.Link -AllowPlain:([bool]$job.IsExtra)
         $folder = if ($job.Into) { Join-Path $AppDir $job.Into } else { $AppDir }
-        $fileName = if ($job.SaveAs) { $job.SaveAs } else { Get-DownloadName $job.Link $finalUrl $kind }
+        # (MajorGeeks' download links are all index.php, so its file is named from where it was sent)
+        $fileName = if ($job.SaveAs) { $job.SaveAs } elseif ($job.MirrorUsed) { Get-DownloadName $finalUrl $finalUrl $kind } else { Get-DownloadName $job.Link $finalUrl $kind }
         $job | Add-Member -NotePropertyMembers @{
             Temp = $temp; Kind = $kind; FinalUrl = $finalUrl; Folder = $folder
             Target = (Join-Path $folder $fileName)
@@ -1487,6 +1665,12 @@ try {
             $script:wingetVersion = $null
             $script:wingetDate = $null
         }
+    }
+    if (@($jobs | Where-Object { $_.MirrorUsed }).Count) {
+        # (MajorGeeks' copy may not be the version the GitHub release or winget lists: read it from the files instead)
+        $script:release = $null
+        $script:wingetVersion = $null
+        $script:wingetDate = $null
     }
 
     # skip everything if the downloads match what was installed last time

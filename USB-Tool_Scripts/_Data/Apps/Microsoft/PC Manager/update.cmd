@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "Microsoft PC Manager (Microsoft Store installer)" ^
     -Page "https://apps.microsoft.com/detail/9PM860492SZD" ^
     -Url "https://get.microsoft.com/installer/download/9PM860492SZD" ^
-    -SaveAs "Microsoft PC Manager Installer.exe" -Into "Any"
+    -SaveAs "Microsoft PC Manager Installer.exe" -Into "Any" ^
+    -MajorGeeks "microsoft_pc_manager:Microsoft Store"
 call :result
 
 if /i not "%~1" == "/nopause" pause

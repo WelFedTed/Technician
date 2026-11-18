@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft Remote Desktop PassView" ^
     -Url "https://www.nirsoft.net/toolsdownload/rdpv.zip" -Into "x86" ^
     -Referer "https://www.nirsoft.net/utils/remote_desktop_password.html" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "remote_desktop_passview:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

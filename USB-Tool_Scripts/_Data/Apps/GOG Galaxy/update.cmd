@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "GOG Galaxy (installer)" ^
     -Page "https://www.gog.com/galaxy" ^
     -Winget "GOG.Galaxy" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "gog_galaxy:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

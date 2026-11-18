@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "Remote Desktop Connection Manager (RDCMan)" ^
     -Url "https://download.sysinternals.com/files/RDCMan.zip" ^
-    -Extract -Into "x86_x64" -Clean
+    -Extract -Into "x86_x64" -Clean ^
+    -MajorGeeks "remote_desktop_connection_manager:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

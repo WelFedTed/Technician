@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Seagate SeaTools" ^
     -Page "https://www.seagate.com/support/downloads/seatools/" ^
     -Url "https://www.seagate.com/content/dam/seagate/migrated-assets/www-content/support-content/downloads/seatools/_shared/downloads/SeaToolsWindowsInstaller.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "seagate_seatools_for_windows:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

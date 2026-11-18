@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Clear Disk Info" ^
     -Url "https://www.carifred.com/cleardiskinfo/ClearDiskInfo.exe" ^
-    -SaveAs "ClearDiskInfo.exe" -Into "x86"
+    -SaveAs "ClearDiskInfo.exe" -Into "x86" ^
+    -MajorGeeks "clear_disk_info:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

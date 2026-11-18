@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Victoria HDD/SSD" ^
     -Page "https://hdd.by/victoria/" ^
     -Link "https://hdd\.by/Victoria/Victoria\d+\.zip" -Into "x86" ^
-    -Extract -Flatten -Clean -VersionFrom "x86\Victoria.exe"
+    -Extract -Flatten -Clean -VersionFrom "x86\Victoria.exe" ^
+    -MajorGeeks "victoria_for_windows:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

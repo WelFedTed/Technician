@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Antivirus Removal Tool (ART)" ^
     -Url "https://antivirus-removal-tool.com/download/click.php?id=Antivirus_Removal_Tool" ^
-    -Extract -Into "x86" -Clean -Keep "Settings"
+    -Extract -Into "x86" -Clean -Keep "Settings" ^
+    -MajorGeeks "antivirus_removal_tool:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

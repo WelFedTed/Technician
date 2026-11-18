@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://winscp.net/eng/downloads.php" ^
     -Winget "WinSCP.WinSCP" -WingetType "inno" -Into "x86" ^
     -UserAgent "curl/8.0" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "winscp"
 call :result
 
 rem Portable

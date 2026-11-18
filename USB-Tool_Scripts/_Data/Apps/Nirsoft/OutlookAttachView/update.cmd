@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft OutlookAttachView" ^
     -Url "https://www.nirsoft.net/utils/outlookattachview-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/outlookattachview.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "outlookattachview:64-Bit for Outlook 2010" -MajorGeeks86 "outlookattachview:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "DriverStore Explorer (RAPR)" ^
     -GitHub "lostindark/DriverStoreExplorer" ^
     -Asset "^DriverStoreExplorer-v[\d.]+\.zip$" -Into "Any" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "driverstoreexplorer:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

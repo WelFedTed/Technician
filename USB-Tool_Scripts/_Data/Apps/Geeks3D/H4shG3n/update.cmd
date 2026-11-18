@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Page "https://www.geeks3d.com/geexlab/apps/h4shg3n/" ^
     -Link "Windows 64-bit</div>\s*<p[^>]*>[^<]*</p>\s*<a href=./dl/show/(\d+)" ^
     -UrlFormat "https://geeks3d.com/dl/get/{0}" -Into "x64" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks "h4shg3n"
 call :result
 
 if /i not "%~1" == "/nopause" pause

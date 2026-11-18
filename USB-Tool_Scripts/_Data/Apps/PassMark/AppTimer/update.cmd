@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "PassMark AppTimer" ^
     -Page "https://www.passmark.com/products/apptimer/index.php" ^
     -Url "https://www.passmark.com/downloads/AppTimer.zip" -Into "x86" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "passmark_apptimer:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

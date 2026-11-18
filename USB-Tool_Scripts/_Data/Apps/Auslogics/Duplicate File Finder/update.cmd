@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "Auslogics Duplicate File Finder" ^
     -Page "https://www.auslogics.com/en/software/duplicate-file-finder/" ^
     -Winget "Auslogics.DuplicateFileFinder" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "auslogics_duplicate_file_finder"
 call :result
 
 if /i not "%~1" == "/nopause" pause

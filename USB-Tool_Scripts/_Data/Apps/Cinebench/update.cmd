@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.maxon.net/en/downloads/cinebench-downloads" ^
     -Link "https://mx-app-blob-prod\.maxon\.net/mx-package-production/website/windows/maxon/cinebench/Cinebench\d+_win_x86_64\.zip" -Into "x64" ^
     -LinkArm "https://mx-app-blob-prod\.maxon\.net/mx-package-production/website/windows/maxon/cinebench/Cinebench\d+_win_arm64\.zip" -IntoArm "ARM64" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks "cinebench:ZIP" -MajorGeeksArm "cinebench:ARM64"
 call :result
 
 if /i not "%~1" == "/nopause" pause

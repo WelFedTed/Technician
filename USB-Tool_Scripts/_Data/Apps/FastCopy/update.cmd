@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "FastCopy (installer, can also set up a portable copy)" ^
     -Page "https://fastcopy.jp/" ^
     -Link "/archive/FastCopy[\d.]+_installer\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "fastcopy:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

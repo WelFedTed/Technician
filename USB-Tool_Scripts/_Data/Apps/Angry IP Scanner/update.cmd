@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Angry IP Scanner (installer)" ^
     -GitHub "angryip/ipscan" ^
     -Asset "^ipscan-[\d.]+-setup\.exe$" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "angry_ip_scanner:EXE"
 call :result
 
 rem Portable

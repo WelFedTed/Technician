@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Nmap (installer, with Zenmap and Npcap)" ^
     -Page "https://nmap.org/download.html" ^
     -Link "https://nmap\.org/dist/nmap-[\d.]+-setup\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "nmap_security_scanner:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

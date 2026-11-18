@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Obsidian" ^
     -GitHub "obsidianmd/obsidian-releases" ^
     -Asset "^Obsidian-[\d.]+\.exe$" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "obsidian:64-Bit EXE"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

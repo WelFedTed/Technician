@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "AnyDesk" ^
     -Url "https://download.anydesk.com/AnyDesk.exe" ^
-    -SaveAs "AnyDesk.exe" -Into "x86"
+    -SaveAs "AnyDesk.exe" -Into "x86" ^
+    -MajorGeeks "anydesk"
 call :result
 
 if /i not "%~1" == "/nopause" pause

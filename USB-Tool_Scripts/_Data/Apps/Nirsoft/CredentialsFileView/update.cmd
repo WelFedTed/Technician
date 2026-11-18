@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Url "https://www.nirsoft.net/toolsdownload/credentialsfileview-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/toolsdownload/credentialsfileview.zip" -Into86 "x86" ^
     -Referer "https://www.nirsoft.net/utils/credentials_file_view.html" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "credentialsfileview:64-Bit" -MajorGeeks86 "credentialsfileview:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

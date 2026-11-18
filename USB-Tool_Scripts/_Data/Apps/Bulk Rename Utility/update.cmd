@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Bulk Rename Utility (installer)" ^
     -Page "https://www.bulkrenameutility.co.uk/Download.php" ^
     -Winget "TGRMNSoftware.BulkRenameUtility" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "bulk_rename_utility:EXE"
 call :result
 
 rem Portable

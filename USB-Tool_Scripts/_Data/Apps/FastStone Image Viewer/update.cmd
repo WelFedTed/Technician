@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "FastStone Image Viewer (installer)" ^
     -Page "https://www.faststone.org/FSViewerDownload.htm" ^
     -Link "https://www\.faststonesoft\.net/DN/FSViewerSetup\d+\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "faststone_image_viewer:EXE"
 call :result
 
 rem Portable (its settings stay next to it)
@@ -24,7 +25,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "FastStone Image Viewer (portable)" ^
     -Page "https://www.faststone.org/FSViewerDownload.htm" ^
     -Link "https://www\.faststonesoft\.net/DN/FSViewer\d+\.zip" -Into "x86" ^
-    -Extract -Flatten -Clean -VersionFrom "x86\FSViewer.exe"
+    -Extract -Flatten -Clean -VersionFrom "x86\FSViewer.exe" ^
+    -MajorGeeks "faststone_image_viewer:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

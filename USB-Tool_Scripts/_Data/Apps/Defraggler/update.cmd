@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Defraggler" ^
     -Page "https://www.ccleaner.com/defraggler" ^
     -Winget "Piriform.Defraggler" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "defraggler:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

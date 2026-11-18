@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Link "testdisk-([\d.]+)\.win64\.zip" ^
     -UrlFormat "https://www.cgsecurity.org/testdisk-{0}.win64.zip" -Into "x64" ^
     -UrlFormat86 "https://www.cgsecurity.org/testdisk-{0}.win.zip" -Into86 "x86" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks86 "testdisk:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

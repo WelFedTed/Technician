@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "Desktops" ^
     -Url "https://download.sysinternals.com/files/Desktops.zip" ^
-    -Extract -Into "x86_x64" -Clean
+    -Extract -Into "x86_x64" -Clean ^
+    -MajorGeeks "microsoft_desktops:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

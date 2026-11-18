@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "AccessEnum" ^
     -Url "https://download.sysinternals.com/files/AccessEnum.zip" ^
-    -Extract -Into "x86" -Clean
+    -Extract -Into "x86" -Clean ^
+    -MajorGeeks "accessenum:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

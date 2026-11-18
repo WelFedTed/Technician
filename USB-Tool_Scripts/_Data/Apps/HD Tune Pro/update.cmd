@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "HD Tune Pro" ^
     -Page "https://www.hdtune.com/download.html" ^
     -Winget "EFDSoftware.HDTunePro" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "hd_tune:Pro"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

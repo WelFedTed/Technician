@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "ESET Online Scanner" ^
     -Url "https://download.eset.com/com/eset/tools/online_scanner/latest/esetonlinescanner.exe" ^
-    -SaveAs "esetonlinescanner.exe" -Into "x86"
+    -SaveAs "esetonlinescanner.exe" -Into "x86" ^
+    -MajorGeeks "eset_online_scanner"
 call :result
 
 if /i not "%~1" == "/nopause" pause

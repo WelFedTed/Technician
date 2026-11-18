@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "Spybot Identity Monitor" ^
     -Page "https://www.safer-networking.org/products/spybot-identity-monitor/download/" ^
     -Link "https://download\.spybot\.info/(?:[^/]+/)+SpybotIdentityMonitor-[\d.]+-setup\.exe" -Into "x86" ^
-    -VersionFromUrl -Clean
+    -VersionFromUrl -Clean ^
+    -MajorGeeks "spybot_identity_monitor:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

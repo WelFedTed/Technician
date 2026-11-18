@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "keepassxreboot/keepassxc" ^
     -Asset "^KeePassXC-[\d.]+-x64\.msi$" -Into "x64" ^
     -AssetArm "^KeePassXC-[\d.]+-ARM64\.msi$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "keepassxc:64-Bit"
 call :result
 
 rem Portable
@@ -26,7 +27,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "keepassxreboot/keepassxc" ^
     -Asset "^KeePassXC-[\d.]+-x64\.zip$" -Into "x64" ^
     -AssetArm "^KeePassXC-[\d.]+-ARM64\.zip$" -IntoArm "ARM64" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks "keepassxc:64-Bit Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

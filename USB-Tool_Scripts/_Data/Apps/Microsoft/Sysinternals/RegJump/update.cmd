@@ -15,7 +15,8 @@ rem CLI
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\_Update-App.ps1" -AppDir "%~dp0CLI" ^
     -Name "RegJump" ^
     -Url "https://download.sysinternals.com/files/regjump.zip" ^
-    -Extract -Into "x86" -Clean
+    -Extract -Into "x86" -Clean ^
+    -MajorGeeks "regjump:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

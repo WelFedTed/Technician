@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Tor Browser" ^
     -Page "https://www.torproject.org/download/" ^
     -Winget "TorProject.TorBrowser" -Into "x64" -Into86 "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "tor_browser_bundle_64"
 call :result
 
 if /i not "%~1" == "/nopause" pause

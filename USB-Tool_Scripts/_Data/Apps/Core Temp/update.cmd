@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Core Temp (installer)" ^
     -Page "https://www.alcpu.com/CoreTemp/" ^
     -Link "https://www\.alcpu\.com/CoreTemp/Core-Temp-setup-v[\d.]+\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "core_temp:EXE"
 call :result
 
 rem Portable

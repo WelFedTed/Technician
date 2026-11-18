@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "NetSpot" ^
     -Page "https://www.netspotapp.com/download-win.html" ^
     -Url "https://cdn.netspotapp.com/download/Win/NetSpot.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "netspot"
 call :result
 
 if /i not "%~1" == "/nopause" pause

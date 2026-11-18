@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "audacity/audacity" ^
     -Asset "^audacity-win-[\d.]+-x86_64\.msi$" -Into "x64" ^
     -AssetArm "^audacity-win-[\d.]+-arm64\.msi$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "audacity:MSI"
 call :result
 
 rem Portable

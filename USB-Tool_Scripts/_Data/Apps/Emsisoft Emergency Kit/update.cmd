@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0..\Emsisoft Emergency Kit Portable" ^
     -Name "Emsisoft Emergency Kit" ^
     -Url "https://dl.emsisoft.com/EmsisoftEmergencyKit.exe" ^
-    -SaveAs "EmsisoftEmergencyKit.exe" -Into "x86"
+    -SaveAs "EmsisoftEmergencyKit.exe" -Into "x86" ^
+    -MajorGeeks "emsisoft_emergency_kit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

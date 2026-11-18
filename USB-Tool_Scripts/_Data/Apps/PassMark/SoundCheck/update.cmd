@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "PassMark SoundCheck" ^
     -Page "https://www.passmark.com/products/soundcheck/index.php" ^
     -Url "https://www.passmark.com/downloads/soundchk.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "soundcheck"
 call :result
 
 if /i not "%~1" == "/nopause" pause

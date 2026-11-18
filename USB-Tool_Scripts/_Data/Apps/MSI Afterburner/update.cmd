@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "MSI Afterburner" ^
     -Page "https://www.msi.com/Landing/afterburner/graphics-cards" ^
     -Winget "Guru3D.Afterburner" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "msi_afterburner"
 call :result
 
 if /i not "%~1" == "/nopause" pause

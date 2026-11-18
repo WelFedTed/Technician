@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "Cobian Backup 11 Gravity" ^
     -Page "https://www.cobiansoft.com/cobianbackup.html" ^
     -Url "https://files.cobiansoft.com/programs/cbSetup.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "cobian_backup:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

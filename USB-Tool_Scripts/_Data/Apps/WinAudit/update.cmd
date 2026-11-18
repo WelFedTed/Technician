@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "WinAudit" ^
     -Page "http://parmavex.co.uk/winaudit.html" ^
     -Url "http://parmavex.co.uk/WinAudit.zip" -Into "x86" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "winaudit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

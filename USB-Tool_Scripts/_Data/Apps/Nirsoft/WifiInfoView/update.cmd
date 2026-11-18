@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft WifiInfoView" ^
     -Url "https://www.nirsoft.net/utils/wifiinfoview-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/wifiinfoview.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "wifiinfoview:64-Bit ZIP" -MajorGeeks86 "wifiinfoview:32-Bit ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

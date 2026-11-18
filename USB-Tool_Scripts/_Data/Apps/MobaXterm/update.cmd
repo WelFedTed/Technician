@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "MobaXterm (installer)" ^
     -Page "https://mobaxterm.mobatek.net/download-home-edition.html" ^
     -Link "https://download\.mobatek\.net/\d+/MobaXterm_Installer_v[\d.]+\.zip" -Into "x86" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "mobaxterm:ZIP"
 call :result
 
 rem Portable (the free Home edition)
@@ -24,7 +25,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "MobaXterm (portable)" ^
     -Page "https://mobaxterm.mobatek.net/download-home-edition.html" ^
     -Link "https://download\.mobatek\.net/\d+/MobaXterm_Portable_v[\d.]+\.zip" -Into "x86" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "mobaxterm:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

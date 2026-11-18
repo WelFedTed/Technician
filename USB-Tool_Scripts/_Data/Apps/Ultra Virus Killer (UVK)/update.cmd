@@ -15,7 +15,8 @@ rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Ultra Virus Killer (installer)" ^
     -Url "https://www.carifred.com/uvk/UVKInstaller.exe" ^
-    -SaveAs "UVKInstaller.exe" -Into "x86"
+    -SaveAs "UVKInstaller.exe" -Into "x86" ^
+    -MajorGeeks "uvk_ultra_virus_killer"
 call :result
 
 rem Portable

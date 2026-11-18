@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "Kaspersky Virus Removal Tool (KVRT)" ^
     -Url "https://devbuilds.s.kaspersky-labs.com/devbuilds/KVRT/latest/full/KVRT.exe" ^
-    -SaveAs "KVRT.exe" -Into "x86"
+    -SaveAs "KVRT.exe" -Into "x86" ^
+    -MajorGeeks "kaspersky_virus_removal_tool"
 call :result
 
 if /i not "%~1" == "/nopause" pause

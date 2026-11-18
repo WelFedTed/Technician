@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft AppCompatibilityView" ^
     -Url "https://www.nirsoft.net/utils/appcompatibilityview-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/appcompatibilityview.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "appcompatibilityview:64-Bit" -MajorGeeks86 "appcompatibilityview:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

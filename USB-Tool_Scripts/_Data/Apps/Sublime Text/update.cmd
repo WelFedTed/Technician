@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.sublimetext.com/download" ^
     -Link "Build (\d{4})" ^
     -UrlFormat "https://download.sublimetext.com/sublime_text_build_{0}_x64_setup.exe" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "sublime_text:64-Bit EXE"
 call :result
 
 rem Portable
@@ -26,7 +27,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.sublimetext.com/download" ^
     -Link "Build (\d{4})" ^
     -UrlFormat "https://download.sublimetext.com/sublime_text_build_{0}_x64.zip" ^
-    -Extract -Into "x64" -Clean -DataFolder "Data"
+    -Extract -Into "x64" -Clean -DataFolder "Data" ^
+    -MajorGeeks "sublime_text:64-Bit Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "Unigine Heaven Benchmark" ^
     -Page "https://benchmark.unigine.com/heaven" ^
     -Link "https://assets\.unigine\.com/d/Unigine_Heaven-[\d.]+\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "heaven_benchmark"
 call :result
 
 if /i not "%~1" == "/nopause" pause

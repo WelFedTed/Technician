@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Link "//download\.nirsoft\.net/nirsoft_package_enc_[\d.]+\.zip" ^
     -Referer "https://launcher.nirsoft.net/downloads/index.html" ^
     -Password "nirsoft9876$" ^
-    -Extract -Into "x86_x64" -Clean
+    -Extract -Into "x86_x64" -Clean ^
+    -MajorGeeks "nirlauncher"
 call :result
 
 if /i not "%~1" == "/nopause" pause

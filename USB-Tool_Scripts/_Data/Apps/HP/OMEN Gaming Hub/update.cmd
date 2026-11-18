@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "OMEN Gaming Hub (Microsoft Store installer)" ^
     -Page "https://apps.microsoft.com/detail/9NQDW009T0T5" ^
     -Url "https://get.microsoft.com/installer/download/9NQDW009T0T5" ^
-    -SaveAs "OMEN Gaming Hub Installer.exe" -Into "Any"
+    -SaveAs "OMEN Gaming Hub Installer.exe" -Into "Any" ^
+    -MajorGeeks "omen_gaming_hub"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.voidtools.com/downloads/" ^
     -Link "/Everything-[\d.]+\.x64-Setup\.exe" -Into "x64" ^
     -Link86 "/Everything-[\d.]+\.x86-Setup\.exe" -Into86 "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "everything:64-Bit" -MajorGeeks86 "everything:32-Bit"
 call :result
 
 rem Portable
@@ -28,7 +29,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Link86 "/Everything-[\d.]+\.x86\.zip" ^
     -LinkArm "/Everything-[\d.]+\.ARM64\.zip" ^
     -Extract -Into "x64" -Into86 "x86" -IntoArm "ARM64" ^
-    -Clean -Keep "Everything.ini,*.db"
+    -Clean -Keep "Everything.ini,*.db" ^
+    -MajorGeeks "everything:64-Bit Portable" -MajorGeeks86 "everything:32-Bit Portable"
 call :result
 
 rem CLI

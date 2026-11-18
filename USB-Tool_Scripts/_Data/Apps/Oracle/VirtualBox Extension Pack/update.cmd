@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -PageIndex "https://download.virtualbox.org/virtualbox/LATEST.TXT" -PageIndexLink "([\d.]+)" ^
     -Page "https://download.virtualbox.org/virtualbox/{0}/" ^
     -Link "Oracle_VirtualBox_Extension_Pack-[\d.]+\.vbox-extpack" -Into "Any" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "virtualbox_extension_pack:Extension Pack"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "NirSoft HotKeysList" ^
     -Url "https://www.nirsoft.net/utils/hotkeyslist.zip" -Into "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "hotkeyslist:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

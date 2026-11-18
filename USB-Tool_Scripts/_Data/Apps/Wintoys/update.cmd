@@ -15,7 +15,8 @@ rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Wintoys (Microsoft Store installer)" ^
     -Url "https://get.microsoft.com/installer/download/9P8LTPGCBZXD" ^
-    -SaveAs "Wintoys Installer.exe" -Into "Any"
+    -SaveAs "Wintoys Installer.exe" -Into "Any" ^
+    -MajorGeeks "wintoys"
 call :result
 
 if /i not "%~1" == "/nopause" pause

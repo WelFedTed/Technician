@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\_Update-App.p
     -Name "RootkitRevealer" ^
     -Page "https://learn.microsoft.com/en-us/sysinternals/downloads/rootkit-revealer" ^
     -Url "https://download.sysinternals.com/files/RootkitRevealer.zip" -Into "x86" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "microsoft_sysinternals_rootkit_revealer"
 call :result
 
 if /i not "%~1" == "/nopause" pause

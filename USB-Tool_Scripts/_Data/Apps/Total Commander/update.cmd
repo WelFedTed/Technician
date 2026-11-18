@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Total Commander" ^
     -Page "https://www.ghisler.com/download.htm" ^
     -Winget "Ghisler.TotalCommander" -Into "x64" -Into86 "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "total_commander_for_android:64-Bit" -MajorGeeks86 "total_commander_for_android:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

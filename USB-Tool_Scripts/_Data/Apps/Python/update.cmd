@@ -19,7 +19,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -UrlFormat "https://www.python.org/ftp/python/{0}/python-{0}-amd64.exe" -Into "x64" ^
     -UrlFormat86 "https://www.python.org/ftp/python/{0}/python-{0}.exe" -Into86 "x86" ^
     -UrlFormatArm "https://www.python.org/ftp/python/{0}/python-{0}-arm64.exe" -IntoArm "ARM64" ^
-    -VersionFromUrl -Clean
+    -VersionFromUrl -Clean ^
+    -MajorGeeks "python:64-Bit" -MajorGeeks86 "python"
 call :result
 
 rem Portable (python.org's zip of the whole of Python, which runs from its folder)

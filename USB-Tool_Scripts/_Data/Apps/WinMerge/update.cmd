@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Asset "^WinMerge-[\d.]+-x64-Setup\.exe$" -Into "x64" ^
     -Asset86 "^WinMerge-[\d.]+-Setup\.exe$" -Into86 "x86" ^
     -AssetArm "^WinMerge-[\d.]+-ARM64-Setup\.exe$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "winmerge:64-Bit" -MajorGeeks86 "winmerge"
 call :result
 
 rem Portable
@@ -28,7 +29,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Asset "^winmerge-[\d.]+-x64-exe\.zip$" -Into "x64" ^
     -Asset86 "^winmerge-[\d.]+-exe\.zip$" -Into86 "x86" ^
     -AssetArm "^winmerge-[\d.]+-ARM64-exe\.zip$" -IntoArm "ARM64" ^
-    -Extract -Flatten -Clean -Keep "winmerge.ini"
+    -Extract -Flatten -Clean -Keep "winmerge.ini" ^
+    -MajorGeeks "winmerge:64-Bit Portable" -MajorGeeks86 "winmerge:32-Bit Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

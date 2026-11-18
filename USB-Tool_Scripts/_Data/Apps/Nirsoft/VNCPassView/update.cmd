@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft VNCPassView" ^
     -Url "https://www.nirsoft.net/toolsdownload/vncpassview.zip" -Into "x86" ^
     -Referer "https://www.nirsoft.net/utils/vnc_password.html" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "vncpassview"
 call :result
 
 if /i not "%~1" == "/nopause" pause

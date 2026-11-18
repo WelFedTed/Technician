@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "MSI Center" ^
     -Page "https://www.msi.com/Landing/MSI-Center" ^
     -Url "https://download-2.msi.com/uti_exe/desktop/MSI-Center.zip" -Into "x86" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "msi_center"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "peazip/PeaZip" ^
     -Asset "^peazip-[\d.]+\.WIN64\.exe$" -Into "x64" ^
     -Asset86 "^peazip-[\d.]+\.WINDOWS\.exe$" -Into86 "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "peazip:64-Bit" -MajorGeeks86 "peazip"
 call :result
 
 rem Portable
@@ -26,7 +27,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "peazip/PeaZip" ^
     -Asset "^peazip_portable-[\d.]+\.WIN64\.zip$" -Into "x64" ^
     -Asset86 "^peazip_portable-[\d.]+\.WINDOWS\.zip$" -Into86 "x86" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks "peazip:64-Bit Portable" -MajorGeeks86 "peazip:32-Bit Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

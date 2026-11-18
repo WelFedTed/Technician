@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "fxsound2/fxsound-app" -PreRelease -SkipPreReleases ^
     -Asset "^fxsound_setup\.exe$" -Into "x86" ^
     -AssetArm "^fxsound_setup\.arm64\.exe$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "fxsound:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

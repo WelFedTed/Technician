@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Asset "^rufus-[\d.]+p\.exe$" -Into "x64" ^
     -Asset86 "^rufus-[\d.]+_x86\.exe$" -Into86 "x86" ^
     -AssetArm "^rufus-[\d.]+_arm64\.exe$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "rufus:Portable" -MajorGeeksArm "rufus:ARM64"
 call :result
 
 if /i not "%~1" == "/nopause" pause

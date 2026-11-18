@@ -24,7 +24,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "MultiPar" ^
     -GitHub "Yutaka-Sawada/MultiPar" ^
     -Asset "^MultiPar\d+\.zip$" ^
-    -Extract -Flatten -Into "x86_x64" -Clean -Keep "MultiPar.ini"
+    -Extract -Flatten -Into "x86_x64" -Clean -Keep "MultiPar.ini" ^
+    -MajorGeeks "multipar:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

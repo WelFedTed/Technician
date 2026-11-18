@@ -15,7 +15,8 @@ rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" -MoveFrom "%~dp0." ^
     -Name "Disk Drill" ^
     -Url "https://win.cleverfiles.com/disk-drill-win.exe" ^
-    -SaveAs "disk-drill-win.exe" -Into "x64"
+    -SaveAs "disk-drill-win.exe" -Into "x64" ^
+    -MajorGeeks "disk_drill:EXE"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

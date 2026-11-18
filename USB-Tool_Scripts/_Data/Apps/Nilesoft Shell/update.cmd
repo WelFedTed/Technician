@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Link "/download/shell/[\d.]+/setup-x64\.msi" -Into "x64" ^
     -Link86 "/download/shell/[\d.]+/setup-x86\.msi" -Into86 "x86" ^
     -LinkArm "/download/shell/[\d.]+/setup-arm64\.msi" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks86 "shell:64-Bit MSI" -MajorGeeksArm "shell:ARM64"
 call :result
 
 if /i not "%~1" == "/nopause" pause

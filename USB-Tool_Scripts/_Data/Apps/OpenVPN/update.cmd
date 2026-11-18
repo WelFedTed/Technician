@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Link "https://swupdate\.openvpn\.org/community/releases/OpenVPN-[\d.]+-I\d+-amd64\.msi" -Into "x64" ^
     -Link86 "https://swupdate\.openvpn\.org/community/releases/OpenVPN-[\d.]+-I\d+-x86\.msi" -Into86 "x86" ^
     -LinkArm "https://swupdate\.openvpn\.org/community/releases/OpenVPN-[\d.]+-I\d+-arm64\.msi" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "openvpn:64-Bit" -MajorGeeks86 "openvpn"
 call :result
 
 if /i not "%~1" == "/nopause" pause

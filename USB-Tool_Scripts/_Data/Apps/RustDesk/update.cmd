@@ -27,7 +27,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Asset "^rustdesk-[\d.]+-x86_64\.exe$" -Into "x64" ^
     -Asset86 "^rustdesk-[\d.]+-x86-sciter\.exe$" -Into86 "x86" ^
     -AssetArm "^rustdesk-[\d.]+-aarch64\.exe$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "rustdesk"
 call :result
 
 if /i not "%~1" == "/nopause" pause

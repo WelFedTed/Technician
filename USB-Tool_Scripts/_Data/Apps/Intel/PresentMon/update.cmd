@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "Intel PresentMon" ^
     -GitHub "GameTechDev/PresentMon" ^
     -Asset "^PresentMon-[\d.]+\.msi$" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "intel_presentmon:MSI"
 call :result
 
 rem CLI
@@ -24,7 +25,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "PresentMon command line" ^
     -GitHub "GameTechDev/PresentMon" ^
     -Asset "^PresentMon-[\d.]+-x64\.exe$" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "intel_presentmon:64-Bit"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

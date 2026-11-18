@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "NirSoft FastResolver" ^
     -Url "https://www.nirsoft.net/utils/fastresolver.zip" -Into "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "fastresolver:Download@Authors Site (Portable)"
 call :result
 
 if /i not "%~1" == "/nopause" pause

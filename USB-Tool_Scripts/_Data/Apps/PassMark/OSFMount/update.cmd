@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "PassMark OSFMount" ^
     -Page "https://www.osforensics.com/tools/mount-disk-images.html" ^
     -Url "https://www.osforensics.com/downloads/osfmount.exe" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "osfmount:64-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

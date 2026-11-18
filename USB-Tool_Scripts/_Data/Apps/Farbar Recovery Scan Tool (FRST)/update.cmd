@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.bleepingcomputer.com/download/farbar-recovery-scan-tool/dl/82/" ^
     -Link "https://download\.bleepingcomputer\.com/dl/[0-9a-f]+/[0-9a-f]+/windows/security/security-utilities/f/farbar-recovery-scan-tool/FRST64\.exe" -Into "x64" ^
     -Page86 "https://www.bleepingcomputer.com/download/farbar-recovery-scan-tool/dl/81/" ^
-    -Link86 "https://download\.bleepingcomputer\.com/dl/[0-9a-f]+/[0-9a-f]+/windows/security/security-utilities/f/farbar-recovery-scan-tool/FRST\.exe" -Into86 "x86"
+    -Link86 "https://download\.bleepingcomputer\.com/dl/[0-9a-f]+/[0-9a-f]+/windows/security/security-utilities/f/farbar-recovery-scan-tool/FRST\.exe" -Into86 "x86" ^
+    -MajorGeeks86 "farbar_recovery_scan_tool"
 call :result
 
 if /i not "%~1" == "/nopause" pause

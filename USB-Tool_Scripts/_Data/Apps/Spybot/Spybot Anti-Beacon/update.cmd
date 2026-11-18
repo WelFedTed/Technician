@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "Spybot Anti-Beacon" ^
     -Page "https://www.safer-networking.org/products/spybot-anti-beacon/download/" ^
     -Winget "SaferNetworking.SpybotAntiBeacon" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "spybot_anti_beacon_for_windows_10:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

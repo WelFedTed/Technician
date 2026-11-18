@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft BluetoothLEView" ^
     -Url "https://www.nirsoft.net/utils/bluetoothleview-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/bluetoothleview.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "bluetoothleview:64-Bit" -MajorGeeks86 "bluetoothleview:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

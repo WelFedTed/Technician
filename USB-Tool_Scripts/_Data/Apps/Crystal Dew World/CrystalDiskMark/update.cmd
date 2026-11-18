@@ -26,7 +26,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Page "https://crystalmark.info/redirect.php?product=CrystalDiskMark" ^
     -Link "https://sourceforge\.net/projects/crystaldiskmark/files/[\d.]+/CrystalDiskMark[\d_]+\.zip/download" ^
     -UserAgent "curl/8.0" -Into "x86_x64_ARM64" ^
-    -Extract -Clean -Keep "DiskMark.ini"
+    -Extract -Clean -Keep "DiskMark.ini" ^
+    -MajorGeeks "crystaldiskmark"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Asset "^BraveBrowserStandaloneSetup\.exe$" -Into "x64" ^
     -Asset86 "^BraveBrowserStandaloneSetup32\.exe$" -Into86 "x86" ^
     -AssetArm "^BraveBrowserStandaloneSetupArm64\.exe$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "brave:64-Bit" -MajorGeeks86 "brave"
 call :result
 
 if /i not "%~1" == "/nopause" pause

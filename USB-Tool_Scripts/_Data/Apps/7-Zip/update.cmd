@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Asset "^7z\d+-x64\.exe$" -Into "x64" ^
     -Asset86 "^7z\d+\.exe$" -Into86 "x86" ^
     -AssetArm "^7z\d+-arm64\.exe$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "7_zip:64-Bit" -MajorGeeks86 "7_zip:32-Bit" -MajorGeeksArm "7_zip:ARM64"
 call :result
 
 rem Portable

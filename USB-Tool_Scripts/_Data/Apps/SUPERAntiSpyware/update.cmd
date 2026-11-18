@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "SUPERAntiSpyware" ^
     -Page "https://www.superantispyware.com/download.html" ^
     -Winget "SUPERAntiSpyware.SUPERAntiSpyware" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "superantispyware_free"
 call :result
 
 if /i not "%~1" == "/nopause" pause

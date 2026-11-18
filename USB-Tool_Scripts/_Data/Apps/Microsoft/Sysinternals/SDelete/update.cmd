@@ -15,7 +15,8 @@ rem CLI
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\_Update-App.ps1" -AppDir "%~dp0CLI" -MoveFrom "%~dp0." ^
     -Name "SDelete" ^
     -Url "https://download.sysinternals.com/files/SDelete.zip" ^
-    -Extract -Into "x86_x64_ARM64" -Clean
+    -Extract -Into "x86_x64_ARM64" -Clean ^
+    -MajorGeeks "sdelete:ZIP"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

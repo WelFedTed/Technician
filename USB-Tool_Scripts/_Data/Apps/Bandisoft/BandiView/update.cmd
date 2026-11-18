@@ -15,7 +15,8 @@ rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Installer" -MoveFrom "%~dp0." ^
     -Name "BandiView" ^
     -Url "https://en.bandisoft.com/bandiview/dl.php?web" ^
-    -SaveAs "BANDIVIEW-SETUP.EXE" -Into "x86"
+    -SaveAs "BANDIVIEW-SETUP.EXE" -Into "x86" ^
+    -MajorGeeks "bandiview"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

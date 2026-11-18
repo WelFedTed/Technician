@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Link "https://files\.teamspeak-services\.com/releases/client/(3\.[\d.]+)/TeamSpeak3-Client-win64-[\d.]+\.exe" ^
     -UrlFormat "https://files.teamspeak-services.com/releases/client/{0}/TeamSpeak3-Client-win64-{0}.exe" -Into "x64" ^
     -UrlFormat86 "https://files.teamspeak-services.com/releases/client/{0}/TeamSpeak3-Client-win32-{0}.exe" -Into86 "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "teamspeak:64-Bit" -MajorGeeks86 "teamspeak:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

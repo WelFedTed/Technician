@@ -26,7 +26,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Asset "^Microsoft\.WindowsTerminal_[\d.]+_x64\.zip$" -Into "x64" ^
     -Asset86 "^Microsoft\.WindowsTerminal_[\d.]+_x86\.zip$" -Into86 "x86" ^
     -AssetArm "^Microsoft\.WindowsTerminal_[\d.]+_arm64\.zip$" -IntoArm "ARM64" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks "windows_terminal:64-Bit ZIP" -MajorGeeks86 "windows_terminal:32-Bit ZIP" -MajorGeeksArm "windows_terminal:ARM64"
 call :result
 
 if /i not "%~1" == "/nopause" pause

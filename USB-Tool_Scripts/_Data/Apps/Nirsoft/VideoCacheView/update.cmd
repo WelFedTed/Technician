@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft VideoCacheView" ^
     -Url "https://www.nirsoft.net/utils/videocacheview-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/videocacheview.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "videocacheview:64-Bit" -MajorGeeks86 "videocacheview:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

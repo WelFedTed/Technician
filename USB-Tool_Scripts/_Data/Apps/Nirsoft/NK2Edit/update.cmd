@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft NK2Edit" ^
     -Url "https://www.nirsoft.net/utils/nk2edit-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/nk2edit.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks86 "nk2edit:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

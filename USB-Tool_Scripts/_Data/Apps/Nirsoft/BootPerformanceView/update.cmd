@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "NirSoft BootPerformanceView" ^
     -Url "https://www.nirsoft.net/utils/bootperformanceview.zip" -Into "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "bootperformanceview:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

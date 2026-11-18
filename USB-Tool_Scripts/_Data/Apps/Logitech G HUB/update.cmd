@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Logitech G HUB (installer)" ^
     -Page "https://www.logitechg.com/en-au/innovation/g-hub.html" ^
     -Url "https://download01.logi.com/web/ftp/pub/techsupport/gaming/lghub_installer.exe" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "logitech_g_hub"
 call :result
 
 if /i not "%~1" == "/nopause" pause

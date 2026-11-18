@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "PassMark KeyboardTest (installer)" ^
     -Page "https://www.passmark.com/products/keytest/" ^
     -Url "https://www.passmark.com/downloads/keyboardtest.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "keyboardtest"
 call :result
 
 if /i not "%~1" == "/nopause" pause

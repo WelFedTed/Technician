@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Steam (installer)" ^
     -Page "https://store.steampowered.com/about/" ^
     -Url "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "valve_corporation"
 call :result
 
 if /i not "%~1" == "/nopause" pause

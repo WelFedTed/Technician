@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "PassMark BatteryMon" ^
     -Page "https://www.passmark.com/products/batmon/index.php" ^
     -Url "https://www.passmark.com/downloads/batmon.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "batterymon"
 call :result
 
 if /i not "%~1" == "/nopause" pause

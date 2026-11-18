@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\_Update-App.p
     -Name "Disk2vhd" ^
     -Url "https://download.sysinternals.com/files/Disk2vhd.zip" ^
     -Extract -Into "x86_x64_ARM64" -Clean ^
-    -VersionFrom "x86_x64_ARM64\disk2vhd64.exe"
+    -VersionFrom "x86_x64_ARM64\disk2vhd64.exe" ^
+    -MajorGeeks "microsoft_disk2vhd:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

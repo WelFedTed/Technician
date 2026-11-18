@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -GitHub "PowerShell/PowerShell" -PreRelease -SkipPreReleases ^
     -Asset "^PowerShell-7\.6\.[\d.]+-win-x64\.msi$" -Into "x64" ^
     -AssetArm "^PowerShell-7\.6\.[\d.]+-win-arm64\.msi$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "microsoft_powershell:64-Bit MSI"
 call :result
 
 rem Portable (the latest version, which runs from the USB (pwsh.exe))
@@ -28,7 +29,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Asset "^PowerShell-[\d.]+-win-x64\.zip$" -Into "x64" ^
     -Asset86 "^PowerShell-[\d.]+-win-x86\.zip$" -Into86 "x86" ^
     -AssetArm "^PowerShell-[\d.]+-win-arm64\.zip$" -IntoArm "ARM64" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "microsoft_powershell:64-Bit ZIP" -MajorGeeks86 "microsoft_powershell:32-Bit ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft FileTypesMan" ^
     -Url "https://www.nirsoft.net/utils/filetypesman-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/filetypesman.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "filetypesman:64-Bit" -MajorGeeks86 "filetypesman:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

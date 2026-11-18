@@ -15,7 +15,8 @@ rem CLI
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\_Update-App.ps1" -AppDir "%~dp0CLI" ^
     -Name "Registry Usage (RU)" ^
     -Url "https://download.sysinternals.com/files/RU.zip" ^
-    -Extract -Into "x86_x64_ARM64" -Clean
+    -Extract -Into "x86_x64_ARM64" -Clean ^
+    -MajorGeeks "registry_usage_(ru):Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

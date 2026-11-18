@@ -28,7 +28,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Link "//mediaarea\.net/download/binary/mediainfo-gui/[\d.]+/MediaInfo_GUI_[\d.]+_Windows_x64_WithoutInstaller\.7z" ^
     -Link86 "//mediaarea\.net/download/binary/mediainfo-gui/[\d.]+/MediaInfo_GUI_[\d.]+_Windows_i386_WithoutInstaller\.7z" ^
     -LinkArm "//mediaarea\.net/download/binary/mediainfo-gui/[\d.]+/MediaInfo_GUI_[\d.]+_Windows_ARM64_WithoutInstaller\.7z" ^
-    -Extract -Into "x64" -Into86 "x86" -IntoArm "ARM64" -Clean
+    -Extract -Into "x64" -Into86 "x86" -IntoArm "ARM64" -Clean ^
+    -MajorGeeks "mediainfo_x64:64-Bit Portable 7z" -MajorGeeks86 "mediainfo_x64:32-Bit Portable 7z"
 call :result
 
 rem CLI

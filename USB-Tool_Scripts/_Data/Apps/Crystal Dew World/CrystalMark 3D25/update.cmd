@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Link "(https://sourceforge\.net/projects/crystalmark3d25/files/[\d.]+/CrystalMark3D25[\d_]+\.exe)" ^
     -UrlFormat "{0}/download" ^
     -UserAgent "curl/8.0" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "crystalmark_3d25"
 call :result
 
 rem Portable
@@ -28,7 +29,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Link "(https://sourceforge\.net/projects/crystalmark3d25/files/[\d.]+/CrystalMark3D25[\d_]+\.zip)" ^
     -UrlFormat "{0}/download" ^
     -UserAgent "curl/8.0" -Into "x64" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "crystalmark_3d25:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

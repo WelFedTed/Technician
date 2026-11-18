@@ -15,7 +15,8 @@ rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Final Fantasy XV Windows Edition Benchmark (installer, about 4 GB)" ^
     -Url "http://gdl.square-enix.com/ffxv/windows/benchmark/ffxvbench_installer.zip" ^
-    -Extract -Flatten -Into "x64" -Clean
+    -Extract -Flatten -Into "x64" -Clean ^
+    -MajorGeeks "final_fantasy_xv_benchmark"
 call :result
 
 if /i not "%~1" == "/nopause" pause

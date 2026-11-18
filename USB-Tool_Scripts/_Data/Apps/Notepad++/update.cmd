@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Asset "^npp\.[\d.]+\.Installer\.x64\.exe$" -Into "x64" ^
     -Asset86 "^npp\.[\d.]+\.Installer\.exe$" -Into86 "x86" ^
     -AssetArm "^npp\.[\d.]+\.Installer\.arm64\.exe$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "notepad:64-Bit" -MajorGeeks86 "notepad" -MajorGeeksArm "notepad:ARM64"
 call :result
 
 rem Portable

@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Asset "^rclone-v[\d.]+-windows-amd64\.zip$" -Into "x64" ^
     -Asset86 "^rclone-v[\d.]+-windows-386\.zip$" -Into86 "x86" ^
     -AssetArm "^rclone-v[\d.]+-windows-arm64\.zip$" -IntoArm "ARM64" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks "rclone:64-Bit" -MajorGeeks86 "rclone"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

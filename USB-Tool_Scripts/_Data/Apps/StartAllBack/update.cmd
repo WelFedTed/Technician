@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "StartAllBack" ^
     -Page "https://www.startallback.com/" ^
     -Url "https://www.startallback.com/download.php" -SaveAs "StartAllBack_setup.exe" -Into "x64" ^
-    -VersionFromUrl -Clean
+    -VersionFromUrl -Clean ^
+    -MajorGeeks "startallback"
 call :result
 
 if /i not "%~1" == "/nopause" pause

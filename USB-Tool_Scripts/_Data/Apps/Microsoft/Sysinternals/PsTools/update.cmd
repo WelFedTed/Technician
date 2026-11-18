@@ -15,7 +15,8 @@ rem CLI
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\_Update-App.ps1" -AppDir "%~dp0CLI" ^
     -Name "PsTools" ^
     -Url "https://download.sysinternals.com/files/PSTools.zip" ^
-    -Extract -Into "x86_x64" -Clean
+    -Extract -Into "x86_x64" -Clean ^
+    -MajorGeeks "microsoft_pstools:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

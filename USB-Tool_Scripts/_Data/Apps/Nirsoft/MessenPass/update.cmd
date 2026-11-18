@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft MessenPass" ^
     -Url "https://www.nirsoft.net/toolsdownload/mspass.zip" -Into "x86" ^
     -Referer "https://www.nirsoft.net/utils/mspass.html" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "messenpass:Download@Authors Site (Portable)"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Url "https://download.teamviewer.com/download/TeamViewer_Setup_x64.exe" -Into "x64" ^
     -Url86 "https://download.teamviewer.com/download/TeamViewer_Setup.exe" -Into86 "x86" ^
     -UrlArm "https://download.teamviewer.com/download/TeamViewer_Setup_arm64.exe" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "teamviewer:64-Bit" -MajorGeeks86 "teamviewer"
 call :result
 
 rem Portable
@@ -26,7 +27,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Url "https://download.teamviewer.com/download/TeamViewerPortable.zip" -Into "x86_x64" ^
     -Extra "https://download.teamviewer.com/download/TeamViewerQS_x64.exe" ^
     -Extract -Clean -Keep "TeamViewer.ini" ^
-    -VersionFrom "x86_x64\TeamViewer.exe"
+    -VersionFrom "x86_x64\TeamViewer.exe" ^
+    -MajorGeeks "teamviewer:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -19,7 +19,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -UrlFormat "https://download.videolan.org/pub/videolan/vlc/last/win64/vlc-{0}-win64.exe" -Into "x64" ^
     -UrlFormat86 "https://download.videolan.org/pub/videolan/vlc/last/win32/vlc-{0}-win32.exe" -Into86 "x86" ^
     -UrlFormatArm "https://download.videolan.org/pub/videolan/vlc/last/winarm64/vlc-{0}-winarm64.exe" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "vlc_media_player:64-Bit" -MajorGeeks86 "vlc_media_player:32-Bit"
 call :result
 
 rem Portable

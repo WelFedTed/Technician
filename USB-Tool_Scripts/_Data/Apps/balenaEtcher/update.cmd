@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "balenaEtcher (installer)" ^
     -GitHub "balena-io/etcher" ^
     -Asset "^balenaEtcher-[\d.]+\.Setup\.exe$" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "etcher"
 call :result
 
 rem Portable
@@ -24,7 +25,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "balenaEtcher (portable zip)" ^
     -GitHub "balena-io/etcher" ^
     -Asset "^balenaEtcher-win32-x64-[\d.]+\.zip$" ^
-    -Extract -Flatten -Into "x64" -Clean
+    -Extract -Flatten -Into "x64" -Clean ^
+    -MajorGeeks "etcher:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

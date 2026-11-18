@@ -23,7 +23,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "Bandizip Portable" ^
     -Url "https://www.bandisoft.com/bandizip/dl.php?portable" ^
     -SaveAs "BANDIZIP-PORTABLE.ZIP" ^
-    -Extract -Into "x86_x64" -Clean -Keep "config.ini"
+    -Extract -Into "x86_x64" -Clean -Keep "config.ini" ^
+    -MajorGeeks "bandizip:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

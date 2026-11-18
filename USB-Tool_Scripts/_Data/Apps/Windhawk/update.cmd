@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Windhawk" ^
     -Page "https://windhawk.net/" ^
     -GitHub "ramensoftware/windhawk" -Asset "^windhawk_setup\.exe$" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "windhawk"
 call :result
 
 if /i not "%~1" == "/nopause" pause

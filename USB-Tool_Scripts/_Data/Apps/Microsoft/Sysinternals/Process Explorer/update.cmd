@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Process Explorer" ^
     -Url "https://download.sysinternals.com/files/ProcessExplorer.zip" ^
-    -Extract -Into "x86_x64_ARM64" -Clean
+    -Extract -Into "x86_x64_ARM64" -Clean ^
+    -MajorGeeks "microsoft_process_explorer:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

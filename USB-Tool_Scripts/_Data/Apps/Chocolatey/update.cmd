@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Chocolatey" ^
     -Page "https://chocolatey.org/install" ^
     -Winget "Chocolatey.Chocolatey" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "chocolatey"
 call :result
 
 if /i not "%~1" == "/nopause" pause

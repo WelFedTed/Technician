@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "SteelSeries GG (installer)" ^
     -Page "https://steelseries.com/gg" ^
     -Url "https://steelseries.com/gg/downloads/gg/latest/windows" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "steelseries_engine"
 call :result
 
 if /i not "%~1" == "/nopause" pause

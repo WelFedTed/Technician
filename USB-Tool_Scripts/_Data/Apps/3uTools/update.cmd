@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.3u.com/" ^
     -Link "https://dl\.3u\.com/update/v\d+/dl/3uTools_v[\d.]+_Setup_x64\.exe" -Into "x64" ^
     -Link86 "https://dl\.3u\.com/update/v\d+/dl/3uTools_v[\d.]+_Setup_x86\.exe" -Into86 "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "3utools:64-Bit" -MajorGeeks86 "3utools"
 call :result
 
 if /i not "%~1" == "/nopause" pause

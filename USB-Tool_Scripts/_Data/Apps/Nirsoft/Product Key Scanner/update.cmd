@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft Product Key Scanner" ^
     -Url "https://www.nirsoft.net/utils/productkeyscanner-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/productkeyscanner.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "product_key_scanner:64-Bit" -MajorGeeks86 "product_key_scanner:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

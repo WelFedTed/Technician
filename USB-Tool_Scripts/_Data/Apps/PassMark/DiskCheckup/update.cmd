@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "PassMark DiskCheckup" ^
     -Page "https://www.passmark.com/products/diskcheckup/index.php" ^
     -Url "https://www.passmark.com/downloads/diskcheckup.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "passmark_diskcheckup:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

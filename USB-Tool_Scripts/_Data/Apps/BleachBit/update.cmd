@@ -15,14 +15,16 @@ rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "BleachBit (installer)" ^
     -GitHub "bleachbit/bleachbit" -Asset "^BleachBit-[\d.]+-setup\.exe$" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "bleachbit:EXE"
 call :result
 
 rem Portable (its settings stay in BleachBit.ini next to it)
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "BleachBit (portable)" ^
     -GitHub "bleachbit/bleachbit" -Asset "^BleachBit-[\d.]+-portable\.zip$" -Into "x86" ^
-    -Extract -Flatten -Clean -Keep "BleachBit.ini"
+    -Extract -Flatten -Clean -Keep "BleachBit.ini" ^
+    -MajorGeeks "bleachbit:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

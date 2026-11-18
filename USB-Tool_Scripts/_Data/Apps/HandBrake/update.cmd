@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "HandBrake/HandBrake" ^
     -Asset "^HandBrake-[\d.]+-x86_64-Win_GUI\.exe$" -Into "x64" ^
     -AssetArm "^HandBrake-[\d.]+-arm64-Win_GUI\.exe$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "handbrake"
 call :result
 
 rem Portable

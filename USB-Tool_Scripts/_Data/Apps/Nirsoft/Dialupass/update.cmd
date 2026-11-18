@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Url "https://www.nirsoft.net/toolsdownload/dialupass.zip" -Into "x86" ^
     -Referer "https://www.nirsoft.net/utils/dialupass.html" ^
     -Password "nsdlps3861@" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "dialupass:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

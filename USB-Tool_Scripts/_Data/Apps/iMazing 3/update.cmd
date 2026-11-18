@@ -15,7 +15,8 @@ rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" -MoveFrom "%~dp0..\iMazing" ^
     -Name "iMazing 3" ^
     -Url "https://downloads.imazing.com/windows/iMazing/iMazing3forWindows.exe" ^
-    -SaveAs "iMazing3forWindows.exe" -Into "x64"
+    -SaveAs "iMazing3forWindows.exe" -Into "x64" ^
+    -MajorGeeks "imazing"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

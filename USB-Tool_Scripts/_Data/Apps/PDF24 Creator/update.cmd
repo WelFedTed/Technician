@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://creator.pdf24.org/listVersions.php" ^
     -Link "https://download\.pdf24\.org/pdf24-creator-[\d.]+-x64\.exe" -Into "x64" ^
     -LinkArm "https://download\.pdf24\.org/pdf24-creator-[\d.]+-arm64\.exe" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "pdf24_creator"
 call :result
 
 if /i not "%~1" == "/nopause" pause

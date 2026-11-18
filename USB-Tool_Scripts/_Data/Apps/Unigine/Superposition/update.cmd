@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "Unigine Superposition Benchmark" ^
     -Page "https://benchmark.unigine.com/superposition" ^
     -Link "https://assets\.unigine\.com/d/Unigine_Superposition-[\d.]+\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "unigine_superposition_benchmark:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

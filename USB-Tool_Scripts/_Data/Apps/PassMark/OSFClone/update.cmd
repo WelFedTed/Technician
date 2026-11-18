@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "PassMark OSFClone" ^
     -Page "https://www.osforensics.com/tools/create-disk-images.html" ^
     -Url "https://www.osforensics.com/downloads/osfclone.zip" -Into "x86" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks "osfclone:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

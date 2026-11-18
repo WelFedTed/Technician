@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "PingPlotter" ^
     -Page "https://www.pingplotter.com/download/" ^
     -Url "https://www.pingplotter.com/downloads/pingplotter_install.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "pingplotter"
 call :result
 
 if /i not "%~1" == "/nopause" pause

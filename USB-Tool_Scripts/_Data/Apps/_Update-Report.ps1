@@ -399,7 +399,9 @@ foreach ($app in $apps) {
         continue
     }
     foreach ($part in $app.Parts) {
-        [void]$allRows.Append("<tr data-status=`"$($part.status)`"><td>$(Enc (Show $app.Name))</td><td>$(Enc $(if ($part.type) { $part.type } else { $part.part }))</td><td>$(Badge $part.status)</td><td>$(Version $part.version $part.built)</td><td class=`"num`">$(Span ([TimeSpan]::FromSeconds([double]$part.seconds)))</td></tr>")
+        # (got from MajorGeeks, the backup source, as its own one failed: why, when the mouse is over it)
+        $mirrorTag = if (@($part.mirror | Where-Object { $_ }).Count) { " <span class=`"dim`" title=`"$(Enc ((@($part.mirror) -join '; ')))`">via MajorGeeks</span>" } else { '' }
+        [void]$allRows.Append("<tr data-status=`"$($part.status)`"><td>$(Enc (Show $app.Name))</td><td>$(Enc $(if ($part.type) { $part.type } else { $part.part }))$mirrorTag</td><td>$(Badge $part.status)</td><td>$(Version $part.version $part.built)</td><td class=`"num`">$(Span ([TimeSpan]::FromSeconds([double]$part.seconds)))</td></tr>")
     }
 }
 

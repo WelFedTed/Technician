@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Url "https://www.nirsoft.net/toolsdownload/encryptedregview-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/toolsdownload/encryptedregview.zip" -Into86 "x86" ^
     -Referer "https://www.nirsoft.net/utils/encrypted_registry_view.html" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "encryptedregview:64-Bit" -MajorGeeks86 "encryptedregview:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

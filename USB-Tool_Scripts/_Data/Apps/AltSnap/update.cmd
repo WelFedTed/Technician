@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "RamonUnch/AltSnap" ^
     -Asset "^AltSnap[\d.]+-x64-inst\.exe$" -Into "x64" ^
     -Asset86 "^AltSnap[\d.]+-inst\.exe$" -Into86 "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "altsnap:64-Bit" -MajorGeeks86 "altsnap"
 call :result
 
 rem Portable
@@ -27,7 +28,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Asset "^AltSnap[\d.]+bin_x64\.zip$" -Into "x64" ^
     -Asset86 "^AltSnap[\d.]+bin\.zip$" -Into86 "x86" ^
     -AssetArm "^AltSnap[\d.]+bin_ARM64\.zip$" -IntoArm "ARM64" ^
-    -Extract -Clean -Keep "AltSnap.ini"
+    -Extract -Clean -Keep "AltSnap.ini" ^
+    -MajorGeeks "altsnap:64-Bit ZIP" -MajorGeeks86 "altsnap:32-Bit ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

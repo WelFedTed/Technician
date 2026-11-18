@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Krita (installer)" ^
     -Page "https://krita.org/en/download/" ^
     -Link "https://download\.kde\.org/stable/krita/[\d.]+/krita-x64-[\d.]+-setup\.exe" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "krita_studio:64-Bit"
 call :result
 
 rem Portable
@@ -24,7 +25,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Krita (portable)" ^
     -Page "https://krita.org/en/download/" ^
     -Link "https://download\.kde\.org/stable/krita/[\d.]+/krita-x64-[\d.]+\.zip" -Into "x64" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks "krita_studio:64-Bit Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

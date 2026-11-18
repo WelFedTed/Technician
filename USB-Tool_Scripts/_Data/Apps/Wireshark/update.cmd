@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.wireshark.org/download/win64/" ^
     -Link "Wireshark-[\d.]+-x64\.exe" -Into "x64" ^
     -LinkArm "Wireshark-[\d.]+-arm64\.exe" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "wireshark:64-Bit" -MajorGeeksArm "wireshark:ARM64"
 call :result
 
 rem Portable

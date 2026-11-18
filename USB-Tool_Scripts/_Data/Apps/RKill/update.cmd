@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Url "https://download.bleepingcomputer.com/grinler/rkill.exe" ^
     -SaveAs "rkill.exe" -Into "x86" ^
     -Extra "https://download.bleepingcomputer.com/grinler/rkill.com,https://download.bleepingcomputer.com/grinler/rkill.scr,https://download.bleepingcomputer.com/grinler/eXplorer.exe,https://download.bleepingcomputer.com/grinler/iExplore.exe,https://download.bleepingcomputer.com/grinler/uSeRiNiT.exe,https://download.bleepingcomputer.com/grinler/WiNlOgOn.exe" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "rkill:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

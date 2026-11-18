@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.mersenne.org/download/" ^
     -Link "https://download\.mersenne\.ca/gimps/v[\d.]+/[\d.]+/p95v\d+b\d+\.win64\.zip" -Into "x64" ^
     -Link86 "https://download\.mersenne\.ca/gimps/v[\d.]+/[\d.]+/p95v\d+b\d+\.win32\.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "prime.txt,local.txt"
+    -Extract -Clean -Keep "prime.txt,local.txt" ^
+    -MajorGeeks "prime95:64-Bit ZIP" -MajorGeeks86 "prime95:32-Bit ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

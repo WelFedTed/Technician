@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Link "wireguard-amd64-[\d.]+\.msi" -Into "x64" ^
     -Link86 "wireguard-x86-[\d.]+\.msi" -Into86 "x86" ^
     -LinkArm "wireguard-arm64-[\d.]+\.msi" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "wireguard:64-Bit" -MajorGeeks86 "wireguard"
 call :result
 
 if /i not "%~1" == "/nopause" pause

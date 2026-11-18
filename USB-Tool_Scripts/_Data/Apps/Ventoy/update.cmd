@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Ventoy" ^
     -GitHub "ventoy/Ventoy" ^
     -Asset "^ventoy-[\d.]+-windows\.zip$" ^
-    -Extract -Flatten -Into "x86_x64_ARM64" -Clean
+    -Extract -Flatten -Into "x86_x64_ARM64" -Clean ^
+    -MajorGeeks "ventoy:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

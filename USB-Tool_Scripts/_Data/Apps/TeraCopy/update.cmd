@@ -15,7 +15,8 @@ rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "TeraCopy (installer)" ^
     -Url "https://www.codesector.com/files/teracopy.exe" ^
-    -SaveAs "teracopy.exe" -Into "x86"
+    -SaveAs "teracopy.exe" -Into "x86" ^
+    -MajorGeeks "teracopy:EXE 4.x"
 call :result
 
 if /i not "%~1" == "/nopause" pause

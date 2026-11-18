@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Eraser" ^
     -Page "https://eraser.heidi.ie/download/" ^
     -Winget "Eraser.Eraser" -UserAgent "curl/8.0" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "eraser"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "GIMP (installer)" ^
     -Page "https://www.gimp.org/downloads/" ^
     -Link "//download\.gimp\.org/gimp/v[\d.]+/windows/gimp-[\d.]+(-\d+)?-setup\.exe" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "the_gimp:EXE"
 call :result
 
 rem Portable

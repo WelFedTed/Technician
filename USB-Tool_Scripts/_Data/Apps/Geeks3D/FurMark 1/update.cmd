@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Page "https://geeks3d.com/furmark/downloads/" ^
     -Link "dl/show/(\d+)[^>]*>v?1\.\d+\.\d+" ^
     -UrlFormat "https://geeks3d.com/dl/get/{0}" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "furmark"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

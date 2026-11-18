@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Page "https://www.cpuid.com/softwares/hwmonitor.html" ^
     -Link "hwmonitor_([\d.]+)\.exe" ^
     -UrlFormat "https://download.cpuid.com/hwmonitor/hwmonitor_{0}.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "hwmonitor:EXE"
 call :result
 
 rem Portable
@@ -26,7 +27,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Page "https://www.cpuid.com/softwares/hwmonitor.html" ^
     -Link "hwmonitor_([\d.]+)\.zip" ^
     -UrlFormat "https://download.cpuid.com/hwmonitor/hwmonitor_{0}.zip" ^
-    -Extract -Into "x86_x64" -Clean
+    -Extract -Into "x86_x64" -Clean ^
+    -MajorGeeks "hwmonitor:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

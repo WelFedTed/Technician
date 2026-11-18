@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://sourceforge.net/projects/win32diskimager/files/Archive/" ^
     -Link "(?i)https://sourceforge\.net/projects/win32diskimager/files/Archive/win32diskimager-[\d.]+-install\.exe/download" ^
     -UserAgent "curl/8.0" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "win32_disk_imager"
 call :result
 
 rem Portable

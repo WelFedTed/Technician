@@ -22,7 +22,8 @@ rem Portable (its settings stay next to it)
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "Ditto (portable)" ^
     -GitHub "sabrogden/Ditto" -Asset "^DittoPortable_[\d_]+\.zip$" -Into "x64" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks "ditto"
 call :result
 
 if /i not "%~1" == "/nopause" pause

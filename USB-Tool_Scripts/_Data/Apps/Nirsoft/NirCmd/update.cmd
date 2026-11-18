@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft NirCmd" ^
     -Url "https://www.nirsoft.net/utils/nircmd-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/nircmd.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "nircmd:64-Bit" -MajorGeeks86 "nircmd:32-Bit"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

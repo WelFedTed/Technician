@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Greenshot (installer)" ^
     -GitHub "greenshot/greenshot" ^
     -Asset "^Greenshot-INSTALLER-[\d.]+-RELEASE\.exe$" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "greenshot"
 call :result
 
 rem Portable

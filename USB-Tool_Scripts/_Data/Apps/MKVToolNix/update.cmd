@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://mkvtoolnix.download/downloads.html" ^
     -Link "windows/releases/[\d.]+/mkvtoolnix-64-bit-[\d.]+-setup\.exe" -Into "x64" ^
     -Link86 "windows/releases/[\d.]+/mkvtoolnix-32-bit-[\d.]+-setup\.exe" -Into86 "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks86 "mkvtoolnix:EXE"
 call :result
 
 rem Portable
@@ -26,7 +27,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://mkvtoolnix.download/downloads.html" ^
     -Link "windows/releases/[\d.]+/mkvtoolnix-64-bit-[\d.]+\.7z" ^
     -Link86 "windows/releases/[\d.]+/mkvtoolnix-32-bit-[\d.]+\.7z" ^
-    -Extract -Flatten -Into "x64" -Into86 "x86" -Clean
+    -Extract -Flatten -Into "x64" -Into86 "x86" -Clean ^
+    -MajorGeeks86 "mkvtoolnix:Portable 7z"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "paintdotnet/release" ^
     -Asset "^paint\.net\.[\d.]+\.install\.x64\.zip$" -Into "x64" ^
     -AssetArm "^paint\.net\.[\d.]+\.install\.arm64\.zip$" -IntoArm "ARM64" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "paint_net:ZIP" -MajorGeeksArm "paint_net:ARM64"
 call :result
 
 rem Portable
@@ -26,7 +27,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "paintdotnet/release" ^
     -Asset "^paint\.net\.[\d.]+\.portable\.x64\.zip$" -Into "x64" ^
     -AssetArm "^paint\.net\.[\d.]+\.portable\.arm64\.zip$" -IntoArm "ARM64" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "paint_net:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

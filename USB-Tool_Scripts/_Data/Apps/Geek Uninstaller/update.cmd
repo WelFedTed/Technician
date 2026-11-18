@@ -15,7 +15,8 @@ rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "Geek Uninstaller" ^
     -Url "https://geekuninstaller.com/geek.zip" ^
-    -Extract -Into "x86" -Clean
+    -Extract -Into "x86" -Clean ^
+    -MajorGeeks "geekuninstaller:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

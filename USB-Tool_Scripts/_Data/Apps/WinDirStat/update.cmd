@@ -28,7 +28,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Asset "^WinDirStat\.zip$" -Inner "x64" -Into "x64" ^
     -Asset86 "^WinDirStat\.zip$" -Inner86 "x86" -Into86 "x86" ^
     -AssetArm "^WinDirStat\.zip$" -InnerArm "arm64" -IntoArm "ARM64" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "windirstat" -MajorGeeks86 "windirstat" -MajorGeeksArm "windirstat"
 call :result
 
 if /i not "%~1" == "/nopause" pause

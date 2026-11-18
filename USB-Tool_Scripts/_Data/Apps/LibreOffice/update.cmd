@@ -19,7 +19,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -UrlFormat "https://download.documentfoundation.org/libreoffice/stable/{0}/win/x86_64/LibreOffice_{0}_Win_x86-64.msi" -Into "x64" ^
     -UrlFormat86 "https://download.documentfoundation.org/libreoffice/stable/{0}/win/x86/LibreOffice_{0}_Win_x86.msi" -Into86 "x86" ^
     -UrlFormatArm "https://download.documentfoundation.org/libreoffice/stable/{0}/win/aarch64/LibreOffice_{0}_Win_aarch64.msi" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "libreoffice_productivity_suite:MSI"
 call :result
 
 rem Portable

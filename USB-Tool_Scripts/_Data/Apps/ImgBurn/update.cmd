@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "ImgBurn (installer)" ^
     -Page "https://www.imgburn.com/index.php?act=download" ^
     -Link "https://download\.imgburn\.com/SetupImgBurn_[\d.]+\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "imgburn"
 call :result
 
 if /i not "%~1" == "/nopause" pause

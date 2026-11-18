@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Winaero Tweaker" ^
     -Page "https://winaerotweaker.com/" ^
     -Url "https://winaerotweaker.com/download/winaerotweaker.zip" -Into "x86" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "winaero_tweaker"
 call :result
 
 if /i not "%~1" == "/nopause" pause

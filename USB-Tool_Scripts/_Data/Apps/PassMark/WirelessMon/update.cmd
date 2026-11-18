@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "PassMark WirelessMon" ^
     -Page "https://www.passmark.com/products/wirelessmonitor/index.php" ^
     -Url "https://www.passmark.com/downloads/wirelessmon.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "passmark_wirelessmon"
 call :result
 
 if /i not "%~1" == "/nopause" pause

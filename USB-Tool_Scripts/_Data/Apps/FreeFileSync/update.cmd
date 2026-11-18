@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "FreeFileSync" ^
     -Page "https://freefilesync.org/download.php" ^
     -Link "download/FreeFileSync_[\d.]+_Windows_Setup\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "freefilesync:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

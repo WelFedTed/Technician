@@ -19,7 +19,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -UrlArm "https://zoom.us/client/latest/ZoomInstallerFull.exe?archType=winarm64" ^
     -SaveAsArm "ZoomInstallerFull.exe" -IntoArm "ARM64" ^
     -Clean ^
-    -VersionFromUrl
+    -VersionFromUrl ^
+    -MajorGeeks "zoom"
 call :result
 
 if /i not "%~1" == "/nopause" pause

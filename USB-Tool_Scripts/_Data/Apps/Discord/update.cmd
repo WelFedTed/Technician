@@ -19,7 +19,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -UrlArm "https://discord.com/api/downloads/distributions/app/installers/latest?channel=stable&platform=win&arch=arm64" ^
     -SaveAsArm "DiscordSetup.exe" -IntoArm "ARM64" ^
     -Clean ^
-    -VersionFromUrl
+    -VersionFromUrl ^
+    -MajorGeeks "discord"
 call :result
 
 if /i not "%~1" == "/nopause" pause

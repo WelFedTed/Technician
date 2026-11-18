@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft MZCookiesView" ^
     -Url "https://www.nirsoft.net/utils/mzcv-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/mzcv.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "mozillacookiesview:64-Bit ZIP" -MajorGeeks86 "mozillacookiesview:32-Bit ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

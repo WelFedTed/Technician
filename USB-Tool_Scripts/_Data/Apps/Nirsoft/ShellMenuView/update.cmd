@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft ShellMenuView" ^
     -Url "https://www.nirsoft.net/utils/shmnview-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/shmnview.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "shellmenuview:64-Bit ZIP" -MajorGeeks86 "shellmenuview:32-Bit ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

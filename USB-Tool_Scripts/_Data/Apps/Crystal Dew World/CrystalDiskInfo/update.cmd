@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Page "https://crystalmark.info/redirect.php?product=CrystalDiskInfoInstaller" ^
     -Link "https://sourceforge\.net/projects/crystaldiskinfo/files/[\d.]+/CrystalDiskInfo[\d_]+\.exe/download" ^
     -UserAgent "curl/8.0" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "crystaldiskinfo"
 call :result
 
 rem Portable

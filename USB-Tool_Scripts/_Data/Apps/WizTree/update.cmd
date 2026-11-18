@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "WizTree (installer)" ^
     -Page "https://diskanalyzer.com/download" ^
     -Link "files/wiztree_[\d_]+_setup\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "wiztree:EXE"
 call :result
 
 rem Portable
@@ -24,7 +25,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "WizTree" ^
     -Page "https://diskanalyzer.com/download" ^
     -Link "files/wiztree_[\d_]+_portable\.zip" ^
-    -Extract -Into "x86_x64" -Clean
+    -Extract -Into "x86_x64" -Clean ^
+    -MajorGeeks "wiztree:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

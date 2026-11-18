@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Kingston SSD Manager" ^
     -Page "https://www.kingston.com/en/support/technical/ssdmanager" ^
     -Winget "Kingston.SSDManager" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "kingston_ssd_manager:64-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

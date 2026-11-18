@@ -15,7 +15,8 @@ rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "AppControl (installer)" ^
     -Url "https://www.appcontrol.com/files/AppControlSetup.exe" ^
-    -SaveAs "AppControlSetup.exe" -Into "x86"
+    -SaveAs "AppControlSetup.exe" -Into "x86" ^
+    -MajorGeeks "appcontrol:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

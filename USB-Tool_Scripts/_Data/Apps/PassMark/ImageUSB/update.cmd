@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "PassMark ImageUSB" ^
     -Page "https://www.osforensics.com/tools/write-usb-images.html" ^
     -Url "https://www.osforensics.com/downloads/imageusb.zip" -Into "x86" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "imageusb:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

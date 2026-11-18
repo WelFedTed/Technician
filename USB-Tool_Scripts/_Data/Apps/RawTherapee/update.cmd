@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "RawTherapee/RawTherapee" ^
     -Asset "^RawTherapee_[\d.]+_win64_x86_64_release\.exe$" -Into "x64" ^
     -AssetArm "^RawTherapee_[\d.]+_win64_arm64_release\.exe$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "rawtherapee:EXE"
 call :result
 
 rem Portable
@@ -26,7 +27,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "RawTherapee/RawTherapee" ^
     -Asset "^RawTherapee_[\d.]+_win64_x86_64_release\.zip$" -Into "x64" ^
     -AssetArm "^RawTherapee_[\d.]+_win64_arm64_release\.zip$" -IntoArm "ARM64" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeksArm "rawtherapee:ARM64"
 call :result
 if /i not "%~1" == "/nopause" pause
 exit /b %result%

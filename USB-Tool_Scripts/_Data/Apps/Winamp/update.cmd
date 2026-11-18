@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -PageIndex "https://github.com/microsoft/winget-pkgs/tree/master/manifests/w/Winamp/Winamp" -PageIndexLink "name.:\s*.(\d+(?:\.\d+)+)." ^
     -Page "https://raw.githubusercontent.com/microsoft/winget-pkgs/master/manifests/w/Winamp/Winamp/{0}/Winamp.Winamp.installer.yaml" ^
     -Link "https://download\.winamp\.com/winamp/Winamp\d+_\d+_final_full_en-us\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "winamp_5_full:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

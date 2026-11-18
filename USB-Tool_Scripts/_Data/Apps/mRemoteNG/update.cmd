@@ -15,7 +15,8 @@ rem Installer (the last stable release, from 2019)
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "mRemoteNG (installer)" ^
     -GitHub "mRemoteNG/mRemoteNG" -Asset "^mRemoteNG-Installer-[\d.]+\.msi$" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "mremoteng"
 call :result
 
 rem Portable (the current nightly builds (self-contained), as mRemoteNG hasn't made a stable release since 2019)

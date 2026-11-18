@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Advanced IP Scanner (installer, can also run without installing)" ^
     -Page "https://www.advanced-ip-scanner.com/download/" ^
     -Link "https://download\.advanced-ip-scanner\.com/download/files/Advanced_IP_Scanner_[\d.]+\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "advanced_ip_scanner:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

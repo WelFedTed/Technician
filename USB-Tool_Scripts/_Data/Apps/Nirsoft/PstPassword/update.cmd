@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft PstPassword" ^
     -Url "https://www.nirsoft.net/toolsdownload/pstpassword.zip" -Into "x86" ^
     -Referer "https://www.nirsoft.net/utils/pst_password.html" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "pstpassword:Download@Authors Site"
 call :result
 
 if /i not "%~1" == "/nopause" pause

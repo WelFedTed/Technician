@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.nvidia.com/en-us/software/nvidia-app/" ^
     -Link "https://us\.download\.nvidia\.com/nvapp/client/[\d.]+/x64/NVIDIA_app_v[\d.]+_x64\.exe" ^
     -LinkArm "https://us\.download\.nvidia\.com/nvapp/client/[\d.]+/arm64/NVIDIA_app_v[\d.]+_arm64\.exe" ^
-    -Into "x64" -IntoArm "ARM64" -Clean
+    -Into "x64" -IntoArm "ARM64" -Clean ^
+    -MajorGeeks "nvidia_app:EXE" -MajorGeeksArm "nvidia_app:ARM64"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

@@ -15,7 +15,8 @@ rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "HxD (installer)" ^
     -Url "https://mh-nexus.de/downloads/HxDSetup.zip" ^
-    -Extract -Into "x86" -Clean
+    -Extract -Into "x86" -Clean ^
+    -MajorGeeks "hxd"
 call :result
 
 if /i not "%~1" == "/nopause" pause

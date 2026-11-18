@@ -15,14 +15,16 @@ rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "HeavyLoad (installer)" ^
     -Url "https://downloads.jam-software.de/heavyload/HeavyLoad-x64-Setup.exe" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "heavyload:EXE"
 call :result
 
 rem Portable
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "HeavyLoad" ^
     -Url "https://downloads.jam-software.de/heavyload/HeavyLoad-x64.zip" -Into "x64" ^
-    -Extract -Clean -Keep "GlobalOptions.config,GlobalOptions.xml"
+    -Extract -Clean -Keep "GlobalOptions.config,GlobalOptions.xml" ^
+    -MajorGeeks "heavyload:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "JDownloader 2" ^
     -Page "https://jdownloader.org/jdownloader2" ^
     -Winget "AppWork.JDownloader" -Into "x64" -Into86 "x86" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "jdownloader"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

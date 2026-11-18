@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Asset "^DesktopEditors_x64\.exe$" -Into "x64" ^
     -Asset86 "^DesktopEditors_x86\.exe$" -Into86 "x86" ^
     -AssetArm "^DesktopEditors_arm64\.exe$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "onlyoffice:64-Bit" -MajorGeeks86 "onlyoffice"
 call :result
 
 rem Portable (64-bit only, to save space)

@@ -20,7 +20,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -SaveAs86 "Firefox Setup.exe" -Into86 "x86" ^
     -UrlArm "https://download.mozilla.org/?product=firefox-latest-ssl&os=win64-aarch64&lang=en-US" ^
     -SaveAsArm "Firefox Setup.exe" -IntoArm "ARM64" ^
-    -VersionFromUrl
+    -VersionFromUrl ^
+    -MajorGeeks "mozilla_firefox:64-Bit" -MajorGeeks86 "mozilla_firefox" -MajorGeeksArm "mozilla_firefox:ARM64"
 call :result
 
 rem Portable

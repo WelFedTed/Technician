@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "H2testw" ^
     -Page "https://www.heise.de/download/product/h2testw-50539" ^
     -Winget "HaraldBoegeholz.h2testw" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "h2testw"
 call :result
 
 if /i not "%~1" == "/nopause" pause

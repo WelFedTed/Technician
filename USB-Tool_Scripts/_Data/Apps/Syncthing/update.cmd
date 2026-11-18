@@ -25,7 +25,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Asset "^syncthing-windows-amd64-v[\d.]+\.zip$" -Into "x64" ^
     -Asset86 "^syncthing-windows-386-v[\d.]+\.zip$" -Into86 "x86" ^
     -AssetArm "^syncthing-windows-arm64-v[\d.]+\.zip$" -IntoArm "ARM64" ^
-    -Extract -Flatten -Clean
+    -Extract -Flatten -Clean ^
+    -MajorGeeks "syncthing:64-Bit" -MajorGeeks86 "syncthing:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

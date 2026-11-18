@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Ubisoft Connect (installer)" ^
     -Page "https://ubisoftconnect.com/" ^
     -Url "https://static3.cdn.ubi.com/orbit/launcher_installer/UbisoftConnectInstaller.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "uplay"
 call :result
 
 if /i not "%~1" == "/nopause" pause

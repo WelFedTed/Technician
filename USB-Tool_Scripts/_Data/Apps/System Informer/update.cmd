@@ -15,7 +15,8 @@ rem Installer (formerly Process Hacker)
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "System Informer (installer)" ^
     -GitHub "winsiderss/systeminformer" -Asset "^systeminformer-[\d.]+-release-setup\.exe$" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "system_informer"
 call :result
 
 rem Portable (the release's zip holds every build, so each build folder takes its own)

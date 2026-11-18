@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft Mail PassView" ^
     -Url "https://www.nirsoft.net/toolsdownload/mailpv.zip" -Into "x86" ^
     -Referer "https://www.nirsoft.net/utils/mailpv.html" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "mail_passview:ZIP"
 call :result
 
 if /i not "%~1" == "/nopause" pause

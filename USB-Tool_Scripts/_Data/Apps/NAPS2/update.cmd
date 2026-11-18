@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -GitHub "cyanfish/naps2" ^
     -Asset "^naps2-[\d.]+-win-x64\.exe$" -Into "x64" ^
     -AssetArm "^naps2-[\d.]+-win-arm64\.exe$" -IntoArm "ARM64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "naps2"
 call :result
 
 rem Portable (its settings stay in its Data folder)

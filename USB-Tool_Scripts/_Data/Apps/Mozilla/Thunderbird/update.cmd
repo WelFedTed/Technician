@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -SaveAs "Thunderbird Setup.exe" -Into "x64" ^
     -Url86 "https://download.mozilla.org/?product=thunderbird-latest-SSL&os=win&lang=en-US" ^
     -SaveAs86 "Thunderbird Setup.exe" -Into86 "x86" ^
-    -VersionFromUrl -Clean
+    -VersionFromUrl -Clean ^
+    -MajorGeeks "mozilla_thunderbird_nebula:64-Bit" -MajorGeeks86 "mozilla_thunderbird_nebula"
 call :result
 
 rem Portable

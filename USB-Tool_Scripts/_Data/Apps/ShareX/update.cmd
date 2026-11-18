@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "ShareX (installer)" ^
     -GitHub "ShareX/ShareX" ^
     -Asset "^ShareX-[\d.]+-setup-x64\.exe$" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "sharex:EXE"
 call :result
 
 rem Portable
@@ -24,7 +25,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "ShareX (portable)" ^
     -GitHub "ShareX/ShareX" ^
     -Asset "^ShareX-[\d.]+-portable-x64\.zip$" -Into "x64" ^
-    -Extract -Clean -Keep "ShareX"
+    -Extract -Clean -Keep "ShareX" ^
+    -MajorGeeks "sharex:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

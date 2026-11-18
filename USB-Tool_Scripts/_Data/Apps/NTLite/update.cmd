@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "NTLite (installer)" ^
     -Page "https://www.ntlite.com/download/" ^
     -Winget "Nlitesoft.NTLite" -Into "x64" -Into86 "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "ntlite:64-Bit" -MajorGeeks86 "ntlite:32-Bit Win 7+ Legacy"
 call :result
 
 if /i not "%~1" == "/nopause" pause

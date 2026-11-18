@@ -26,7 +26,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Page "https://www.den4b.com/download/renamer/portable" ^
     -Link "portable\?key=([0-9a-f]+)" ^
     -UrlFormat "https://www.den4b.com/download/renamer/portable?key={0}" ^
-    -Extract -Into "x86" -Clean -Keep "*.ini"
+    -Extract -Into "x86" -Clean -Keep "*.ini" ^
+    -MajorGeeks "renamer"
 call :result
 
 if /i not "%~1" == "/nopause" pause

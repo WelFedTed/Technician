@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Advanced Port Scanner (installer)" ^
     -Page "https://www.advanced-port-scanner.com/" ^
     -Link "https://download\.advanced-port-scanner\.com/download/files/Advanced_Port_Scanner_[\d.]+\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "advanced_port_scanner"
 call :result
 
 if /i not "%~1" == "/nopause" pause

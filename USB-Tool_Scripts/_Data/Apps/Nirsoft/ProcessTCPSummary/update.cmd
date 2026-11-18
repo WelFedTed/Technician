@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Name "NirSoft ProcessTCPSummary" ^
     -Url "https://www.nirsoft.net/utils/processtcpsummary-x64.zip" -Into "x64" ^
     -Url86 "https://www.nirsoft.net/utils/processtcpsummary.zip" -Into86 "x86" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "processtcpsummary:64-Bit" -MajorGeeks86 "processtcpsummary:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

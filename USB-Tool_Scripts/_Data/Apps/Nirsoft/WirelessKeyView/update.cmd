@@ -18,7 +18,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Url86 "https://www.nirsoft.net/toolsdownload/wirelesskeyview.zip" -Into86 "x86" ^
     -Referer "https://www.nirsoft.net/utils/wireless_key.html" ^
     -Password "WKey4567#" ^
-    -Extract -Clean -Keep "*.cfg"
+    -Extract -Clean -Keep "*.cfg" ^
+    -MajorGeeks "wirelesskeyview:64-Bit" -MajorGeeks86 "wirelesskeyview:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

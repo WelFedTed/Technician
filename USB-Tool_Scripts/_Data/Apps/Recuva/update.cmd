@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Recuva (installer)" ^
     -Page "https://www.ccleaner.com/recuva/builds" ^
     -Link "https://download\.ccleaner\.com/rcsetup\d+\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "recuva_portable:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause

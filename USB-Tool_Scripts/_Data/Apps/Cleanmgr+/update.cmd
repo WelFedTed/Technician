@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Cleanmgr+" ^
     -GitHub "builtbybel/CleanmgrPlus" ^
     -Asset "^cleanmgrplus\.zip$" -Into "x86" ^
-    -Extract -Clean
+    -Extract -Clean ^
+    -MajorGeeks "cleanmgr"
 call :result
 
 if /i not "%~1" == "/nopause" pause

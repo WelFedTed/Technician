@@ -30,7 +30,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -UrlFormat "https://www.irfanview.info/files/iview{0}_x64.zip" -Into "x64" ^
     -UrlFormat86 "https://www.irfanview.info/files/iview{0}.zip" -Into86 "x86" ^
     -Referer "https://www.irfanview.info/" ^
-    -Extract -Clean -Keep "i_view64.ini,i_view32.ini"
+    -Extract -Clean -Keep "i_view64.ini,i_view32.ini" ^
+    -MajorGeeks86 "irfanview"
 call :result
 
 if /i not "%~1" == "/nopause" pause

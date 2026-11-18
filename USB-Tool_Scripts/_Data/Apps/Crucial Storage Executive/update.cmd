@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Crucial Storage Executive" ^
     -Page "https://www.crucial.com/support/storage-executive" ^
     -Winget "Crucial.StorageExecutive" -Into "x64" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "crucial_storage_executive:64-Bit"
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

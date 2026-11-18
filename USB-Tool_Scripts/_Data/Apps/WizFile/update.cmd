@@ -16,7 +16,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "WizFile (installer)" ^
     -Page "https://antibody-software.com/wizfile/download" ^
     -Link "/files/wizfile_[\d_]+_setup\.exe" -Into "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "wizfile:EXE"
 call :result
 
 rem Portable
@@ -24,7 +25,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "WizFile" ^
     -Page "https://antibody-software.com/wizfile/download" ^
     -Link "/files/wizfile_[\d_]+_portable\.zip" ^
-    -Extract -Into "x86_x64" -Clean
+    -Extract -Into "x86_x64" -Clean ^
+    -MajorGeeks "wizfile:Portable"
 call :result
 
 if /i not "%~1" == "/nopause" pause

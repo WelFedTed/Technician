@@ -17,7 +17,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -PageIndex "https://download.virtualbox.org/virtualbox/LATEST.TXT" -PageIndexLink "([\d.]+)" ^
     -Page "https://download.virtualbox.org/virtualbox/{0}/" ^
     -Link "VirtualBox-[\d.]+-\d+-Win\.exe" -Into "x86" ^
-    -VersionFromUrl -Clean
+    -VersionFromUrl -Clean ^
+    -MajorGeeks "virtualbox:EXE"
 call :result
 
 if /i not "%~1" == "/nopause" pause
