@@ -12,12 +12,13 @@ set "result=0"
 set "resultRank=0"
 
 rem Installer
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "iTunes" ^
     -Page "https://www.apple.com/itunes/" ^
     -Url "https://www.apple.com/itunes/download/win64" -Into "x64" ^
     -Url86 "https://www.apple.com/itunes/download/win32" -Into86 "x86" ^
-    -Clean
+    -Clean ^
+    -MajorGeeks "itunes:64-Bit" -MajorGeeks86 "itunes:32-Bit"
 call :result
 
 if /i not "%~1" == "/nopause" pause

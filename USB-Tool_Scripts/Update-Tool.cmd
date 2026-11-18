@@ -196,6 +196,9 @@ rem ----------------------------------------------------------------------------
 	call :moveFolder "_Data\Apps\AdwCleaner" "_Data\Apps\Malwarebytes\AdwCleaner"
 	rem (an app whose folder became its maker's folder, with the app now in a subfolder of the same name)
 	call :moveDown "_Data\Apps\Malwarebytes" "Malwarebytes"
+	call :moveFolder "_Data\Apps\Apple Devices" "_Data\Apps\Apple\Devices"
+	call :moveFolder "_Data\Apps\iCloud" "_Data\Apps\Apple\iCloud"
+	call :moveFolder "_Data\Apps\iTunes" "_Data\Apps\Apple\iTunes"
 	call :moveFolder "_Data\Apps\BandiView" "_Data\Apps\Bandisoft\BandiView"
 	call :moveFolder "_Data\Apps\Bandizip" "_Data\Apps\Bandisoft\Bandizip"
 	call :moveFolder "_Data\Apps\CPUID CPU-Z" "_Data\Apps\CPUID\CPU-Z"

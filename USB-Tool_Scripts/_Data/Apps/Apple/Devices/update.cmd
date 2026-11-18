@@ -12,7 +12,7 @@ set "result=0"
 set "resultRank=0"
 
 rem Installer
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Apple Devices (Microsoft Store installer)" ^
     -Url "https://get.microsoft.com/installer/download/9NP83LWLPZ9K" ^
     -SaveAs "Apple Devices Installer.exe" -Into "Any"
