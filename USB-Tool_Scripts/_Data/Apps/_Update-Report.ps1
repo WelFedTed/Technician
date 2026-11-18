@@ -13,8 +13,8 @@
 #       plan.txt                  every app folder the run was going to try, in order
 #       state.txt                 how far the run got: step=scripts / app*<n>*<name> / finish / report,
 #                                 and scripts=, selfUpdate=, stamp= once they're known
-# The report has the run's numbers, then what needs doing by hand (with download links and the scripts to
-# run, eg. Aseprite's build.cmd), then what was updated and every app's state.
+# The report has the run's numbers, then what needs your attention (folded away until clicked: download links
+# and the scripts to run, eg. Aseprite's build.cmd), then every app's state.
 # The watcher (-Watch, in its own hidden window, so Ctrl+C in Update-Tool's window doesn't stop it too):
 # Update-Tool keeps running.lock open while it works. If it lets go (or its window closes) before the report
 # was made, the run was stopped early, eg. with Ctrl+C, so the watcher makes the report itself, saying where
@@ -383,14 +383,8 @@ foreach ($app in $apps | Where-Object { $_.Status -in @('failed', 'manual', 'blo
 }
 
 # ---------------------------------------------------------------------------------------------
-# What was updated, and every app
+# Every app
 # ---------------------------------------------------------------------------------------------
-
-$updatedRows = New-Object Text.StringBuilder
-foreach ($part in $parts | Where-Object { $_.status -in @('updated', 'blocked') }) {
-    $from = if ($part.oldVersion -or $part.oldBuilt) { Version $part.oldVersion $part.oldBuilt } else { '<span class="dim">new</span>' }
-    [void]$updatedRows.Append("<tr><td>$(Enc (Show $part.app))</td><td>$(Enc $part.part)</td><td>$from</td><td>$(Version $part.version $part.built)</td><td class=`"num`">$(Size $part.downloaded)</td><td class=`"num`">$(Span ([TimeSpan]::FromSeconds([double]$part.seconds)))</td></tr>")
-}
 
 $allRows = New-Object Text.StringBuilder
 foreach ($app in $apps) {
@@ -441,11 +435,28 @@ if ($counts.cancelled) { $tiles += Tile $counts.cancelled 'Stopped part-way' 'ba
 if ($Cancelled) { $tiles += Tile $counts.notrun 'Not tried (cancelled)' $(if ($counts.notrun) { 'warn' }) }
 $tiles += (Tile $counts.skipped 'Skipped (no update.cmd)') + (Tile (Size $downloaded) 'Downloaded')
 
-$attentionHtml = if ($attention.Length) { "<h2>Needs you</h2><div class=`"cards`">$($attention.ToString())</div>" }
-    elseif ($DoApps -eq '1') { "<h2>Needs you</h2><p class=`"ok`">Nothing: every app updated or was already up to date.</p>" } else { '' }
-$updatedHtml = if ($updatedRows.Length) {
-    "<h2>Updated <span class=`"count`">$(@($parts | Where-Object { $_.status -in @('updated', 'blocked') }).Count)</span></h2><div class=`"table-wrap`"><table><thead><tr><th>App</th><th>Part</th><th>Was</th><th>Now</th><th class=`"num`">Downloaded</th><th class=`"num`">Took</th></tr></thead><tbody>$($updatedRows.ToString())</tbody></table></div>"
-} else { '' }
+# (a coloured bar that says what's in it, with its cards folded away until it's clicked)
+$attentionHtml = if ($attention.Length) {
+    $kinds = @([regex]::Matches($attention.ToString(), '<article class="card (\w+)"') | ForEach-Object { $_.Groups[1].Value })
+    $cardCount = $kinds.Count
+    $what = @()
+    if ($kinds -contains 'stop') { $what += 'the update needs finishing' }
+    foreach ($kind in @(@('failed', 'failed'), @('cancelled', 'stopped part-way'), @('manual', 'to update by hand'), @('blocked', 'with files Defender blocked'))) {
+        $n = @($kinds | Where-Object { $_ -eq $kind[0] }).Count
+        if ($n) { $what += "$n $($kind[1])" }
+    }
+    $attentionTone = if ($kinds | Where-Object { $_ -in @('failed', 'cancelled', 'stop') }) { 'bad' } else { 'warn' }
+    $plural = if ($cardCount -eq 1) { '' } else { 's' }
+    @"
+<details class="attention $attentionTone"><summary>
+<span class="attention-icon" aria-hidden="true">!</span>
+<span class="attention-text"><h2>Needs your attention</h2><span class="attention-sub">$(($what | ForEach-Object { Enc $_ }) -join ' &middot; ')</span></span>
+<span class="attention-count" title="$cardCount card$plural">$cardCount</span>
+<span class="attention-toggle"><span class="show">Show</span><span class="hide">Hide</span></span>
+</summary><div class="cards">$($attention.ToString())</div></details>
+"@
+}
+elseif ($DoApps -eq '1') { "<h2>Needs your attention</h2><p class=`"ok`">Nothing: every app updated or was already up to date.</p>" } else { '' }
 # a filter for each result in the table
 $filterNames = [ordered]@{ updated = 'Updated'; current = 'Up to date'; manual = 'By hand'; failed = 'Failed'; blocked = 'Blocked'; cancelled = 'Stopped'; notrun = 'Not tried'; skipped = 'Skipped' }
 $shown = $allRows.ToString()
@@ -506,6 +517,27 @@ p { overflow-wrap: anywhere; }
 .run-row code { flex: 1; min-width: 0; padding: 7px 10px; overflow-wrap: anywhere; }
 code { background: var(--code); border-radius: 6px; padding: 1px 6px; font: 13px Consolas, "Cascadia Mono", monospace; overflow-wrap: anywhere; }
 .files code { display: inline-block; margin: 2px 2px 0 0; }
+details.attention { --tone: var(--warn); --tone-bg: var(--warn-bg); margin: 28px 0 0; }
+details.attention.bad { --tone: var(--bad); --tone-bg: var(--bad-bg); }
+details.attention > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px;
+  background: var(--tone-bg); border: 1px solid var(--tone); border-left-width: 6px; color: var(--tone); }
+details.attention > summary::-webkit-details-marker { display: none; }
+details.attention > summary:hover { filter: brightness(0.97); }
+@media (prefers-color-scheme: dark) { details.attention > summary:hover { filter: brightness(1.15); } }
+details.attention > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.attention-icon { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--tone); color: var(--panel); display: grid; place-items: center; font-weight: 800; font-size: 20px; }
+.attention-text { flex: 1; min-width: 0; }
+.attention-text h2 { margin: 0; font-size: 19px; }
+.attention-sub { display: block; font-size: 14px; color: var(--text); }
+.attention-count { flex: none; min-width: 32px; padding: 2px 10px; border-radius: 999px; background: var(--tone); color: var(--panel); font-weight: 700; text-align: center; }
+.attention-toggle { flex: none; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--tone); background: var(--panel); color: var(--tone); font-weight: 600; font-size: 14px; white-space: nowrap; }
+.attention-toggle::after { content: " \25BE"; display: inline-block; transition: transform .15s; }
+details.attention[open] .attention-toggle::after { transform: rotate(180deg); }
+.attention-toggle .hide, details.attention[open] .attention-toggle .show { display: none; }
+details.attention[open] .attention-toggle .hide { display: inline; }
+details.attention > .cards { margin-top: 12px; }
+@media (max-width: 600px) { details.attention > summary { flex-wrap: wrap; gap: 10px 14px; } .attention-text { flex-basis: calc(100% - 48px); }
+  .attention-count { margin-left: 48px; } .attention-toggle { margin-left: auto; } }
 details.log { margin: 10px 0 4px; } details.log summary { cursor: pointer; color: var(--dim); font-size: 13px; }
 details.log pre { background: var(--code); border-radius: 8px; padding: 10px 12px; margin: 6px 0 0; font: 12px/1.45 Consolas, "Cascadia Mono", monospace; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow-y: auto; }
 button { font: inherit; cursor: pointer; }
@@ -541,7 +573,6 @@ $(if ($DoApps -eq '1') { "<div class=`"tiles`">$tiles</div>" })
 $(if ($Cancelled) { "<dt>Cancelled</dt><dd>$(Enc $finished.ToString('h:mm:ss tt')), $(Enc $stoppedAt)</dd>" } else { "<dt>Finished</dt><dd>$(Enc $finished.ToString('h:mm:ss tt'))</dd>" })
 </dl>
 $attentionHtml
-$updatedHtml
 $allHtml
 <p class="dim small">Made by Update-Tool.cmd. Saved as $(Enc $report)$(if ($OutDir -and -not $OutFile) { '; each update makes its own report next to this one.' } else { ', and replaced by the next update.' })</p>
 </main>
