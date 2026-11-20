@@ -11,12 +11,14 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
+rem (from 2026.11.0 the open-source build's files start with "oss-", and the commercial build's with "bit-")
+
 rem Installer
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Bitwarden (installer)" ^
     -Page "https://bitwarden.com/download/" ^
     -GitHub "bitwarden/clients" -PreRelease -SkipPreReleases ^
-    -Asset "^Bitwarden-Installer-[\d.]+\.exe$" -Into "x86_x64_ARM64" ^
+    -Asset "^(oss-)?Bitwarden-Installer-[\d.]+\.exe$" -Into "x86_x64_ARM64" ^
     -Clean
 call :result
 
@@ -25,7 +27,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
     -Name "Bitwarden" ^
     -Page "https://bitwarden.com/download/" ^
     -GitHub "bitwarden/clients" -PreRelease -SkipPreReleases ^
-    -Asset "^Bitwarden-Portable-[\d.]+\.exe$" -Into "x86_x64_ARM64" ^
+    -Asset "^(oss-)?Bitwarden-Portable-[\d.]+\.exe$" -Into "x86_x64_ARM64" ^
     -Clean -Keep "bitwarden-appdata"
 call :result
 

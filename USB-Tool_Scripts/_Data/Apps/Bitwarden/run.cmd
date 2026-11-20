@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title Bitwarden
 
-set "application=Bitwarden-Portable-*.exe"
+set "application=oss-Bitwarden-Portable-*.exe;Bitwarden-Portable-*.exe"
 set "arguments="
 set "folder=Portable"
 

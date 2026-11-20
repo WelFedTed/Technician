@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 title Install Bitwarden
 
-set "application=Bitwarden-Installer-*.exe"
+set "application=oss-Bitwarden-Installer-*.exe;Bitwarden-Installer-*.exe"
 set "arguments="
 set "folder=Installer"
 
