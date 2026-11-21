@@ -73,8 +73,13 @@
 #
 # What to do with it:
 #   -SaveAs, -SaveAs86, -SaveAsArm    save a single file under this name (default: name from the link)
+#   -Hash, -Hash86, -HashArm          the SHA256 the download must have, or it isn't used: MajorGeeks' copy is tried
+#                                     instead (when there's a -MajorGeeks page), and it must have the same SHA256, or
+#                                     the update fails. For files that never change, eg. an app's final version
+#                                     kept by the Internet Archive (web.archive.org) after its maker removed it,
+#                                     checked against the maker's own published hashes
 #   -Extract                          unzip it (.zip, .7z or .rar)
-#     -Sfx                            with -Extract: the download is a self-extracting 7-Zip .exe (eg. Kdenlive's
+#     -Sfx                            with -Extract: the download is a self-extracting 7-Zip (or RAR / zip) .exe (eg. Kdenlive's
 #                                     standalone build), unpacked like a .7z instead of being run
 #   -Paf                              a PortableApps.com installer (.paf.exe): unpack the ready-to-run app
 #                                     straight into the build folder (eg. x86_x64\7-ZipPortable.exe + App\)
@@ -108,11 +113,14 @@
 #   -Password <text>                  password for a protected .zip (extracted with 7-Zip's 7za.exe)
 #   -UserAgent <text>                 send this instead of a browser user agent (eg. "curl" for SourceForge)
 #   -Inner, -Inner86, -InnerArm       take this folder from inside the archive instead of all of it
-#   -VersionFrom <file>               read the version from this file instead of the link
+#   -VersionFrom <file>               read the version from this file instead of the link (it can have a * for a
+#                                     folder named after the version, eg. "x64\App_*\App.exe")
 #       [-VersionMatch <regex>]       ... from the file's text, the regex's first group (eg. a site's script that
 #                                     says version="V2.1": -VersionMatch 'version="V([\d.]+)"'), not an exe's version
 #   -VersionFromUrl                   read the version from the download link before the exe (for installers
 #                                     whose exe carries the installer's version, eg. Firefox)
+#   -ProductVersion                   read a downloaded exe's product version instead of its file version (for
+#                                     setups whose file version is always the same, eg. DefenderUI's 1.00)
 #
 # Exit codes: 0 = updated or already up to date, 1 = failed, 2 = needs a manual update,
 #             3 = updated, but Windows Defender blocked some files
@@ -126,12 +134,12 @@ param(
     [string]$GitHub, [string]$Asset, [string]$Asset86, [string]$AssetArm,
     [string]$Winget, [string]$WingetType, [string]$WingetScope,
     [switch]$Manual, [switch]$NoUpdates, [string]$Note, [string]$Action, [string]$ActionText,
-    [string]$SaveAs, [string]$SaveAs86, [string]$SaveAsArm,
+    [string]$SaveAs, [string]$SaveAs86, [string]$SaveAsArm, [string]$Hash, [string]$Hash86, [string]$HashArm,
     [switch]$Extract, [switch]$Sfx, [switch]$Paf, [string]$Into, [string]$Into86, [string]$IntoArm,
     [switch]$Flatten, [switch]$Clean, [string]$Keep, [string]$DataFolder,
     [string]$Referer, [switch]$Cookies, [string]$Password, [string]$UserAgent, [string]$ExtraAsset,
     [string]$Inner, [string]$Inner86, [string]$InnerArm,
-    [string]$VersionFrom, [string]$VersionMatch, [switch]$VersionFromUrl,
+    [string]$VersionFrom, [string]$VersionMatch, [switch]$VersionFromUrl, [switch]$ProductVersion,
     [string]$Site,
     [string]$MoveFrom,
     [switch]$CheckOnly,
@@ -377,6 +385,14 @@ function Get-MirrorFor([string]$folder) {
     if ($folder -eq $Into) { return $script:mirrors.main }
     if ($folder -eq $Into86) { return $script:mirrors.x86 }
     if ($folder -eq $IntoArm) { return $script:mirrors.arm }
+    return $null
+}
+
+# the SHA256 the download for this job's build folder must have (-Hash, -Hash86, -HashArm), if one was given
+function Get-PinnedHash($job) {
+    if ($job.IsExtra -or $job.IsSite) { return $null }
+    $pin = if ($job.Into -eq $Into) { $Hash } elseif ($job.Into -eq $Into86) { $Hash86 } elseif ($job.Into -eq $IntoArm) { $HashArm }
+    if ($pin) { return ($pin -replace '\s', '').ToUpper() }
     return $null
 }
 
@@ -1028,7 +1044,9 @@ function Expand-ToStaging([string]$archive, [string]$kind, [string]$staging, [st
     }
     elseif ($kind -eq '7z') {
         $sevenZip = Get-Tool '7zr.exe' 'https://www.7-zip.org/a/7zr.exe'
-        & $sevenZip x $archive "-o$staging" -y | Out-Null
+        # (its errors aren't shown: when it can't open the file, eg. a -Sfx download that's a RAR or zip
+        # self-extractor, the full 7-Zip below unpacks it)
+        & cmd.exe /d /c "`"$sevenZip`" x `"$archive`" `"-o$staging`" -y >nul 2>nul"
         if ($LASTEXITCODE -ne 0) {
             # 7zr.exe only knows the basic 7z methods; the full 7-Zip unpacks the rest (eg. Bulk Crap Uninstaller's)
             if (Test-Path -LiteralPath $staging) { Remove-Item -LiteralPath $staging -Recurse -Force }
@@ -1110,9 +1128,19 @@ function Get-MsiVersion([string]$path) {
     catch { return $null }
 }
 
+# the -VersionFrom file: as given, or the first match when it has a * (eg. a folder named after the version)
+function Resolve-VersionFile {
+    $file = Join-Path $AppDir $VersionFrom
+    if (-not (Test-Path -LiteralPath $file) -and $VersionFrom -match '\*') {
+        $hit = Get-Item -Path $file -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($hit) { $file = $hit.FullName }
+    }
+    return $file
+}
+
 function Get-Version([object[]]$jobs) {
     if ($VersionFrom -and $VersionMatch) {
-        $file = Join-Path $AppDir $VersionFrom
+        $file = Resolve-VersionFile
         if (Test-Path -LiteralPath $file) {
             $m = [regex]::Match([IO.File]::ReadAllText($file), $VersionMatch)
             if ($m.Success -and $m.Groups[1].Value) { return $m.Groups[1].Value }
@@ -1120,7 +1148,7 @@ function Get-Version([object[]]$jobs) {
         Say "WARNING: no version matching '$VersionMatch' in $VersionFrom"
     }
     elseif ($VersionFrom) {
-        $file = Join-Path $AppDir $VersionFrom
+        $file = Resolve-VersionFile
         if (Test-Path -LiteralPath $file) {
             $v = (Get-Item -LiteralPath $file).VersionInfo.FileVersionRaw
             if ($v -and $v.ToString() -ne '0.0.0.0') { return $v.ToString() }
@@ -1148,7 +1176,12 @@ function Get-Version([object[]]$jobs) {
             if ($v) { return $v }
         }
         if (-not ($Extract -or $Paf) -and $job.Target -like '*.exe') {
-            $v = (Get-Item -LiteralPath $job.Target).VersionInfo.FileVersionRaw
+            $info = (Get-Item -LiteralPath $job.Target).VersionInfo
+            if ($ProductVersion) {
+                $m = [regex]::Match("$($info.ProductVersion)", '\d+(?:\.\d+)+')
+                if ($m.Success) { return $m.Value }
+            }
+            $v = $info.FileVersionRaw
             if ($v -and $v.ToString() -ne '0.0.0.0') { return $v.ToString() }
         }
     }
@@ -1241,9 +1274,13 @@ function Write-Parity {
     # (only the packet naming the program that made it differs), which any PAR2 tool can verify and repair with
     # (cached as par2-turbo.exe, so PCs that cached the original par2cmdline's par2.exe get this one)
     $par2 = Get-Tool 'par2-turbo.exe' 'https://github.com/animetosho/par2cmdline-turbo/releases/download/v1.5.0/par2cmdline-turbo-1.5.0-win-x64.zip' -Zipped -InZip 'par2.exe'
+    # (5000 blocks, or 4 per file for a download with more than 1250 files: PAR2 needs at least one block per file,
+    # and with few spare blocks they get so big that the parity data outgrows the app; it allows up to 32768)
+    $fileCount = @(Get-ChildItem -LiteralPath $AppDir -Recurse -File -Force).Count
+    $blocks = [Math]::Min(32768, [Math]::Max(5000, $fileCount * 4))
     Push-Location -LiteralPath $AppDir
     try {
-        & $par2 c -q -b5000 -r5 -n1 -R parity.par2 * | Out-Null
+        & $par2 c -q "-b$blocks" -r5 -n1 -R parity.par2 * | Out-Null
         if ($LASTEXITCODE -ne 0) { Say "WARNING: par2 couldn't create parity data (exit code $LASTEXITCODE)" }
     }
     finally { Pop-Location }
@@ -1635,6 +1672,11 @@ try {
             try {
                 $finalUrl = Get-Download $job.Link $temp
                 $kind = Test-Download $temp $job.Link -AllowPlain:([bool]$job.IsExtra)
+                $pin = Get-PinnedHash $job
+                if ($pin) {
+                    $got = Get-Sha256 $temp
+                    if ($got -ne $pin) { $kind = $null; throw "it isn't the expected file: its SHA256 is $got, not $pin" }
+                }
             }
             catch {
                 if (-not $job.Mirror) { throw }
@@ -1657,6 +1699,12 @@ try {
                 $stamp = (Get-Item -LiteralPath $temp).LastWriteTime
                 if ($stamp -lt (Get-Date).AddMinutes(-10)) { $stamp } else { $null }
             )
+        }
+        $pin = Get-PinnedHash $job
+        if ($pin) {
+            # (from the original or MajorGeeks: either way it must be the exact file expected)
+            if ($job.Hash -ne $pin) { throw "$(if ($job.Into) { "$($job.Into): " })the download isn't the expected file: its SHA256 is $($job.Hash), not $pin" }
+            Say "SHA256 checked: it's the expected file"
         }
         if ($job.Sha256 -and $job.Hash -ne $job.Sha256) {
             # the vendor has usually put out a newer build at the same link since winget listed it, so it's kept,
