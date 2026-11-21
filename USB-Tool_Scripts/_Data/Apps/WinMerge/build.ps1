@@ -10,7 +10,7 @@ trap { Stop-Build $_ }
 # DownloadDeps.cmd (Merge7z, Frhed, WinIMerge, WinWebDiff, darkmodelib, tree-sitter grammars, the shell extension,
 # jq, tidy, md4c, patch). Not built: the help file (needs HTML Help Workshop) and the installers
 # x86 uses the project's v141_xp toolset when Visual Studio has it (Microsoft.VisualStudio.Component.WinXP), otherwise
-# v143; ARM64 is built only when Visual Studio has its ARM64 C++ tools and ARM64 MFC
+# v143 (targeting Windows 7 instead of XP); ARM64 is built only when Visual Studio has its ARM64 C++ tools and ARM64 MFC
 # Needs: Visual Studio 2022 with the C++ tools and MFC (Microsoft.VisualStudio.Component.VC.ATLMFC)
 # Usage: build.cmd [-Version <x.y.z>] [-KeepWork] [-WorkDir <folder>]
 
@@ -47,6 +47,9 @@ if ((Split-Path -Leaf $sevenZip) -ne '7z.exe') {
 else { Add-ToPath (Split-Path -Parent $sevenZip) }
 
 Push-Location -LiteralPath $src
+# (the project's .cmd scripts call each other by name from the current folder, which cmd skips when the
+# NoDefaultCurrentDirectoryInExePath variable is set, as some tools' shells do)
+Remove-Item -LiteralPath Env:NoDefaultCurrentDirectoryInExePath -ErrorAction SilentlyContinue
 try {
     Say 'Getting the prebuilt parts (DownloadDeps.cmd)...'
     & cmd.exe /d /c 'DownloadDeps.cmd < NUL'
@@ -61,6 +64,15 @@ try {
     [IO.File]::WriteAllLines((Join-Path $src 'BuildArcZip.cmd'), $arc)
 
     $xp = Test-VSComponent 'Microsoft.VisualStudio.Component.WinXP'
+    if (-not $xp) {
+        # (the x86 projects target Windows XP (WINVER=0x0501), for v141_xp's old SDK: with v143 and today's SDK,
+        # Src\Common\IatHook.h's own IMAGE_DELAYLOAD_DESCRIPTOR clashes with the SDK's, so they target Windows 7, like
+        # x64 and ARM64 do; v143's programs don't run on XP anyway)
+        Get-ChildItem -LiteralPath $src -Recurse -Filter '*.vcxproj' | Where-Object { $_.FullName -notlike "$src\Externals\*" } | ForEach-Object {
+            $text = [IO.File]::ReadAllText($_.FullName)
+            if ($text.Contains('WINVER=0x0501;')) { [IO.File]::WriteAllText($_.FullName, $text.Replace('WINVER=0x0501;', 'WINVER=0x0601;')) }
+        }
+    }
     foreach ($arch in @(@{ Platform = 'x64'; Folder = 'x64'; Zip = 'x64-' }, @{ Platform = 'x86'; Folder = 'x86'; Zip = '' }, @{ Platform = 'ARM64'; Folder = 'ARM64'; Zip = 'ARM64-'; Needs = @('Microsoft.VisualStudio.Component.VC.Tools.ARM64', 'Microsoft.VisualStudio.Component.VC.ATL.ARM64', 'Microsoft.VisualStudio.Component.VC.MFC.ARM64') })) {
         if ($arch.Needs -and -not (Test-VSComponent $arch.Needs)) { Say "Skipping $($arch.Folder): Visual Studio 2022 doesn't have $($arch.Needs -join ', ')"; continue }
         $toolset = @(); if ($arch.Platform -eq 'x86' -and -not $xp) { $toolset = @('/p:PlatformToolset=v143') }

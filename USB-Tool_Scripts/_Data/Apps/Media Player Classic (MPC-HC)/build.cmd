@@ -3,7 +3,7 @@
 title Build MPC-HC
 
 rem Builds MPC-HC from source into this app's Built folder (next to the official download, which update.cmd
-rem keeps in Installer / Portable, and which run.cmd starts). Needs: Visual Studio 2022 with C++, ATL and MFC; NASM, Python and 7-Zip, downloaded when missing.
+rem keeps in Installer / Portable, and which run.cmd starts). Needs: Visual Studio 2022 with C++, ATL and MFC; NASM, Python, 7-Zip and (for some releases) MSYS2 with MinGW-w64 GCC, downloaded when missing.
 rem See build.ps1 for the details and options, eg. build.cmd -Version x.y.z, -KeepWork or -WorkDir D:\Build
 
 rem clear PSModulePath so Windows PowerShell loads its own modules (it breaks if started from PowerShell 7)

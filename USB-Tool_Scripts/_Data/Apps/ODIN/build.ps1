@@ -9,9 +9,9 @@ trap { Stop-Build $_ }
 # today's Visual Studio can't open .vcproj files any more, so this makes a CMake project with the same sources,
 # settings and libraries as those .vcproj files (zlib, libbz2, ODIN, ODINC: Unicode, static C runtime, version.lib and
 # shlwapi.lib), built with Visual Studio 2022's ATL and WTL 10 (the "wtl" NuGet package, WTL's own release).
-# Differences: zlib without its 2008-era assembly files (the plain C code, same results); the Windows version macros
-# in stdafx.h are raised to Windows 7 (today's ATL / WTL refuse the old Windows 2000 values); no ODIN.chm help file
-# (it needs the HTML Help Workshop, which only comes as an installer).
+# Differences: zlib without its 2008-era assembly files (the plain C code, same results); a few source changes for
+# today's ATL / WTL (Windows 7's version macros, no ATL 3.0 workarounds, ATL's CString, sync.h's CHandle renamed; see
+# below); no ODIN.chm help file (it needs the HTML Help Workshop, which only comes as an installer).
 # Needs: Visual Studio 2022 with C++ and ATL (Microsoft.VisualStudio.Component.VC.ATL), CMake
 # Usage: build.cmd [-Version <x.yy>] [-KeepWork] [-WorkDir <folder>]
 
@@ -37,11 +37,24 @@ Get-File 'https://www.nuget.org/api/v2/package/wtl' $wtlPkg
 [IO.Compression.ZipFile]::ExtractToDirectory($wtlPkg, (Join-Path $work 'wtl'))
 $wtlInclude = (Join-Path $work 'wtl\lib\native\include') -replace '\\', '/'
 
-# (today's ATL and WTL need at least Windows XP's version macros; Windows 7's are used)
+# (the source is for Visual C++ 2008 with the Platform SDK's ATL 3.0 and WTL 8.0; for today's ATL and WTL 10:)
+# - stdafx.h: Windows 7's version macros (today's ATL / WTL refuse the old Windows 2000 ones), the rich edit version
+#   WTL 10 needs, and no _WTL_SUPPORT_SDK_ATL3 (its ATL 3.0 workarounds clash with today's ATL); WTL 10 has no
+#   CString of its own, so WTL::CString is ATL's (atlstr.h)
 $stdafx = Join-Path $src 'src\ODIN\stdafx.h'
 $text = [IO.File]::ReadAllText($stdafx)
 $text = $text -replace '#define WINVER\s+0x0500', '#define WINVER 0x0601' -replace '#define _WIN32_WINNT\s+0x0502', '#define _WIN32_WINNT 0x0601' -replace '#define _WIN32_IE\s+0x0502', '#define _WIN32_IE 0x0800'
+$text = $text -replace '#define _RICHEDIT_VER\s+0x0200', '#define _RICHEDIT_VER 0x0300'
+$text = $text -replace '(?m)^#define _WTL_SUPPORT_SDK_ATL3', '// #define _WTL_SUPPORT_SDK_ATL3'
+$text = $text -replace '(?m)^#include <atlbase.h>', "#include <atlbase.h>`r`n#include <atlstr.h>"
+$text = $text -replace '(?m)^#include <atlapp.h>', "#include <atlapp.h>`r`nnamespace WTL { using ATL::CString; }"
 [IO.File]::WriteAllText($stdafx, $text)
+# - sync.h's own CHandle (ATL 3.0 had none) is ambiguous with today's ATL::CHandle, so it's renamed
+$sync = Join-Path $src 'src\ODIN\sync.h'
+[IO.File]::WriteAllText($sync, ([IO.File]::ReadAllText($sync) -replace '\bCHandle\b', 'CSyncHandle'))
+# - ODIN.cpp includes <xdebug>, an internal header of the old C++ library that's gone
+$odinCpp = Join-Path $src 'src\ODIN\ODIN.cpp'
+[IO.File]::WriteAllText($odinCpp, ([IO.File]::ReadAllText($odinCpp) -replace '(?m)^#include <xdebug>\r?\n', ''))
 
 # the CMake project, from the .vcproj files' sources and Release settings (the source list is read from each .vcproj)
 function Get-VcprojSources([string]$vcproj, [string]$pattern) {

@@ -13,52 +13,14 @@ trap { Stop-Build $_ }
 # package.json's packageManager names): portable copies are downloaded when needed. Building uses up to 8 GB of
 # memory (gulp's --max-old-space-size) and about 20 GB of disk.
 # Usage: build.cmd [-Version <x.y.z>] [-KeepWork] [-WorkDir <folder>]
-# ---------------------------------------------------------------------------------------------
-# Node.js helper (the same in balenaEtcher's, GitHub Desktop's, Bitwarden's and VS Code's build.ps1)
-# ---------------------------------------------------------------------------------------------
-
-# the Node.js version a project pins (eg. '24' for the newest 24.x, or '24.22.1'): this PC's when it's that one,
-# otherwise a portable copy from nodejs.org in the tools folder (in node-versions, apart from Use-Tool node's).
-# Also keeps the npm / node-gyp / Electron download caches in the tools folder, not in the PC's user profile.
-function Use-NodeVersion([string]$Wanted) {
-    $Wanted = $Wanted.Trim() -replace '^v'
-    $matchesWanted = { param($v) $v = $v -replace '^v'; $v -eq $Wanted -or $v -like "$Wanted.*" }
-    $pc = Get-Command node.exe -ErrorAction SilentlyContinue | Select-Object -First 1
-    $have = if ($pc) { (& $pc.Source --version 2>$null | Out-String).Trim() }
-    if (-not ($have -and (& $matchesWanted $have))) {
-        $base = Join-Path $script:toolsDir 'node-versions'
-        # (ForEach-Object unrolls the JSON array, which Windows PowerShell 5.1 passes on as one object)
-        $index = @(Get-Text 'https://nodejs.org/dist/index.json' | ConvertFrom-Json) | ForEach-Object { $_ }
-        $release = $index | Where-Object { & $matchesWanted $_.version } | Select-Object -First 1
-        if (-not $release) { throw "Couldn't find Node.js $Wanted on nodejs.org" }
-        $dir = Join-Path $base "node-$($release.version)-win-x64"
-        if (-not (Test-Path -LiteralPath "$dir\node.exe")) {
-            Say "Getting a portable Node.js ($($release.version))..."
-            $zip = Join-Path $base "node-$($release.version)-win-x64.zip"
-            Get-File "https://nodejs.org/dist/$($release.version)/node-$($release.version)-win-x64.zip" $zip
-            [IO.Compression.ZipFile]::ExtractToDirectory($zip, $base); Remove-Item -LiteralPath $zip
-        }
-        Add-ToPath $dir
-        # (npm's global folder in it too, eg. for corepack's yarn)
-        $env:npm_config_prefix = $dir
-    }
-    Say "Using Node.js $((& node --version | Out-String).Trim())"
-    $env:npm_config_cache = Join-Path $script:toolsDir 'npm-cache'
-    $env:npm_config_devdir = Join-Path $script:toolsDir 'node-gyp'
-    $env:electron_config_cache = Join-Path $script:toolsDir 'electron-cache'
-    $env:npm_config_update_notifier = 'false'
-    $env:npm_config_fund = 'false'
-    $env:npm_config_audit = 'false'
-}
-
-# ---------------------------------------------------------------------------------------------
-# Code - OSS
-# ---------------------------------------------------------------------------------------------
 
 $repo = 'microsoft/vscode'
 $tag = if ($Version) { $Version -replace '^v' } else { Get-LatestGitHubTag $repo }
-$work = Start-Build -Name 'Code-OSS' -NeedGB 20
-$src = Join-Path $work 'vscode'
+# (short folder names: a native module's build under remote\node_modules\.pnpm otherwise goes past cl's 260-character
+# limit for paths, eg. its .nativecodeanalysis.xml)
+$work = Start-Build -Name 'VSC' -NeedGB 20
+$script:appName = 'Code-OSS'
+$src = Join-Path $work 'src'
 # (git long paths: some of its test files' names are very long)
 if (-not $env:GIT_CONFIG_COUNT) { $env:GIT_CONFIG_COUNT = '1'; $env:GIT_CONFIG_KEY_0 = 'core.longpaths'; $env:GIT_CONFIG_VALUE_0 = 'true' }
 Get-GitSource "https://github.com/$repo.git" $tag $src

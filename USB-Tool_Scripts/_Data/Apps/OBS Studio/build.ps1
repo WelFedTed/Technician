@@ -5,13 +5,12 @@ trap { Stop-Build $_ }
 # Builds OBS Studio from source (github.com/obsproject/obs-studio, with its submodules: obs-browser, obs-websocket,
 # ...) into Built\x64 (and Built\ARM64), the way its CI's .github/scripts/Build-Windows.ps1 does: "cmake --preset
 # windows-x64" (which downloads the prebuilt obs-deps, Qt 6 and CEF its buildspec names), "cmake --build" with
-# RelWithDebInfo, then "cmake --install" - the same bin\64bit, data and obs-plugins folders as the portable zip.
+# RelWithDebInfo, then "cmake --install" - the bin\64bit, data and (from OBS 33) core plugin folders of the portable zip.
 # Differences: Visual Studio 2022's generator (the preset asks for Visual Studio 2026, whose Build Tools here have
 # no C++); not signed; no .pdb files. ARM64 is built only when Visual Studio has its ARM64 C++ tools
-# (Microsoft.VisualStudio.Component.VC.Tools.ARM64).
-# Needs: Visual Studio 2022 with C++, ATL (Microsoft.VisualStudio.Component.VC.ATL) and a Windows 10/11 SDK (10.0.20348 or\r
-# newer), CMake, Git; the build downloads
-# OBS's own prebuilt dependencies
+# and ATL (Microsoft.VisualStudio.Component.VC.Tools.ARM64, Microsoft.VisualStudio.Component.VC.ATL.ARM64).
+# Needs: Visual Studio 2022 with C++, ATL (Microsoft.VisualStudio.Component.VC.ATL) and a Windows 10/11 SDK (10.0.20348 or
+# newer), CMake, Git; the build downloads OBS's own prebuilt dependencies
 # Usage: build.cmd [-Version <x.y.z>] [-KeepWork] [-WorkDir <folder>]
 
 $repo = 'obsproject/obs-studio'
@@ -37,9 +36,10 @@ function Test-VSComponent([string[]]$Components) {
     return [bool](& $vswhere -version '[17.0,18.0)' -products * -requires $Components -property installationPath)
 }
 
+# (the ARM64 build installs into bin\64bit too; it needs ATL for ARM64, for win-dshow)
 foreach ($arch in @(
         @{ Preset = 'x64'; VS = 'x64'; Folder = 'x64'; Bits = '64bit' },
-        @{ Preset = 'arm64'; VS = 'arm64'; Folder = 'ARM64'; Bits = 'arm64'; Needs = 'Microsoft.VisualStudio.Component.VC.Tools.ARM64' })) {
+        @{ Preset = 'arm64'; VS = 'arm64'; Folder = 'ARM64'; Bits = '64bit'; Needs = @('Microsoft.VisualStudio.Component.VC.Tools.ARM64', 'Microsoft.VisualStudio.Component.VC.ATL.ARM64') })) {
     if ($arch.Needs -and -not (Test-VSComponent $arch.Needs)) { Say "Skipping $($arch.Folder): Visual Studio 2022 doesn't have $($arch.Needs)"; continue }
     Reset-Env
     # (ATL: win-dshow's virtual camera module uses atlcomcli.h)

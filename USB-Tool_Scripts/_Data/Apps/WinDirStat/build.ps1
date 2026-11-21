@@ -17,6 +17,9 @@ $ver = $tag -replace '^release/v'
 $work = Start-Build -Name 'WinDirStat' -NeedGB 2
 $src = Join-Path $work 'src'
 Get-GitSource "https://github.com/$repo.git" $tag $src
+# (the exe's build number is the Git commit count, which a shallow clone gives as 1: the history's commits are fetched,
+# without their files)
+Invoke-Checked (Get-Git) -C $src fetch -q --unshallow --filter=blob:none origin
 
 function Test-VSComponent([string[]]$Components, [string]$Range = $vsRange) {
     $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'

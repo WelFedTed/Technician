@@ -22,6 +22,7 @@
 #   Use-Msys2 -Packages ... ; Invoke-Msys2 -Env mingw64|mingw32|ucrt64|msys -Command '...' [-Dir <folder>]
 #   Use-Tool go|node|dotnet|ninja|jdk|python|rust [-Version ...]   adds it to the PATH, getting a portable copy
 #                                                  into the shared tools folder when this PC doesn't have it
+#   Use-NodeVersion <24 | 24.22.1>               the Node.js version a project pins (Use-Tool node takes any newer one)
 #   Invoke-Checked <exe> <args...>               runs it and fails the build on a non-zero exit code
 #   Add-NuGetOrg <folder>                        a NuGet.Config there with nuget.org (some PCs' own config has no sources)
 #   Publish-Build -From <folder> -Arch x64 -Version <v> [-Files <names>] [-Note <text>]   copies the result into Built\<arch>
@@ -113,6 +114,9 @@ function Start-Build([string]$Name, [int]$NeedGB = 2) {
     if ($dir.Length -gt 100) { Say "Note: $dir is a long path; some build tools fail on paths over 260 characters, so a shorter -WorkDir may be needed" }
     # (MSBuild's worker processes would otherwise stay running and keep files in the work folder locked)
     $env:MSBUILDDISABLENODEREUSE = '1'
+    # (projects' batch files run each other from the current folder by bare name, which cmd skips when this is set,
+    # as some terminals do)
+    Remove-Item -LiteralPath Env:NoDefaultCurrentDirectoryInExePath -ErrorAction SilentlyContinue
     $script:Work = $dir
     $script:buildStarted = Get-Date
     Say "Building $Name in $dir"
@@ -388,6 +392,40 @@ function Use-Tool([string]$Name, [string]$Version) {
         }
         default { throw "Use-Tool doesn't know '$Name'" }
     }
+}
+
+# the Node.js version a project pins (eg. '24' for the newest 24.x, or '24.22.1'): this PC's when it's that one,
+# otherwise a portable copy from nodejs.org in the tools folder (in node-versions, apart from Use-Tool node's).
+# Also keeps the npm / node-gyp / Electron download caches in the tools folder, not in the PC's user profile.
+function Use-NodeVersion([string]$Wanted) {
+    $Wanted = $Wanted.Trim() -replace '^v'
+    $matchesWanted = { param($v) $v = $v -replace '^v'; $v -eq $Wanted -or $v -like "$Wanted.*" }
+    $pc = Get-Command node.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+    $have = if ($pc) { (& $pc.Source --version 2>$null | Out-String).Trim() }
+    if (-not ($have -and (& $matchesWanted $have))) {
+        $base = Join-Path $script:toolsDir 'node-versions'
+        # (ForEach-Object unrolls the JSON array, which Windows PowerShell 5.1 passes on as one object)
+        $index = @(Get-Text 'https://nodejs.org/dist/index.json' | ConvertFrom-Json) | ForEach-Object { $_ }
+        $release = $index | Where-Object { & $matchesWanted $_.version } | Select-Object -First 1
+        if (-not $release) { throw "Couldn't find Node.js $Wanted on nodejs.org" }
+        $dir = Join-Path $base "node-$($release.version)-win-x64"
+        if (-not (Test-Path -LiteralPath "$dir\node.exe")) {
+            Say "Getting a portable Node.js ($($release.version))..."
+            $zip = Join-Path $base "node-$($release.version)-win-x64.zip"
+            Get-File "https://nodejs.org/dist/$($release.version)/node-$($release.version)-win-x64.zip" $zip
+            [IO.Compression.ZipFile]::ExtractToDirectory($zip, $base); Remove-Item -LiteralPath $zip
+        }
+        Add-ToPath $dir
+        # (npm's global folder in it too, eg. for corepack's yarn)
+        $env:npm_config_prefix = $dir
+    }
+    Say "Using Node.js $((& node --version | Out-String).Trim())"
+    $env:npm_config_cache = Join-Path $script:toolsDir 'npm-cache'
+    $env:npm_config_devdir = Join-Path $script:toolsDir 'node-gyp'
+    $env:electron_config_cache = Join-Path $script:toolsDir 'electron-cache'
+    $env:npm_config_update_notifier = 'false'
+    $env:npm_config_fund = 'false'
+    $env:npm_config_audit = 'false'
 }
 
 # ---------------------------------------------------------------------------------------------

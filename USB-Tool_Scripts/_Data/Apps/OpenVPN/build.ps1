@@ -38,6 +38,11 @@ $env:VCPKG_DOWNLOADS = Join-Path $script:toolsDir 'vcpkg-downloads'
 $env:VCPKG_DEFAULT_BINARY_CACHE = Join-Path $script:toolsDir 'vcpkg-cache'
 New-Item -ItemType Directory -Path $env:VCPKG_DOWNLOADS, $env:VCPKG_DEFAULT_BINARY_CACHE -Force | Out-Null
 Invoke-Checked (Join-Path $vcpkg 'bootstrap-vcpkg.bat') -disableMetrics
+# (openvpn's triplets build each library in Debug too, which only its Debug presets use: OpenSSL alone takes about an
+# hour for each architecture that way, so only Release is built)
+Get-ChildItem -LiteralPath (Join-Path $src 'src\openvpn\contrib\vcpkg-triplets') -Filter '*-windows-ovpn.cmake' | ForEach-Object {
+    [IO.File]::AppendAllText($_.FullName, "`nset(VCPKG_BUILD_TYPE release)`n")
+}
 
 # rst2html for openvpn's man page (docutils, in a venv in the tools folder)
 $docVenv = Join-Path $script:toolsDir 'docutils-venv'
@@ -58,6 +63,14 @@ if (-not (Test-Path -LiteralPath (Join-Path $wix 'bin\candle.exe'))) {
     [IO.Compression.ZipFile]::ExtractToDirectory($zip, (Join-Path $wix 'bin')); Remove-Item -LiteralPath $zip
 }
 $env:WIX = "$wix\"
+# (build.wsf unzips Easy-RSA with unzip.exe, which the build workflow's runner has from Git's tools; Windows' own
+# tar.exe unpacks zips too, so Builder.js runs that instead)
+$builderJs = Join-Path $src 'windows-msi\script\Builder.js'
+$jsText = [IO.File]::ReadAllText($builderJs)
+$unzipCall = '"unzip\.exe " \+\s*builder\.unzipFlags\.join\(" "\) \+\s*" -o" \+\s*" -d \\"" \+ _CMD\(this\.outDir\) \+ "\\"" \+\s*" \\"" \+ _CMD\(this\.inNames\[0\]\) \+ "\\""'
+if ($jsText -notmatch $unzipCall) { throw "Couldn't find the unzip.exe command in windows-msi\script\Builder.js" }
+$jsText = [regex]::Replace($jsText, $unzipCall, '"\"%SystemRoot%\\System32\\tar.exe\" -xf \"" + _CMD(this.inNames[0]) + "\" -C \"" + _CMD(this.outDir) + "\""')
+[IO.File]::WriteAllText($builderJs, $jsText)
 
 $env:PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer;$env:PATH"
 $env:MSBUILDDISABLENODEREUSE = '1'

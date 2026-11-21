@@ -49,6 +49,15 @@ function Use-Nasm {
 Use-Nasm
 Use-Tool python -Version '3.9'
 Use-Tool rust
+# (Rust 1.100's standard library uses WaitOnAddress from synchronization.lib, which deps\crates\crates.gyp doesn't
+# link yet (it names ntdll and userenv): added, when it's missing; older Rust versions don't mind it)
+$cratesGyp = Join-Path $src 'deps\crates\crates.gyp'
+if (Test-Path -LiteralPath $cratesGyp) {
+    $gyp = [IO.File]::ReadAllText($cratesGyp)
+    if ($gyp -match "'-luserenv'" -and $gyp -notmatch "-lsynchronization") {
+        [IO.File]::WriteAllText($cratesGyp, $gyp.Replace("'-luserenv'", "'-luserenv',`n              '-lsynchronization'"))
+    }
+}
 # (vcbuild's "package" step runs "7z"; a 7z.cmd that runs this PC's 7-Zip or the tools folder's 7za)
 $bin = Join-Path $work 'bin'
 New-Item -ItemType Directory -Path $bin -Force | Out-Null
@@ -57,6 +66,9 @@ Add-ToPath $bin
 
 $env:PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer;$env:PATH"
 $env:MSBUILDDISABLENODEREUSE = '1'
+# (vcbuild.bat runs the batch files in tools\msvs from the current folder, which cmd skips when the
+# NoDefaultCurrentDirectoryInExePath setting is on, as in some terminals and agents)
+Remove-Item Env:NoDefaultCurrentDirectoryInExePath -ErrorAction SilentlyContinue
 $clang = @('Microsoft.VisualStudio.Component.VC.Tools.x86.x64', 'Microsoft.VisualStudio.Component.VC.Llvm.Clang', 'Microsoft.VisualStudio.Component.VC.Llvm.ClangToolset')
 $cleanEnv = @{}; Get-ChildItem Env: | ForEach-Object { $cleanEnv[$_.Name] = $_.Value }
 function Reset-Env { Get-ChildItem Env: | Where-Object { -not $cleanEnv.ContainsKey($_.Name) } | ForEach-Object { Remove-Item -LiteralPath "Env:$($_.Name)" }; foreach ($k in $cleanEnv.Keys) { Set-Item -LiteralPath "Env:$k" -Value $cleanEnv[$k] } }
@@ -70,6 +82,8 @@ foreach ($arch in @(
         @{ Node = 'arm64'; Folder = 'ARM64'; Needs = 'Microsoft.VisualStudio.Component.VC.Tools.ARM64' })) {
     if ($arch.Needs -and -not (Test-VSComponent $arch.Needs)) { Say "Skipping $($arch.Folder): Visual Studio doesn't have $($arch.Needs)"; continue }
     Reset-Env
+    # (deps\crates\cargo_build.py builds Temporal for the MSBuild platform's Rust target, so ARM64 needs that target)
+    if ($arch.Node -eq 'arm64' -and (Test-Path -LiteralPath (Join-Path $src 'deps\crates'))) { Invoke-Checked rustup target add aarch64-pc-windows-msvc }
     # (vcbuild finds Visual Studio itself - 2026 first, then 2022 17.6 or newer - and needs its ClangCL parts; this
     # checks for them first, so a missing part is named before the build starts)
     Use-VisualStudio -Arch 'x64' -Version '[17.6,19.0)' -Components ($clang + @($arch.Needs | Where-Object { $_ })) | Out-Null

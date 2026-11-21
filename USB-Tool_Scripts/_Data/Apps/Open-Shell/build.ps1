@@ -31,7 +31,9 @@ $env:CS_VERSION = $ver; $env:CS_VERSION_ORIG = $ver
 $sln = Join-Path $src 'Src\OpenShell.sln'
 # (NuGet packages from nuget.org, with NuGet's cache in the tools folder instead of the user's profile)
 $env:NUGET_PACKAGES = Join-Path $script:toolsDir 'nuget\packages'
-Invoke-Checked msbuild $sln /m:2 /t:Restore -p:RestorePackagesConfig=true -p:RestoreSources=https://api.nuget.org/v3/index.json /nologo /v:minimal
+# (a packages.config restore ignores RestoreSources, so nuget.org comes from a NuGet.Config above the source)
+Add-NuGetOrg $work
+Invoke-Checked msbuild $sln /m:2 /t:Restore /p:RestorePackagesConfig=true /nologo /v:minimal
 
 # (x64 and ARM64 first, then Win32, as BuildBinaries.bat does)
 $arm64 = Test-VSComponent @('Microsoft.VisualStudio.Component.VC.Tools.ARM64', 'Microsoft.VisualStudio.Component.VC.ATL.ARM64')
