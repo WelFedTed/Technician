@@ -9,9 +9,11 @@
 #                            trap { Stop-Build $_ }
 # and takes these options (passed on from build.cmd):
 #   -Version <x.y.z>   build this release instead of the latest
-#   -WorkDir <folder>  where the source and the build go (default %TEMP%\USB-Tool-Build\<app>, or _Data\Temp on the
-#                      USB when the PC's drive is too full)
-#   -KeepWork          keep the work folder afterwards (eg. to rebuild faster)
+#   -WorkDir <folder>  the folder to build in: the source and the build go in their own <folder>\<app> (default
+#                      %TEMP%\USB-Tool-Build\<app>, or _Data\Temp\Build-<app> on the USB when the PC's drive is too
+#                      full, with the portable tools in _Data\Temp\Build-_tools then). Only folders the build made
+#                      (with a USB-Tool-Build.txt in them) are ever removed.
+#   -KeepWork          keep the work folder afterwards (eg. to look at the build files; the next build starts afresh)
 #   -Yes               install missing Visual Studio parts without asking first
 # and uses these:
 #   Start-Build -Name <app> [-NeedGB <n>]        work folder, free space check; sets $Work
@@ -27,7 +29,8 @@
 #   Add-NuGetOrg <folder>                        a NuGet.Config there with nuget.org (some PCs' own config has no sources)
 #   Publish-Build -From <folder> -Arch x64 -Version <v> [-Files <names>] [-Note <text>]   copies the result into Built\<arch>
 #   Complete-Build                               removes the work folder (unless -KeepWork) and says where the build is
-# Portable toolchains are kept between builds in %TEMP%\USB-Tool-Build\_tools, so the next build is faster.
+# Portable toolchains are kept between builds in %TEMP%\USB-Tool-Build\_tools, so the next build is faster (MSYS2 in
+# %SystemDrive%\USB-Tool-Build\msys64 instead when that path has spaces or non-ASCII characters, which MSYS2 can't use).
 # Nothing is installed on the PC, except Visual Studio parts (which it asks about first, unless -Yes).
 #
 # Windows PowerShell gotchas when passing options to programs (found while writing the build scripts):
@@ -45,8 +48,19 @@ $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $script:curl = Join-Path $env:SystemRoot 'System32\curl.exe'
 $script:buildRoot = Join-Path $env:TEMP 'USB-Tool-Build'
-$script:toolsDir = Join-Path $script:buildRoot '_tools'
+# (in each work folder the build makes, so only those are ever removed)
+$script:workMarker = 'USB-Tool-Build.txt'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+# the tools folder, and MSYS2's folder in it; MSYS2 doesn't work in a path with spaces or non-ASCII characters (as
+# %TEMP% has for a user name like that; ~ is an 8.3 short name standing in for one), so it's in
+# %SystemDrive%\USB-Tool-Build then
+function Set-ToolsRoot([string]$dir) {
+    $script:toolsDir = $dir
+    $script:msysDir = Join-Path $dir 'msys64'
+    if ($script:msysDir -notmatch '^[A-Za-z]:\\[A-Za-z0-9_.\\-]+$') { $script:msysDir = Join-Path "$env:SystemDrive\" 'USB-Tool-Build\msys64' }
+}
+Set-ToolsRoot (Join-Path $script:buildRoot '_tools')
 
 function Say([string]$message) { Write-Host $message }
 function Fail([string]$message) { Say ''; Say "FAILED: $message"; exit 1 }
@@ -57,6 +71,7 @@ function Stop-Build($errorRecord) {
     Say ''
     Say "FAILED: $($errorRecord.Exception.Message)"
     if ($script:Work -and (Test-Path -LiteralPath $script:Work)) { Say "(the source and build files are in $($script:Work); build.cmd removes them next time)" }
+    Say "(the portable tools are kept in $($script:toolsDir) for the next builds; if one of them is broken, eg. after its download was cut off, delete its folder there)"
     exit 1
 }
 
@@ -90,27 +105,59 @@ function Add-NuGetOrg([string]$dir) {
     [IO.File]::WriteAllText((Join-Path $dir 'NuGet.Config'), "<?xml version=`"1.0`" encoding=`"utf-8`"?>`r`n<configuration>`r`n  <packageSources>`r`n    <add key=`"nuget.org`" value=`"https://api.nuget.org/v3/index.json`" protocolVersion=`"3`" />`r`n  </packageSources>`r`n</configuration>`r`n")
 }
 
-# the work folder: -WorkDir, %TEMP%\USB-Tool-Build\<app>, or _Data\Temp on the USB when the PC's drive is too full
+# removes a work folder, but only one the build made: with the marker file in it, or (-Ours) at one of the build's own
+# places, which earlier builds made without the marker; never a drive's root or the user profile (or a folder holding it)
+function Remove-WorkFolder([string]$dir, [switch]$Ours) {
+    if (-not $dir -or -not (Test-Path -LiteralPath $dir)) { return }
+    $full = [IO.Path]::GetFullPath($dir).TrimEnd('\')
+    $marker = Join-Path $full $script:workMarker
+    $userProfile = [IO.Path]::GetFullPath($env:USERPROFILE).TrimEnd('\')
+    if ($full.Length -le 3 -or "$userProfile\".StartsWith("$full\", [StringComparison]::OrdinalIgnoreCase) -or -not ($Ours -or (Test-Path -LiteralPath $marker))) {
+        throw "Not removing $full, as it isn't a work folder a build made"
+    }
+    Remove-Item -LiteralPath $full -Recurse -Force -ErrorAction SilentlyContinue
+    # (when something still has files open in it, it stays marked as the build's, for the next build to remove)
+    if (Test-Path -LiteralPath $full) { [IO.File]::WriteAllText($marker, "Made by a USB-Tool build.cmd; the next build removes it.`r`n") }
+}
+
+# the work folder: <-WorkDir>\<app>, %TEMP%\USB-Tool-Build\<app>, or _Data\Temp\Build-<app> on the USB when the PC's
+# drive is too full (the tools folder then moves to the USB too, as the toolchains need space as well)
 function Start-Build([string]$Name, [int]$NeedGB = 2) {
     $script:appName = $Name
     $script:appDir = Split-Path -Parent $MyInvocation.PSCommandPath
     if (-not $script:appDir) { $script:appDir = $PSScriptRoot }
-    $dir = $WorkDir
-    if (-not $dir) {
-        $dir = Join-Path $script:buildRoot ($Name -replace '[\\/:*?"<>|]', '_')
+    $folderName = $Name -replace '[\\/:*?"<>|]', '_'
+    # (_Data\Temp: up from the app's folder to _Data\Apps, for apps in a group folder too)
+    $apps = $script:appDir; while ($apps -and (Split-Path -Leaf $apps) -ne 'Apps') { $apps = Split-Path -Parent $apps }
+    $usbTemp = if ($apps) { Join-Path (Split-Path -Parent $apps) 'Temp' }
+    $defaultDir = Join-Path $script:buildRoot $folderName
+    $usbDir = if ($usbTemp) { Join-Path $usbTemp "Build-$folderName" }
+    # (an earlier build's work folder goes first, wherever it was: a kept one, or one left on the USB by a build when the
+    # PC's drive was full, may be what's filling a drive)
+    foreach ($old in @($defaultDir, $usbDir)) { Remove-WorkFolder $old -Ours }
+    if ($WorkDir) {
+        # (the build gets its own folder in -WorkDir, so nothing else there is touched; resolved to a full path now, as
+        # the current folder changes during the build)
+        $dir = Join-Path $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($WorkDir) $folderName
+        if (Test-Path -LiteralPath $dir) {
+            if (-not (Test-Path -LiteralPath (Join-Path $dir $script:workMarker))) { Fail "$dir is already there, and isn't a work folder a build made, so it's left alone; use another -WorkDir" }
+            Remove-WorkFolder $dir
+        }
+    }
+    else {
+        $dir = $defaultDir
         if ((Get-FreeSpace $env:TEMP) -lt $NeedGB * 1GB) {
-            # (_Data\Temp: up from the app's folder to _Data\Apps, for apps in a group folder too)
-            $apps = $script:appDir; while ($apps -and (Split-Path -Leaf $apps) -ne 'Apps') { $apps = Split-Path -Parent $apps }
-            $usbTemp = Join-Path (Split-Path -Parent $apps) 'Temp'
-            if ((Get-FreeSpace $usbTemp) -ge $NeedGB * 1GB) {
-                $dir = Join-Path $usbTemp "Build-$($Name -replace '[\\/:*?"<>|]', '_')"
-                Say "Not enough space in $env:TEMP, so building in $dir"
+            if ($usbTemp -and (Get-FreeSpace $usbTemp) -ge $NeedGB * 1GB) {
+                $dir = $usbDir
+                Set-ToolsRoot (Join-Path $usbTemp 'Build-_tools')
+                Say "Not enough space in $env:TEMP, so building in $dir, with the portable tools in $($script:toolsDir) (slower; any not there yet are downloaded again)"
             }
             else { Fail "Building $Name needs about $NeedGB GB free (in $env:TEMP or on the USB); use -WorkDir to build somewhere else" }
         }
     }
-    if (Test-Path -LiteralPath $dir) { Remove-Item -LiteralPath $dir -Recurse -Force }
+    if (Test-Path -LiteralPath $dir) { Fail "Couldn't remove the earlier build's $dir (a program may still have files open in it)" }
     New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    [IO.File]::WriteAllText((Join-Path $dir $script:workMarker), "Made by a USB-Tool build.cmd for $Name; removed when the build is done (unless -KeepWork) or by the next build.`r`n")
     if ($dir.Length -gt 100) { Say "Note: $dir is a long path; some build tools fail on paths over 260 characters, so a shorter -WorkDir may be needed" }
     # (MSBuild's worker processes would otherwise stay running and keep files in the work folder locked)
     $env:MSBUILDDISABLENODEREUSE = '1'
@@ -124,21 +171,55 @@ function Start-Build([string]$Name, [int]$NeedGB = 2) {
     return $dir
 }
 
-# the newest release's tag (from the API, or the releases page when its hourly limit has run out)
+# the newest release's tag (from the API, or the releases pages when its hourly limit has run out)
+# -Pre: a pre-release will do too; -Match: only a tag that matches this regex
 function Get-LatestGitHubTag([string]$repo, [switch]$Pre, [string]$Match) {
+    $wanted = { param($tag, $isPre) ($Pre -or -not $isPre) -and (-not $Match -or $tag -match $Match) }
     try {
         if ($Pre -or $Match) {
             $all = @(Get-Text "https://api.github.com/repos/$repo/releases?per_page=50" | ConvertFrom-Json) | ForEach-Object { $_ }
-            $pick = $all | Where-Object { -not $_.draft -and ($Pre -or -not $_.prerelease) -and (-not $Match -or $_.tag_name -match $Match) } | Select-Object -First 1
+            $pick = $all | Where-Object { -not $_.draft -and (& $wanted $_.tag_name $_.prerelease) } | Select-Object -First 1
             if ($pick) { return $pick.tag_name }
         }
         else { return (Get-Text "https://api.github.com/repos/$repo/releases/latest" | ConvertFrom-Json).tag_name }
     }
     catch {
-        $final = & $script:curl -sSIL --fail -o NUL -w '%{url_effective}' "https://github.com/$repo/releases/latest"
-        if ("$final" -match '/releases/tag/(.+)$') { return [Uri]::UnescapeDataString($Matches[1]) }
+        if (-not ($Pre -or $Match)) {
+            $final = & $script:curl -sSIL --fail -o NUL -w '%{url_effective}' "https://github.com/$repo/releases/latest"
+            if ("$final" -match '/releases/tag/(.+)$') { return [Uri]::UnescapeDataString($Matches[1]) }
+        }
+        else {
+            # (not /releases/latest, which is the newest full release whatever its tag, eg. Bitwarden's web or cli one,
+            # but the releases page: its newest 10, each in a <section> with a Pre-release label when it is one)
+            $page = Get-Text "https://github.com/$repo/releases"
+            $seen = 0
+            foreach ($section in @($page -split '<section\b' | Select-Object -Skip 1)) {
+                $m = [regex]::Match($section, "href=`"/$([regex]::Escape($repo))/releases/tag/([^`"]+)`"", 'IgnoreCase')
+                if (-not $m.Success) { continue }
+                $seen++
+                $tag = [Uri]::UnescapeDataString([Net.WebUtility]::HtmlDecode($m.Groups[1].Value))
+                if (& $wanted $tag ($section -match 'class="Label[^"]*"[^>]*>\s*Pre-release\s*<')) { return $tag }
+            }
+            $what = "a$(if (-not $Pre) { ' full' }) release of $repo$(if ($Match) { " with a tag matching $Match" })"
+            if (-not $seen) { throw "Couldn't find $what (GitHub's API limit has run out, and its releases page has changed); try again in an hour, or give the -Version" }
+            throw "Couldn't find $what in the newest $seen on its releases page (GitHub's API limit has run out); try again in an hour, or give the -Version"
+        }
     }
     throw "Couldn't find the latest release of $repo"
+}
+
+# unzips a downloaded tool into its folder (replacing what's there), by way of a temporary folder that's renamed into
+# place once it's complete: so a cut-off download or unzip never leaves a half-made tool folder behind, which later
+# builds would use as it is, or fail to unzip over. -Inner: the zip has it all in one folder of its own (eg. go\).
+function Expand-ToolZip([string]$zip, [string]$to, [switch]$Inner) {
+    $tmp = "$to.partial"
+    if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp -Recurse -Force }
+    [IO.Compression.ZipFile]::ExtractToDirectory($zip, $tmp)
+    $from = if ($Inner) { @(Get-ChildItem -LiteralPath $tmp -Directory)[0].FullName } else { $tmp }
+    if (Test-Path -LiteralPath $to) { Remove-Item -LiteralPath $to -Recurse -Force }
+    Move-Item -LiteralPath $from -Destination $to
+    if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp -Recurse -Force }
+    Remove-Item -LiteralPath $zip
 }
 
 # git: this PC's, or a portable MinGit in the tools folder
@@ -153,8 +234,7 @@ function Get-Git {
         if (-not $asset) { throw "Couldn't find MinGit in Git for Windows' latest release" }
         $zip = Join-Path $script:toolsDir 'MinGit.zip'
         Get-File $asset.browser_download_url $zip
-        [IO.Compression.ZipFile]::ExtractToDirectory($zip, (Join-Path $script:toolsDir 'MinGit'))
-        Remove-Item -LiteralPath $zip
+        Expand-ToolZip $zip (Join-Path $script:toolsDir 'MinGit')
     }
     return $exe
 }
@@ -182,8 +262,9 @@ function Get-SevenZip {
         $extra = Join-Path $script:toolsDir "7za\$($m.Groups[1].Value)"
         Get-File "https://www.7-zip.org/a/$($m.Groups[1].Value)" $extra
         Invoke-Checked $sevenZr x $extra "-o$(Join-Path $script:toolsDir '7za\x')" -y | Out-Null
-        Copy-Item -LiteralPath (Join-Path $script:toolsDir '7za\x\x64\7za.exe') -Destination $exe
+        # (7za.exe last, as it's what says this is done)
         Copy-Item -Path (Join-Path $script:toolsDir '7za\x\x64\7za.dll'), (Join-Path $script:toolsDir '7za\x\x64\7zxa.dll') -Destination (Split-Path $exe) -ErrorAction SilentlyContinue
+        Copy-Item -LiteralPath (Join-Path $script:toolsDir '7za\x\x64\7za.exe') -Destination $exe
     }
     return $exe
 }
@@ -247,18 +328,18 @@ function Use-VisualStudio([string]$Arch = 'x64', [string]$Version, [string[]]$Co
 }
 
 # ---------------------------------------------------------------------------------------------
-# MSYS2 (MinGW compilers and libraries), in the tools folder
+# MSYS2 (MinGW compilers and libraries), in the tools folder ($script:msysDir, see Set-ToolsRoot)
 # ---------------------------------------------------------------------------------------------
-
-$script:msysDir = Join-Path $script:toolsDir 'msys64'
 
 function Invoke-Msys2([string]$Env = 'mingw64', [string]$Command, [string]$Dir) {
     $bash = Join-Path $script:msysDir 'usr\bin\bash.exe'
     $saved = @{ MSYSTEM = $env:MSYSTEM; CHERE_INVOKING = $env:CHERE_INVOKING; MSYS2_PATH_TYPE = $env:MSYS2_PATH_TYPE }
     $env:MSYSTEM = $Env.ToUpper(); $env:CHERE_INVOKING = '1'; $env:MSYS2_PATH_TYPE = 'minimal'
     Push-Location -LiteralPath $(if ($Dir) { $Dir } else { $script:Work })
-    # (run from a script file: Windows PowerShell drops any " inside a command passed to bash -lc)
-    $file = Join-Path $script:toolsDir "msys2-command-$PID.sh"
+    # (run from a script file: Windows PowerShell drops any " inside a command passed to bash -lc; in MSYS2's own tmp,
+    # whose path is one it can use)
+    $file = Join-Path $script:msysDir "tmp\usb-tool-command-$PID.sh"
+    New-Item -ItemType Directory -Path (Split-Path -Parent $file) -Force | Out-Null
     [IO.File]::WriteAllText($file, ($Command -replace "`r`n", "`n") + "`n")
     try {
         & $bash -l ($file -replace '\\', '/')
@@ -275,18 +356,24 @@ function Invoke-Msys2([string]$Env = 'mingw64', [string]$Command, [string]$Dir) 
 function Use-Msys2([string[]]$Packages) {
     $bash = Join-Path $script:msysDir 'usr\bin\bash.exe'
     if (-not (Test-Path -LiteralPath $bash)) {
-        Say 'Getting a portable MSYS2 (the MinGW compilers and libraries)...'
+        Say "Getting a portable MSYS2 (the MinGW compilers and libraries) into $($script:msysDir)..."
         $sfx = Join-Path $script:toolsDir 'msys2-base.sfx.exe'
         Get-File 'https://repo.msys2.org/distrib/msys2-x86_64-latest.sfx.exe' $sfx
-        Invoke-Checked $sfx -y "-o$($script:toolsDir)\" | Out-Null
+        # (unpacked beside it and then renamed into place, so a cut-off one isn't taken for a whole one next time)
+        $tmp = "$($script:msysDir).partial"
+        if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp -Recurse -Force }
+        Invoke-Checked $sfx -y "-o$tmp\" | Out-Null
+        if (Test-Path -LiteralPath $script:msysDir) { Remove-Item -LiteralPath $script:msysDir -Recurse -Force }
+        Move-Item -LiteralPath (Join-Path $tmp 'msys64') -Destination $script:msysDir
+        Remove-Item -LiteralPath $tmp -Recurse -Force
         Remove-Item -LiteralPath $sfx
         # (its first start sets up the package keys; then the core and everything else are updated)
-        Invoke-Msys2 -Env msys -Command 'true' -Dir $script:toolsDir
+        Invoke-Msys2 -Env msys -Command 'true' -Dir $script:msysDir
         # (the first update can stop part-way to restart its own runtime, so it's run again)
-        try { Invoke-Msys2 -Env msys -Command 'pacman -Syuu --noconfirm' -Dir $script:toolsDir } catch { Say 'MSYS2 updated its core; updating the rest...' }
+        try { Invoke-Msys2 -Env msys -Command 'pacman -Syuu --noconfirm' -Dir $script:msysDir } catch { Say 'MSYS2 updated its core; updating the rest...' }
     }
-    Invoke-Msys2 -Env msys -Command 'pacman -Syuu --noconfirm' -Dir $script:toolsDir
-    if ($Packages) { Invoke-Msys2 -Env msys -Command "pacman -S --needed --noconfirm $($Packages -join ' ')" -Dir $script:toolsDir }
+    Invoke-Msys2 -Env msys -Command 'pacman -Syuu --noconfirm' -Dir $script:msysDir
+    if ($Packages) { Invoke-Msys2 -Env msys -Command "pacman -S --needed --noconfirm $($Packages -join ' ')" -Dir $script:msysDir }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -297,31 +384,42 @@ function Add-ToPath([string]$dir) { if (($env:PATH -split ';') -notcontains $dir
 
 # -Version: the oldest version that will do (eg. '1.22'), or for dotnet the SDK channel (eg. '8.0')
 function Use-Tool([string]$Name, [string]$Version) {
-    # (Continue: some tools, eg. java -version, write their version to stderr, which would stop the build otherwise)
-    $have = { param($exe, $verArgs, $pattern) $ErrorActionPreference = 'Continue'; $c = Get-Command $exe -ErrorAction SilentlyContinue | Select-Object -First 1; if (-not $c) { return $null }; $out = (& $c.Source @verArgs 2>&1 | Out-String); $m = [regex]::Match($out, $pattern); if ($m.Success) { [pscustomobject]@{ Path = $c.Source; Version = $m.Groups[1].Value } } }
+    # (Continue: some tools, eg. java -version, write their version to stderr, which would stop the build otherwise;
+    # $exe can be a full path, eg. a portable one from an earlier build, which may not run when its unzip was cut off)
+    $have = { param($exe, $verArgs, $pattern) $ErrorActionPreference = 'Continue'; $c = Get-Command $exe -ErrorAction SilentlyContinue | Select-Object -First 1; if (-not $c) { return $null }; try { $out = (& $c.Source @verArgs 2>&1 | Out-String) } catch { return $null }; $m = [regex]::Match($out, $pattern); if ($m.Success) { [pscustomobject]@{ Path = $c.Source; Version = $m.Groups[1].Value } } }
     $newEnough = { param($found) if (-not $found) { return $false }; if (-not $Version) { return $true }; try { return [version]($found.Version -replace '^(\d+(\.\d+){0,3}).*', '$1') -ge [version]($Version + $(if ($Version -notmatch '\.') { '.0' })) } catch { return $true } }
     switch ($Name) {
         'go' {
-            if (& $newEnough (& $have go.exe @('version') 'go(\d+\.\d+(\.\d+)?)')) { return }
+            $goVersion = 'go(\d+\.\d+(\.\d+)?)'
+            if (& $newEnough (& $have go.exe @('version') $goVersion)) { return }
             $dir = Join-Path $script:toolsDir 'go'
-            if (-not (Test-Path -LiteralPath "$dir\bin\go.exe")) {
+            # (the portable one from an earlier build, when it's new enough for this one too)
+            if (-not (& $newEnough (& $have "$dir\bin\go.exe" @('version') $goVersion))) {
                 $rel = (Get-Text 'https://go.dev/dl/?mode=json' | ConvertFrom-Json)[0]
                 $file = $rel.files | Where-Object { $_.os -eq 'windows' -and $_.arch -eq 'amd64' -and $_.kind -eq 'archive' } | Select-Object -First 1
                 Say "Getting a portable Go ($($rel.version))..."
                 $zip = Join-Path $script:toolsDir $file.filename; Get-File "https://go.dev/dl/$($file.filename)" $zip
-                [IO.Compression.ZipFile]::ExtractToDirectory($zip, $script:toolsDir); Remove-Item -LiteralPath $zip
+                Expand-ToolZip $zip $dir -Inner
             }
             Add-ToPath "$dir\bin"
         }
         'node' {
-            if (& $newEnough (& $have node.exe @('--version') 'v(\d+\.\d+\.\d+)')) { return }
-            $dir = Get-ChildItem -LiteralPath $script:toolsDir -Directory -Filter 'node-v*-win-x64' -ErrorAction SilentlyContinue | Select-Object -First 1
+            $nodeVersion = 'v(\d+\.\d+\.\d+)'
+            if (& $newEnough (& $have node.exe @('--version') $nodeVersion)) { return }
+            # (the newest portable one from an earlier build that's new enough; one without npx.cmd was cut off unzipping)
+            $dir = Get-ChildItem -LiteralPath $script:toolsDir -Directory -Filter 'node-v*-win-x64' -ErrorAction SilentlyContinue |
+                Where-Object { (Test-Path -LiteralPath "$($_.FullName)\npx.cmd") -and (& $newEnough (& $have "$($_.FullName)\node.exe" @('--version') $nodeVersion)) } |
+                Sort-Object { try { [version]($_.Name -replace '^node-v|-win-x64$') } catch { [version]'0.0' } } -Descending | Select-Object -First 1
             if (-not $dir) {
-                $rel = (Get-Text 'https://nodejs.org/dist/index.json' | ConvertFrom-Json) | Where-Object { $_.lts } | Select-Object -First 1
+                # (the newest LTS, or the newest of all when -Version is newer than that)
+                $index = @(Get-Text 'https://nodejs.org/dist/index.json' | ConvertFrom-Json) | ForEach-Object { $_ }
+                $usable = @($index | Where-Object { & $newEnough ([pscustomobject]@{ Version = $_.version -replace '^v' }) })
+                $rel = @(@($usable | Where-Object { $_.lts }) + $usable)[0]
+                if (-not $rel) { throw "Couldn't find Node.js $Version or newer on nodejs.org" }
                 Say "Getting a portable Node.js ($($rel.version))..."
                 $zip = Join-Path $script:toolsDir "node-$($rel.version)-win-x64.zip"; Get-File "https://nodejs.org/dist/$($rel.version)/node-$($rel.version)-win-x64.zip" $zip
-                [IO.Compression.ZipFile]::ExtractToDirectory($zip, $script:toolsDir); Remove-Item -LiteralPath $zip
-                $dir = Get-ChildItem -LiteralPath $script:toolsDir -Directory -Filter 'node-v*-win-x64' | Select-Object -First 1
+                Expand-ToolZip $zip (Join-Path $script:toolsDir "node-$($rel.version)-win-x64") -Inner
+                $dir = Get-Item -LiteralPath (Join-Path $script:toolsDir "node-$($rel.version)-win-x64")
             }
             Add-ToPath $dir.FullName
         }
@@ -329,14 +427,16 @@ function Use-Tool([string]$Name, [string]$Version) {
             # -Version is the SDK channel (eg. '8.0'), or an exact SDK (eg. '11.0.100') for a project that needs that one;
             # this PC's dotnet counts when it has an SDK in that channel or newer (or that exact one)
             $exact = $Version -match '^\d+\.\d+\.\d+'
+            # (Continue: with Stop, any line dotnet writes to stderr, eg. a first-run notice, would stop the build)
+            $listSdks = { param($exe) $ErrorActionPreference = 'Continue'; @(& $exe --list-sdks 2>$null | ForEach-Object { "$_" }) }
             $c = Get-Command dotnet.exe -ErrorAction SilentlyContinue | Select-Object -First 1
             if ($c) {
-                $sdks = @(& $c.Source --list-sdks 2>$null | ForEach-Object { ($_ -split ' ')[0] })
+                $sdks = @(& $listSdks $c.Source | ForEach-Object { ($_ -split ' ')[0] })
                 if ($exact) { if ($sdks -contains $Version) { return } }
                 elseif ($sdks | Where-Object { -not $Version -or [version]($_ -replace '-.*') -ge [version]"$Version.0" }) { return }
             }
             $dir = Join-Path $script:toolsDir 'dotnet'
-            if (-not (Test-Path -LiteralPath "$dir\dotnet.exe") -or -not (@(& "$dir\dotnet.exe" --list-sdks 2>$null) -match "^$([regex]::Escape($Version))")) {
+            if (-not (Test-Path -LiteralPath "$dir\dotnet.exe") -or -not (@(& $listSdks "$dir\dotnet.exe") -match "^$([regex]::Escape($Version))")) {
                 Say "Getting a portable .NET SDK ($Version)..."
                 $script = Join-Path $script:toolsDir 'dotnet-install.ps1'; Get-File 'https://dot.net/v1/dotnet-install.ps1' $script
                 $which = if ($exact) { @('-Version', $Version) } else { @('-Channel', $Version) }
@@ -350,33 +450,53 @@ function Use-Tool([string]$Name, [string]$Version) {
             $dir = Join-Path $script:toolsDir 'ninja'
             if (-not (Test-Path -LiteralPath "$dir\ninja.exe")) {
                 $zip = Join-Path $script:toolsDir 'ninja-win.zip'; Get-File 'https://github.com/ninja-build/ninja/releases/latest/download/ninja-win.zip' $zip
-                [IO.Compression.ZipFile]::ExtractToDirectory($zip, $dir); Remove-Item -LiteralPath $zip
+                Expand-ToolZip $zip $dir
             }
             Add-ToPath $dir
         }
         'jdk' {
-            # -Version is the major version (eg. '21')
-            $major = if ($Version) { $Version } else { '21' }
-            $found = & $have java.exe @('-version') 'version "(\d+)'
-            if ($found -and [int]$found.Version -ge [int]$major -and $env:JAVA_HOME) { return }
-            if ($found -and [int]$found.Version -ge [int]$major) { $env:JAVA_HOME = Split-Path -Parent (Split-Path -Parent $found.Path); return }
-            $dir = Get-ChildItem -LiteralPath $script:toolsDir -Directory -Filter "jdk-$major*" -ErrorAction SilentlyContinue | Select-Object -First 1
-            if (-not $dir) {
+            # -Version is the major version (eg. '21'). JAVA_HOME (which gradlew goes by) must be a JDK's own folder, and
+            # the java.exe on the PATH may be a launcher somewhere else (eg. Oracle's ...\Common Files\Oracle\Java\javapath),
+            # so it's asked for its java.home; a JDK has javac.exe and a release file saying its version. A JDK 9 or newer
+            # also has lib\modules, which an unzip that was cut off may not have got to.
+            $major = if ($Version) { [int]$Version } else { 21 }
+            $jdkMajor = { param($home_) if (-not $home_ -or -not (Test-Path -LiteralPath "$home_\bin\javac.exe") -or -not (Test-Path -LiteralPath "$home_\release")) { return 0 }
+                $m = [regex]::Match([IO.File]::ReadAllText("$home_\release"), 'JAVA_VERSION="(?:1\.)?(\d+)')
+                if (-not $m.Success) { return 0 }; $v = [int]$m.Groups[1].Value
+                if ($v -ge 9 -and -not (Test-Path -LiteralPath "$home_\lib\modules")) { return 0 }; return $v }
+            $useJdk = { param($home_) $env:JAVA_HOME = $home_.TrimEnd('\'); Add-ToPath "$($env:JAVA_HOME)\bin" }
+            if ($env:JAVA_HOME) {
+                if ((& $jdkMajor $env:JAVA_HOME) -ge $major) { & $useJdk $env:JAVA_HOME; return }
+                Say "JAVA_HOME ($env:JAVA_HOME) isn't a JDK $major or newer, so this build uses another one"
+            }
+            $java = Get-Command java.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($java) {
+                $props = & { $ErrorActionPreference = 'Continue'; & $java.Source '-XshowSettings:properties' -version 2>&1 | ForEach-Object { "$_" } | Out-String }
+                $m = [regex]::Match($props, '(?m)^\s*java\.home = (.+?)\s*$')
+                if ($m.Success -and (& $jdkMajor $m.Groups[1].Value) -ge $major) { & $useJdk $m.Groups[1].Value; return }
+            }
+            $dir = Get-ChildItem -LiteralPath $script:toolsDir -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match "^jdk-$major([.+]|$)" }
+            $whole = $dir | Where-Object { (& $jdkMajor $_.FullName) -eq $major } | Select-Object -First 1
+            if (-not $whole) {
+                # (half-unzipped ones left by earlier builds)
+                $dir | ForEach-Object { Remove-Item -LiteralPath $_.FullName -Recurse -Force }
                 Say "Getting a portable JDK $major (Eclipse Temurin)..."
                 $zip = Join-Path $script:toolsDir "jdk$major.zip"; Get-File "https://api.adoptium.net/v3/binary/latest/$major/ga/windows/x64/jdk/hotspot/normal/eclipse" $zip
-                [IO.Compression.ZipFile]::ExtractToDirectory($zip, $script:toolsDir); Remove-Item -LiteralPath $zip
-                $dir = Get-ChildItem -LiteralPath $script:toolsDir -Directory -Filter "jdk-$major*" | Select-Object -First 1
+                Expand-ToolZip $zip (Join-Path $script:toolsDir "jdk-$major") -Inner
+                $whole = Get-Item -LiteralPath (Join-Path $script:toolsDir "jdk-$major")
             }
-            $env:JAVA_HOME = $dir.FullName; Add-ToPath "$($dir.FullName)\bin"
+            & $useJdk $whole.FullName
         }
         'python' {
-            if (& $newEnough (& $have python.exe @('--version') 'Python (\d+\.\d+(\.\d+)?)')) { return }
-            # (the full Python from its NuGet package: no installer, and it has pip and venv)
+            $pythonVersion = 'Python (\d+\.\d+(\.\d+)?)'
+            if (& $newEnough (& $have python.exe @('--version') $pythonVersion)) { return }
+            # (the full Python from its NuGet package: no installer, and it has pip and venv; the one from an earlier build
+            # when it's new enough for this one too, and whole: Lib\os.py is what it needs first)
             $dir = Join-Path $script:toolsDir 'python'
-            if (-not (Test-Path -LiteralPath "$dir\tools\python.exe")) {
+            if (-not ((Test-Path -LiteralPath "$dir\tools\Lib\os.py") -and (& $newEnough (& $have "$dir\tools\python.exe" @('--version') $pythonVersion)))) {
                 Say 'Getting a portable Python...'
                 $zip = Join-Path $script:toolsDir 'python.zip'; Get-File 'https://www.nuget.org/api/v2/package/python' $zip
-                [IO.Compression.ZipFile]::ExtractToDirectory($zip, $dir); Remove-Item -LiteralPath $zip
+                Expand-ToolZip $zip $dir
             }
             Add-ToPath "$dir\tools\Scripts"; Add-ToPath "$dir\tools"
         }
@@ -401,7 +521,8 @@ function Use-NodeVersion([string]$Wanted) {
     $Wanted = $Wanted.Trim() -replace '^v'
     $matchesWanted = { param($v) $v = $v -replace '^v'; $v -eq $Wanted -or $v -like "$Wanted.*" }
     $pc = Get-Command node.exe -ErrorAction SilentlyContinue | Select-Object -First 1
-    $have = if ($pc) { (& $pc.Source --version 2>$null | Out-String).Trim() }
+    # (Continue: with Stop, a line node writes to stderr, eg. a warning, would stop the build)
+    $have = if ($pc) { & { $ErrorActionPreference = 'Continue'; (& $pc.Source --version 2>$null | Out-String).Trim() } }
     if (-not ($have -and (& $matchesWanted $have))) {
         $base = Join-Path $script:toolsDir 'node-versions'
         # (ForEach-Object unrolls the JSON array, which Windows PowerShell 5.1 passes on as one object)
@@ -409,11 +530,12 @@ function Use-NodeVersion([string]$Wanted) {
         $release = $index | Where-Object { & $matchesWanted $_.version } | Select-Object -First 1
         if (-not $release) { throw "Couldn't find Node.js $Wanted on nodejs.org" }
         $dir = Join-Path $base "node-$($release.version)-win-x64"
-        if (-not (Test-Path -LiteralPath "$dir\node.exe")) {
+        # (one without npx.cmd was cut off unzipping)
+        if (-not (Test-Path -LiteralPath "$dir\npx.cmd")) {
             Say "Getting a portable Node.js ($($release.version))..."
             $zip = Join-Path $base "node-$($release.version)-win-x64.zip"
             Get-File "https://nodejs.org/dist/$($release.version)/node-$($release.version)-win-x64.zip" $zip
-            [IO.Compression.ZipFile]::ExtractToDirectory($zip, $base); Remove-Item -LiteralPath $zip
+            Expand-ToolZip $zip $dir -Inner
         }
         Add-ToPath $dir
         # (npm's global folder in it too, eg. for corepack's yarn)
@@ -456,8 +578,10 @@ $script:published = @()
 
 function Complete-Build {
     if ($script:Work -and -not $KeepWork -and (Test-Path -LiteralPath $script:Work)) {
+        # (out of it first, so it isn't the current folder; $script:Work is a full path, the folder Start-Build made)
         Set-Location -LiteralPath $env:TEMP
-        Remove-Item -LiteralPath $script:Work -Recurse -Force -ErrorAction SilentlyContinue
+        try { Remove-WorkFolder $script:Work } catch { Say $_.Exception.Message }
+        if (Test-Path -LiteralPath $script:Work) { Say "(couldn't remove all of $($script:Work), as something still has files open in it; the next build removes it)" }
     }
     Say ''
     $took = if ($script:buildStarted) { [int]((Get-Date) - $script:buildStarted).TotalMinutes } else { 0 }

@@ -24,7 +24,8 @@ function Use-NodeVersion([string]$Wanted) {
     $Wanted = $Wanted.Trim() -replace '^v'
     $matchesWanted = { param($v) $v = $v -replace '^v'; $v -eq $Wanted -or $v -like "$Wanted.*" }
     $pc = Get-Command node.exe -ErrorAction SilentlyContinue | Select-Object -First 1
-    $have = if ($pc) { (& $pc.Source --version 2>$null | Out-String).Trim() }
+    # (Continue: with Stop, a line node writes to stderr, eg. a warning, would stop the build)
+    $have = if ($pc) { & { $ErrorActionPreference = 'Continue'; (& $pc.Source --version 2>$null | Out-String).Trim() } }
     if (-not ($have -and (& $matchesWanted $have))) {
         $base = Join-Path $script:toolsDir 'node-versions'
         # (ForEach-Object unrolls the JSON array, which Windows PowerShell 5.1 passes on as one object)
@@ -32,11 +33,12 @@ function Use-NodeVersion([string]$Wanted) {
         $release = $index | Where-Object { & $matchesWanted $_.version } | Select-Object -First 1
         if (-not $release) { throw "Couldn't find Node.js $Wanted on nodejs.org" }
         $dir = Join-Path $base "node-$($release.version)-win-x64"
-        if (-not (Test-Path -LiteralPath "$dir\node.exe")) {
+        # (one without npx.cmd was cut off unzipping)
+        if (-not (Test-Path -LiteralPath "$dir\npx.cmd")) {
             Say "Getting a portable Node.js ($($release.version))..."
             $zip = Join-Path $base "node-$($release.version)-win-x64.zip"
             Get-File "https://nodejs.org/dist/$($release.version)/node-$($release.version)-win-x64.zip" $zip
-            [IO.Compression.ZipFile]::ExtractToDirectory($zip, $base); Remove-Item -LiteralPath $zip
+            Expand-ToolZip $zip $dir -Inner
         }
         Add-ToPath $dir
         # (npm's global folder in it too, eg. for corepack's yarn)
