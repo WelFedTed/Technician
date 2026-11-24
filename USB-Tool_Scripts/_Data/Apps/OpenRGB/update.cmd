@@ -21,14 +21,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -A
 call :result
 
 rem Portable
+rem (No MajorGeeks backup: its links go to an old Codeberg release that no longer downloads (Nov 2026))
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
     -Name "OpenRGB" ^
     -Page "https://openrgb.org/" ^
     -GitHub "CalcProgrammer1/OpenRGB" ^
     -Asset "^OpenRGB_[\d.]+_Windows_64_\w+\.zip$" -Into "x64" ^
     -Asset86 "^OpenRGB_[\d.]+_Windows_32_\w+\.zip$" -Into86 "x86" ^
-    -Extract -Flatten -Clean ^
-    -MajorGeeks "openrgb:64-Bit" -MajorGeeks86 "openrgb"
+    -Extract -Flatten -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause

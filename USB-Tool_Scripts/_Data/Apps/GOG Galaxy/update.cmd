@@ -12,12 +12,12 @@ set "result=0"
 set "resultRank=0"
 
 rem Installer
+rem (No MajorGeeks backup: its page links an old version GOG has removed (404, Nov 2026))
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "GOG Galaxy (installer)" ^
     -Page "https://www.gog.com/galaxy" ^
     -Winget "GOG.Galaxy" -Into "x64" ^
-    -Clean ^
-    -MajorGeeks "gog_galaxy:EXE"
+    -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause

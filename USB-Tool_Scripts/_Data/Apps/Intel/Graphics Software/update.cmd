@@ -14,7 +14,7 @@ set "resultRank=0"
 rem Installer (Intel's Arc / Iris Xe graphics driver, which comes with Intel Graphics Software)
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Intel Graphics Software" ^
-    -Page "https://www.intel.com/content/www/us/en/download/785597.html" ^
+    -Page "https://www.intel.com/content/www/us/en/download/785597/intel-arc-graphics-windows.html" ^
     -Link "https://downloadmirror\.intel\.com/\d+/gfx_win_[\d.]+\.exe" -Into "x64" ^
     -UserAgent "curl/8.0" ^
     -Clean

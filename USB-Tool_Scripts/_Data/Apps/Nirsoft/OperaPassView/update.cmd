@@ -17,7 +17,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Url "https://www.nirsoft.net/toolsdownload/operapassview.zip" -Into "x86" ^
     -Referer "https://www.nirsoft.net/utils/opera_password_recovery.html" ^
     -Extract -Clean -Keep "*.cfg" ^
-    -MajorGeeks "operapassview:Download@Authors Site"
+    -MajorGeeks "operapassview:Download@MajorGeeks"
 call :result
 
 if /i not "%~1" == "/nopause" pause

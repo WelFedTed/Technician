@@ -12,13 +12,13 @@ set "result=0"
 set "resultRank=0"
 
 rem Installer
+rem (No MajorGeeks backup: its download (MajorGeeks' own copy) is missing from its server (404, Nov 2026))
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "FurMark 1 (installer)" ^
     -Page "https://geeks3d.com/furmark/downloads/" ^
     -Link "dl/show/(\d+)[^>]*>v?1\.\d+\.\d+" ^
     -UrlFormat "https://geeks3d.com/dl/get/{0}" -Into "x86" ^
-    -Clean ^
-    -MajorGeeks "furmark"
+    -Clean
 call :result
 
 rem run.cmd from the old layout (this app has no portable version, so it has install.cmd or cli.cmd instead)

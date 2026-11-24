@@ -12,12 +12,12 @@ set "result=0"
 set "resultRank=0"
 
 rem Portable
+rem (No MajorGeeks backup: its own copy is the installer (mspass_setup.exe), not this portable zip, and its link to the zip is an old nirsoft.net address that no longer works)
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
     -Name "NirSoft MessenPass" ^
     -Url "https://www.nirsoft.net/toolsdownload/mspass.zip" -Into "x86" ^
     -Referer "https://www.nirsoft.net/utils/mspass.html" ^
-    -Extract -Clean -Keep "*.cfg" ^
-    -MajorGeeks "messenpass:Download@Authors Site (Portable)"
+    -Extract -Clean -Keep "*.cfg"
 call :result
 
 if /i not "%~1" == "/nopause" pause

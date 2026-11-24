@@ -17,7 +17,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1"
     -Page "https://www.cobiansoft.com/cobianbackup.html" ^
     -Url "https://files.cobiansoft.com/programs/cbSetup.exe" -Into "x86" ^
     -Clean ^
-    -MajorGeeks "cobian_backup:Download@Authors Site"
+    -MajorGeeks "cobian_backup:Download@MajorGeeks"
 call :result
 
 if /i not "%~1" == "/nopause" pause

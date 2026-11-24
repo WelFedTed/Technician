@@ -12,12 +12,13 @@ set "result=0"
 set "resultRank=0"
 
 rem Installer (the free Basic edition)
+rem (a fixed link: the page only shows it with JavaScript now, and this version hasn't changed in years)
+rem (No MajorGeeks backup: its download (MajorGeeks' own copy) is missing from its server (404, Nov 2026))
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Unigine Heaven Benchmark" ^
     -Page "https://benchmark.unigine.com/heaven" ^
-    -Link "https://assets\.unigine\.com/d/Unigine_Heaven-[\d.]+\.exe" -Into "x86" ^
-    -Clean ^
-    -MajorGeeks "heaven_benchmark"
+    -Url "https://assets.unigine.com/d/Unigine_Heaven-4.0.exe" -Into "x86" ^
+    -Clean
 call :result
 
 if /i not "%~1" == "/nopause" pause

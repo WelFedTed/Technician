@@ -15,7 +15,7 @@ rem Installer (the APO user interface; APO itself also needs Intel Dynamic Tunin
 rem supported Intel CPU)
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Installer" ^
     -Name "Intel Application Optimization (APO)" ^
-    -Page "https://www.intel.com/content/www/us/en/download/870620.html" ^
+    -Page "https://www.intel.com/content/www/us/en/download/870620/intel-application-optimization-user-interface.html" ^
     -Link "https://downloadmirror\.intel\.com/\d+/APO_UI_Installer_[\d.]+\.exe" -Into "x64" ^
     -UserAgent "curl/8.0" ^
     -Clean
