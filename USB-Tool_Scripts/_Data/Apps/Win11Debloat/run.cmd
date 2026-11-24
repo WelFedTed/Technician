@@ -1,4 +1,5 @@
 @echo off
+setlocal
 
 title Win11Debloat
 
@@ -18,6 +19,8 @@ if not defined webRunner (
 	pause
 	exit /b 1
 )
-powershell -NoProfile -ExecutionPolicy Bypass -File "%webRunner%" -Name "Win11Debloat" -Web "https://debloat.raphi.re/" -Local "%script%" -Admin -Arguments "%*"
+rem (the arguments go to _Run-Web.ps1 in a variable: in -Arguments "...", quotes in them would end its quotes)
+set "USB_TOOL_WEB_ARGUMENTS=%*"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%webRunner%" -Name "Win11Debloat" -Web "https://debloat.raphi.re/" -Local "%script%" -Admin
 if errorlevel 1 pause
 exit /b

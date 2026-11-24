@@ -1,14 +1,16 @@
 $directory=$args[0]
+# (the folder this script is in, if none is given)
+if (-not $directory) { $directory = $PSScriptRoot }
 
 echo "Powershell-Directory-Driver-Installer"
 echo "------------------------------------------------------------"
 
 echo "Scanning directory for drivers..."
-$driverTotal=Get-ChildItem $directory -Recurse -Filter "*.inf" | Measure-Object | %{$_.Count}
+$driverTotal=Get-ChildItem -LiteralPath $directory -Recurse -Filter "*.inf" | Measure-Object | %{$_.Count}
 echo "$driverTotal drivers found."
 
 $driverCount=0
-Get-ChildItem $directory -Recurse -Filter "*.inf" |
+Get-ChildItem -LiteralPath $directory -Recurse -Filter "*.inf" |
 ForEach-Object {
     $driverCount++
     echo ""

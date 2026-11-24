@@ -9,7 +9,7 @@
 #                                 Update-Tool.cmd), and puts its path in report.txt in -DataDir (with neither,
 #                                 Update-Report.html in -DataDir); it's made from
 #       results.jsonl             a line per app part, written by _Update-App.ps1 (status, versions, links)
-#       apps.txt                  a line per app folder, written by Update-Tool.cmd: <exit code or skip>*<name>
+#       apps.txt                  a line per app folder, written by Update-Tool.cmd: <exit code, skip or stop>*<name>
 #       plan.txt                  every app folder the run was going to try, in order
 #       state.txt                 how far the run got: step=scripts / app*<n>*<name> / finish / report,
 #                                 and scripts=, selfUpdate=, stamp= once they're known
@@ -177,6 +177,8 @@ foreach ($line in Read-Lines (Join-Path $DataDir 'apps.txt')) {
         '0' { if ($own | Where-Object { $_.status -eq 'updated' }) { 'updated' } else { 'current' } }
         '2' { 'manual' }
         '3' { 'blocked' }
+        # (stopped with Ctrl+C, or ended as it carried on after it: _Update-Apps.ps1 records these as stop)
+        'stop' { 'cancelled' }
         # (stopped with Ctrl+C, then carried on with the next app)
         default { if ($own | Where-Object { $_.status -eq 'cancelled' }) { 'cancelled' } else { 'failed' } }
     }

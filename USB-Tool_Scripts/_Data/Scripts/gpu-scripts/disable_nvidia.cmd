@@ -1,6 +1,8 @@
 @echo off
 :: Check for administrative rights
-net session >nul 2>&1
+:: (fltmc only succeeds as administrator; unlike net session it doesn't depend on the Server service,
+:: which isn't running in WinPE or when it's been stopped, and made the elevated copy relaunch itself over and over)
+fltmc >nul 2>&1
 if %errorLevel% neq 0 (
     echo Requesting administrative privileges...
     goto UACPrompt

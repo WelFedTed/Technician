@@ -1,5 +1,5 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal enableextensions disabledelayedexpansion
 
 title Nirsoft Clipboardic
 
@@ -42,7 +42,8 @@ rem ----------------------------------------------------------------------------
 			rem myApp.exe + myApp64.exe, myApp.x86.exe + myApp.x64.exe, or myApp_x32.exe + myApp_x64.exe + myApp_arm64.exe,
 			rem or with each build in an x64 / ARM64 subfolder (eg. 7-Zip Extra's x64\7za.exe)
 			rem so set application to the plain name (myApp.exe) and the right build is picked automatically
-	rem Delayed Expansion is used to enable setting variables within if statements
+	rem Delayed Expansion is off: it would remove any ! from the paths used here (eg. a USB tool in D:\Tools!\),
+		rem so a variable set inside a block (eg. an if's brackets) is only read after that block
 	rem exit /b is being used to exit this script without closing the shell that called it
 
 
@@ -51,16 +52,29 @@ rem ----------------------------------------------------------------------------
 	if not "%elevate%" == "1" goto skipCheckElevated
 
 	rem check if already elevated
-	NET FILE 1>NUL 2>NUL
-	if '%errorlevel%' == '0' ( goto gotPrivileges ) else ( goto getPrivileges )
+	rem (fltmc only succeeds as administrator; unlike NET FILE it doesn't depend on the Server service, which
+	rem  isn't running in WinPE or when it's been stopped, and made the elevated copy relaunch itself over and over)
+	fltmc >nul 2>&1
+	if not errorlevel 1 goto gotPrivileges
 
 	:getPrivileges
-	rem not elevated, relaunch as admin
-	powershell -command start-process -file '%~f0' -verb runas
+	rem not elevated, relaunch as admin, with this script's arguments
+	rem (the path and arguments reach PowerShell in variables, so spaces, ' & ( ! in them are kept; cmd.exe is
+	rem  started itself, with the whole command in an extra pair of quotes, as Windows' own Run as administrator
+	rem  for scripts loses the quotes around a path with & in it)
+	set "selfPath=%~f0"
+	set "selfArgs=%*"
+	powershell -NoProfile -Command "$q = [char]34; $line = '/d /c ' + $q + $q + $env:selfPath + $q + ' ' + $env:selfArgs + $q; try { Start-Process -FilePath ($env:SystemRoot + '\System32\cmd.exe') -ArgumentList $line -Verb RunAs -ErrorAction Stop } catch { exit 1 }"
+	if errorlevel 1 (
+		echo Couldn't start it as administrator ^(was the UAC prompt declined?^)
+		pause
+		exit /b 1
+	)
 	exit /b
 
 	:gotPrivileges
-	rem is elevated, continue script
+	rem is elevated, continue script (from this script's folder: a copy started as admin starts in System32)
+	cd /d "%~dp0"
 	echo Running as Administrator
 
 	:skipCheckElevated
@@ -87,12 +101,12 @@ rem ----------------------------------------------------------------------------
 	:nextName
 	if defined found goto doneSearching
 	if not defined names goto doneSearching
-	for /f "tokens=1* delims=;" %%a in ("!names!") do (
+	for /f "tokens=1* delims=;" %%a in ("%names%") do (
 		set "A=%%a"
 		set "names=%%b"
 	)
-	set "N=!A:~0,-4!"
-	set "E=!A:~-4!"
+	set "N=%A:~0,-4%"
+	set "E=%A:~-4%"
 	if "%arch%" == "ARM64" call :findArm64
 	if "%arch%" == "ARM64" call :find64
 	if "%arch%" == "x64" call :find64
@@ -149,7 +163,7 @@ rem ----------------------------------------------------------------------------
 		set "parentDir=%%~fP"
 		set "parentName=%%~nxP"
 	)
-	if /i "!parentName:~0,7!" == "x86_x64" set "extraDir=!parentDir!"
+	if /i "%parentName:~0,7%" == "x86_x64" set "extraDir=%parentDir%"
 	if defined extraDir ( set "PATH=%runDir%;%extraDir%;%PATH%" ) else ( set "PATH=%runDir%;%PATH%" )
 	echo:
 	echo Command-line tools:

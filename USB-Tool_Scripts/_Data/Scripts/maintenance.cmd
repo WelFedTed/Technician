@@ -16,10 +16,12 @@ if /i "%~1"=="/elevated" goto elevationFailed
 
 :getPrivileges
 rem not elevated, relaunch as admin
-rem (path is quoted so folders with spaces work; any ' is doubled because it
-rem  sits inside a PowerShell single-quoted string)
+rem (the path reaches PowerShell in a variable, so spaces, ' & ( ! in it are kept;
+rem  cmd.exe is started itself, with the whole command in an extra pair of quotes,
+rem  as Windows' own Run as administrator for scripts loses the quotes around a
+rem  path with & in it)
 set "self=%~f0"
-powershell -NoProfile -Command "try { Start-Process -FilePath '%self:'=''%' -ArgumentList '/elevated' -Verb RunAs -ErrorAction Stop } catch { exit 1 }"
+powershell -NoProfile -Command "$q = [char]34; $line = '/d /c ' + $q + $q + $env:self + $q + ' /elevated' + $q; try { Start-Process -FilePath ($env:SystemRoot + '\System32\cmd.exe') -ArgumentList $line -Verb RunAs -ErrorAction Stop } catch { exit 1 }"
 if errorlevel 1 (
     echo *** Administrator rights were not granted ^(the UAC prompt was declined^).
     echo *** Maintenance was not run.

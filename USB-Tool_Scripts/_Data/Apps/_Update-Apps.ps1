@@ -5,7 +5,8 @@
 # those lines, a block redrawn as they work shows the apps updating now, what each is doing and its download's progress.
 # Writes to -RunDir, for Update-Tool's summary and its report (_Update-Report.ps1):
 #   plan.txt     every app folder it will try, in order (folders starting with _ are notes, not apps)
-#   apps.txt     a line per app as it finishes: <update.cmd's exit code, or skip>*<name>
+#   apps.txt     a line per app as it finishes: <update.cmd's exit code, skip, or stop>*<name>
+#                (stop: stopped with Ctrl+C, or ended because it carried on after it)
 #   state.txt    step=apps, then start=<n>*<name> as each app starts, and stopped=1 if it's stopped early
 # Apps whose update.cmd refers to another app's folder (eg. -MoveFrom "%~dp0..\7-Zip Portable") don't run at the
 # same time as that app.
@@ -201,10 +202,12 @@ function Show-Line([object]$app, [string]$text, [string]$colour, [double]$second
 function Complete-App([object]$run) {
     $app = $run.App
     $code = $run.Process.ExitCode
-    Add-Line 'apps.txt' "$code*$($app.Name)"
-    $script:done++
     Read-NewResults
     $own = @($script:parts[$app.Name] | Where-Object { $_ })
+    # (an app stopped with Ctrl+C is recorded as stop, as are those ended below, so the summary lists them as stopped)
+    $stopped = "$code" -notin @('0', '2', '3') -and ($own | Where-Object { $_.status -eq 'cancelled' })
+    Add-Line 'apps.txt' "$(if ($stopped) { 'stop' } else { $code })*$($app.Name)"
+    $script:done++
     $seconds = ((Get-Date) - $run.Started).TotalSeconds
     $updated = @($own | Where-Object { $_.status -in @('updated', 'blocked') })
     $versions = ($updated | ForEach-Object { if ($_.version) { $_.version } elseif ($_.built) { $_.built } } | Select-Object -Unique) -join ', '
@@ -284,11 +287,15 @@ finally {
         Write-Host 'Stopping the apps still updating...' -ForegroundColor Yellow
         $until = (Get-Date).AddSeconds(8)
         while (($running | Where-Object { -not $_.Process.HasExited }) -and (Get-Date) -lt $until) { Start-Sleep -Milliseconds 200 }
-        foreach ($run in @($running)) {
+        # (.ToArray(), as Windows PowerShell can't make @($running) of these items: "Argument types do not match")
+        foreach ($run in $running.ToArray()) {
             if ($run.Process.HasExited) { Complete-App $run; continue }
             # (taskkill writes to stderr when part of the tree has already ended, which Windows PowerShell turns
             # into an error with 'Stop'; the rest of the apps still need stopping)
             try { & "$env:SystemRoot\System32\taskkill.exe" /PID $run.Process.Id /T /F 2>&1 | Out-Null } catch { }
+            # (a line in apps.txt like the other apps', so Update-Tool's summary and the report include it)
+            Add-Line 'apps.txt' "stop*$($run.App.Name)"
+            $script:done++
             Show-Line $run.App 'stopped' Red ((Get-Date) - $run.Started).TotalSeconds
         }
         Write-Host "$($queue.Count) app$(if ($queue.Count -ne 1) { 's' }) weren't started." -ForegroundColor Yellow

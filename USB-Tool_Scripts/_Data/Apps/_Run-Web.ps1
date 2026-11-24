@@ -10,7 +10,8 @@
 #
 #   -Web <url>          the address the tool's irm | iex command uses
 #   -Name <text>        the tool's name, for messages
-#   -Arguments <text>   passed to the script, as typed after it in a PowerShell window (eg. "/HWID" or "-UseMSI")
+#   -Arguments <text>   passed to the script, as typed after it in a PowerShell window (eg. "/HWID" or "-UseMSI");
+#                       or in the USB_TOOL_WEB_ARGUMENTS variable, so quotes in them survive (eg. -Name "a b")
 #   -Local <file>       the copy on the USB to run instead (a .ps1)
 #   -Admin              run as admin: asks for it, then runs in a new window that stays open afterwards
 #
@@ -27,6 +28,10 @@ param(
 )
 
 if (-not $Name) { $Name = 'This tool' }
+# the launchers made from _Run-Template.cmd give the arguments in USB_TOOL_WEB_ARGUMENTS instead (on the command
+# line, in -Arguments "...", any quotes in them would end its quotes); it's cleared so the tool doesn't see it
+if (-not $PSBoundParameters.ContainsKey('Arguments') -and $env:USB_TOOL_WEB_ARGUMENTS) { $Arguments = $env:USB_TOOL_WEB_ARGUMENTS }
+Remove-Item -LiteralPath 'Env:USB_TOOL_WEB_ARGUMENTS' -ErrorAction SilentlyContinue
 
 # -Admin: start again as admin, in a new window that stays open (asking once, here)
 if ($Admin -and -not $Elevated) {

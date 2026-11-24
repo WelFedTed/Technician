@@ -11,3 +11,5 @@ New-Item -ItemType Directory -Force -Path "$dir"
 echo ""
 echo "Exporting drivers..."
 DISM /Online /Export-Driver /Destination:"$dir"
+# (DISM's exit code, so export.cmd can tell if it failed)
+exit $LASTEXITCODE

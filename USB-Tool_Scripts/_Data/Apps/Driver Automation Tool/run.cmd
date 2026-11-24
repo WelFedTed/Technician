@@ -15,17 +15,20 @@ if not exist "%script%" (
 	exit /b 1
 )
 
-rem check if already elevated, and if not, start again as administrator
-NET FILE 1>NUL 2>NUL
-rem (Windows PowerShell won't take an empty -ArgumentList, so it's only given when there are arguments)
-if not "%errorlevel%" == "0" (
-	if "%~1" == "" (
-		powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
-	) else (
-		powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -ArgumentList '%*' -Verb RunAs"
-	)
-	exit /b
+rem check if already elevated, and if not, start again as administrator (as _Run-Template.cmd does: fltmc works
+rem without the Server service, and the path and arguments reach PowerShell in variables, so ' & ( in them are kept)
+fltmc >nul 2>&1
+if not errorlevel 1 goto elevated
+set "selfPath=%~f0"
+set "selfArgs=%*"
+powershell -NoProfile -Command "$q = [char]34; $line = '/d /c ' + $q + $q + $env:selfPath + $q + ' ' + $env:selfArgs + $q; try { Start-Process -FilePath ($env:SystemRoot + '\System32\cmd.exe') -ArgumentList $line -Verb RunAs -ErrorAction Stop } catch { exit 1 }"
+if errorlevel 1 (
+	echo Couldn't start it as administrator ^(was the UAC prompt declined?^)
+	pause
+	exit /b 1
 )
+exit /b
+:elevated
 
 echo Starting the Driver Automation Tool...
 start "Driver Automation Tool" powershell -NoProfile -ExecutionPolicy Bypass -File "%script%" -NoShortcut %*

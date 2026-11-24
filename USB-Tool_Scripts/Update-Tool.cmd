@@ -80,6 +80,7 @@ rem ----------------------------------------------------------------------------
 	set "appFailed="
 	set "appManual="
 	set "appBlocked="
+	set "appStopped="
 
 
 rem Checks
@@ -259,9 +260,10 @@ rem ----------------------------------------------------------------------------
 	powershell -NoProfile -ExecutionPolicy Bypass -File "%root%_Data\Apps\_Update-Apps.ps1" -AppsDir "%root%_Data\Apps" -RunDir "%runDir%" -Parallel %parallel%
 	title USB Tool Updater
 
-	rem the summary's numbers, from each app's line in apps.txt: <update.cmd's exit code, or skip>*<name>
+	rem the summary's numbers, from each app's line in apps.txt: <update.cmd's exit code, skip or stop>*<name>
 	rem update.cmd exit codes: 0 = updated or up to date, 2 = needs a manual update,
 	rem 3 = updated but Windows Defender blocked some files, anything else = failed
+	rem (stop = stopped part-way with Ctrl+C, or ended as it carried on after it)
 	rem (* can't be in a folder name, so it separates the fields)
 	if not exist "%appsList%" exit /b 0
 	for /f "usebackq tokens=1* delims=*" %%A in ("%appsList%") do (
@@ -270,6 +272,8 @@ rem ----------------------------------------------------------------------------
 		set "appName=%%B"
 		if "!appResult!" == "skip" (
 			set /a appSkipped+=1
+		) else if "!appResult!" == "stop" (
+			set "appStopped=!appStopped!;!appName!"
 		) else if "!appResult!" == "0" (
 			set /a appCount+=1
 		) else if "!appResult!" == "3" (
@@ -321,11 +325,16 @@ rem fixes the capitalisation of a folder's name, eg. Rkill to RKill (no-op if it
 	ren "%root%%~1\!currentName!" "%~2"
 	exit /b 0
 
-rem moves an old folder's contents into its renamed folder (keeping the repo's update.cmd), then deletes it
+rem moves an old folder's contents into its renamed folder (keeping the repo's scripts), then deletes it
 :moveFolder
 	if not exist "%root%%~1\" exit /b 0
 	echo:
 	echo Moving "%~1" to its new name...
+	rem the repo's copies of the app's scripts (run.cmd, install.cmd, cli.cmd, build.cmd, build.ps1, ...) are already in
+	rem the new folder, and robocopy copies older files over newer ones too, so the old folder's copies of them are
+	rem removed rather than moved over them (only files straight in the old folder that the new folder also has; its
+	rem downloads, in its Installer / Portable / CLI folders, are moved)
+	for %%F in ("%root%%~1\*") do if exist "%root%%~2\%%~nxF" del /f /q "%%~fF"
 	robocopy "%root%%~1" "%root%%~2" /E /MOVE /XF update.cmd /R:1 /W:1 /NJH /NJS /NDL /NFL /NP >nul
 	if errorlevel 8 (
 		echo Couldn't move everything, so "%~1" was left in place.
@@ -405,6 +414,11 @@ rem ----------------------------------------------------------------------------
 		echo:
 		echo These apps FAILED to update ^(the report says why^):
 		for %%W in ("!appFailed:;=" "!") do if not "%%~W" == "" echo   %%~W
+	)
+	if defined appStopped (
+		echo:
+		echo These apps were STOPPED part-way through updating ^(update them again to finish^):
+		for %%W in ("!appStopped:;=" "!") do if not "%%~W" == "" echo   %%~W
 	)
 	if defined appBlocked (
 		echo:
