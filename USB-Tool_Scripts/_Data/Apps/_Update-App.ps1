@@ -330,6 +330,13 @@ function Find-GitHubAsset([string]$pattern) {
             $script:releases = @(Get-GitHubReleases $GitHub)
             if (-not $script:releases) { throw "No releases found for $GitHub" }
         }
+        # the other builds (32-bit, ARM64, extra files) come from the main build's release when it has them, so the
+        # version, build date and files all match; one that release lacks is taken from the newest release that
+        # has it, without changing the release the version is read from
+        if ($script:release) {
+            $match = $script:release.assets | Where-Object { $_.name -match $pattern } | Select-Object -First 1
+            if ($match) { return $match.browser_download_url }
+        }
         for ($i = 0; $i -lt $script:releases.Count; $i++) {
             # (-SkipPreReleases: GitHub's pre-release flag, or the tag when it's read from the releases page; also tags
             # with no version number, eg. FxSound's "beta" and "latest" releases)
@@ -339,7 +346,8 @@ function Find-GitHubAsset([string]$pattern) {
             $candidate = $script:releases[$i]
             $match = $candidate.assets | Where-Object { $_.name -match $pattern } | Select-Object -First 1
             if ($match) {
-                $script:release = $candidate
+                if (-not $script:release) { $script:release = $candidate }
+                elseif ($candidate.tag_name -ne $script:release.tag_name) { Say "($($match.name) isn't in $($script:release.tag_name), so it's from $($candidate.tag_name))" }
                 return $match.browser_download_url
             }
         }
@@ -884,9 +892,23 @@ function Move-ToolIntoPlace([string]$made, [string]$target, [switch]$Folder) {
 }
 
 # (-InZip: the exe's name in the zip, when it's cached under another name)
+# true if a file starts like a Windows program ("MZ"), not eg. a filter's or Wi-Fi sign-in page's HTML
+function Test-IsProgram([string]$path) {
+    try {
+        $stream = [IO.File]::OpenRead($path)
+        try { return ($stream.ReadByte() -eq 0x4D -and $stream.ReadByte() -eq 0x5A) }
+        finally { $stream.Close() }
+    }
+    catch { return $false }
+}
+
 function Get-Tool([string]$exeName, [string]$address, [switch]$Zipped, [string]$InZip = $exeName) {
     $exe = Join-Path $toolsDir $exeName
-    if (Test-Path -LiteralPath $exe) { return $exe }
+    if (Test-Path -LiteralPath $exe) {
+        if (Test-IsProgram $exe) { return $exe }
+        # (a page cached by an older version of this script, eg. from a web filter, instead of the tool)
+        Remove-Item -LiteralPath $exe -Force -ErrorAction SilentlyContinue
+    }
     New-Item -ItemType Directory -Path $toolsDir -Force | Out-Null
     Say "Downloading $exeName (one-off, cached in $toolsDir)..."
     $download = New-ToolTemp
@@ -899,11 +921,15 @@ function Get-Tool([string]$exeName, [string]$address, [switch]$Zipped, [string]$
                 [IO.Compression.ZipFile]::ExtractToDirectory($download, $unzipped)
                 $found = Get-ChildItem -LiteralPath $unzipped -Recurse -Filter $InZip | Select-Object -First 1
                 if (-not $found) { throw "$InZip wasn't in the download" }
+                if (-not (Test-IsProgram $found.FullName)) { throw "$InZip in the download isn't a program" }
                 Move-ToolIntoPlace $found.FullName $exe
             }
             finally { Remove-Item -LiteralPath $unzipped -Recurse -Force -ErrorAction SilentlyContinue }
         }
-        else { Move-ToolIntoPlace $download $exe }
+        else {
+            if (-not (Test-IsProgram $download)) { throw "Couldn't download $exeName (the address gave a web page, not the program: a web filter or Wi-Fi sign-in page?)" }
+            Move-ToolIntoPlace $download $exe
+        }
     }
     finally { Remove-Item -LiteralPath $download -Force -ErrorAction SilentlyContinue }
     return $exe
@@ -1008,6 +1034,26 @@ function Get-SevenZipA {
 # copies a folder tree; files Windows Defender blocks are skipped and listed (eg. NirSoft password tools),
 # so one flagged tool doesn't stop a whole package like NirLauncher from updating
 $script:blocked = @()
+
+# true if an error is Windows Defender blocking a file (ERROR_VIRUS_INFECTED / ERROR_VIRUS_DELETED), found by its
+# error code, as the message is in Windows' own language; the English message is still matched too
+function Test-DefenderBlock($err) {
+    $e = if ($err -is [Management.Automation.ErrorRecord]) { $err.Exception } else { $err }
+    while ($e) {
+        if ($e.HResult -in @(-2147024671, -2147024670)) { return $true }
+        if ($e.Message -match 'virus or potentially unwanted software') { return $true }
+        $e = $e.InnerException
+    }
+    return $false
+}
+
+# true if an error (or one it wraps) is of this .NET type
+function Test-ErrorType($err, [type]$type) {
+    $e = if ($err -is [Management.Automation.ErrorRecord]) { $err.Exception } else { $err }
+    while ($e) { if ($e -is $type) { return $true }; $e = $e.InnerException }
+    return $false
+}
+
 # -Keep's files and folders (the app's settings, eg. Greenshot's greenshot.ini) are the USB's copy, not the
 # download's: a kept file that's already there isn't overwritten, and a kept folder only gets files it doesn't
 # have yet (many downloads include default settings, which replaced the USB's on every update before this)
@@ -1022,7 +1068,7 @@ function Copy-AllowedFiles([string]$source, [string]$destination, [switch]$KeepE
         if ($kept -and (Test-Path -LiteralPath $target)) { continue }
         try { Copy-Item -LiteralPath $item.FullName -Destination $target -Force }
         catch {
-            if ($_.Exception.Message -notmatch 'virus or potentially unwanted software') { throw }
+            if (-not (Test-DefenderBlock $_)) { throw }
             $script:blocked += $item.Name
         }
     }
@@ -1059,7 +1105,8 @@ function Expand-ToStaging([string]$archive, [string]$kind, [string]$staging, [st
         try { [IO.Compression.ZipFile]::ExtractToDirectory($archive, $staging) }
         catch {
             # a zip packed with a method .NET can't unzip (eg. Revo Uninstaller's portable zip): the full 7-Zip can
-            if ($_.Exception.Message -notmatch 'unsupported compression method') { throw }
+            # (InvalidDataException, whatever Windows' language; a damaged zip fails again in 7-Zip, with its error)
+            if (-not (Test-ErrorType $_ ([IO.InvalidDataException]))) { throw }
             Remove-Item -LiteralPath $staging -Recurse -Force
             New-Item -ItemType Directory -Path $staging | Out-Null
             $sevenZip = Get-SevenZipFull
@@ -1132,8 +1179,17 @@ function Get-MsiVersion([string]$path) {
 function Resolve-VersionFile {
     $file = Join-Path $AppDir $VersionFrom
     if (-not (Test-Path -LiteralPath $file) -and $VersionFrom -match '\*') {
-        $hit = Get-Item -Path $file -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($hit) { $file = $hit.FullName }
+        # (one folder at a time from the app folder, so [ ] in the USB's own path aren't taken as wildcards;
+        # -Filter matches * and ? only)
+        $current = @($AppDir)
+        foreach ($part in ($VersionFrom -split '[\\/]' | Where-Object { $_ })) {
+            $current = @(foreach ($folder in $current) {
+                if ($part -match '[*?]') { Get-ChildItem -LiteralPath $folder -Filter $part -Force -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName } }
+                else { $next = Join-Path $folder $part; if (Test-Path -LiteralPath $next) { $next } }
+            })
+            if (-not $current) { break }
+        }
+        if ($current) { $file = $current[0] }
     }
     return $file
 }
@@ -1250,14 +1306,16 @@ function Get-BuildDate([object[]]$jobs) {
 function Write-Checksums {
     Initialize-Crc32
     $sfv = Join-Path $AppDir 'checksums.sfv'
+    $temp = "$sfv.tmp"
+    Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue
     $files = Get-ChildItem -LiteralPath $AppDir -Recurse -File -Force |
-        Where-Object { $_.Name -ne 'checksums.sfv' -and $_.Extension -ne '.par2' } |
+        Where-Object { $_.Name -ne 'checksums.sfv' -and $_.Name -ne 'checksums.sfv.tmp' -and $_.Extension -ne '.par2' } |
         Sort-Object FullName
     $rows = foreach ($f in $files) {
         try { $crc = [UsbToolCrc32]::OfFile($f.FullName) }
         catch {
             # Defender can block reading a file even after it was copied; leave it out of the checksums
-            if ($_.Exception.Message -notmatch 'virus or potentially unwanted software') { throw }
+            if (-not (Test-DefenderBlock $_)) { throw }
             if ($script:blocked -notcontains $f.Name) { $script:blocked += $f.Name }
             continue
         }
@@ -1265,7 +1323,22 @@ function Write-Checksums {
     }
     $width = ($rows | ForEach-Object { $_.Path.Length } | Measure-Object -Maximum).Maximum
     $lines = $rows | ForEach-Object { $_.Path.PadRight($width + 1) + $_.Crc }
-    [IO.File]::WriteAllLines($sfv, [string[]]$lines)
+    # (written under another name first, so an update stopped part-way leaves no checksums rather than a partial
+    # list, and the next run writes them; see Repair-Checksums)
+    [IO.File]::WriteAllLines($temp, [string[]]$lines)
+    Move-Item -LiteralPath $temp -Destination $sfv -Force
+}
+
+# checksums and parity data that are missing (an update stopped while writing them, or they were deleted):
+# write them again, so an app that's otherwise up to date still gets them
+function Repair-Checksums {
+    $missing = @()
+    if (-not (Test-Path -LiteralPath (Join-Path $AppDir 'checksums.sfv'))) { $missing += 'checksums' }
+    if (-not (Test-Path -LiteralPath (Join-Path $AppDir 'parity.par2'))) { $missing += 'parity data' }
+    if ($missing.Count -eq 0) { return }
+    Say "The $($missing -join ' and ') $(if ($missing.Count -gt 1) { 'are' } else { 'is' }) missing, so writing $(if ($missing.Count -gt 1) { 'them' } else { 'it' }) again..."
+    if ($missing -contains 'checksums') { Write-Checksums }
+    Write-Parity
 }
 
 function Write-Parity {
@@ -1280,8 +1353,18 @@ function Write-Parity {
     $blocks = [Math]::Min(32768, [Math]::Max(5000, $fileCount * 4))
     Push-Location -LiteralPath $AppDir
     try {
-        & $par2 c -q "-b$blocks" -r5 -n1 -R parity.par2 * | Out-Null
-        if ($LASTEXITCODE -ne 0) { Say "WARNING: par2 couldn't create parity data (exit code $LASTEXITCODE)" }
+        # (made as parity-new*.par2 and renamed when complete, so an update stopped part-way leaves no parity.par2
+        # and the next run makes it; PAR2 tools find the volume files by their base name, so renaming is fine)
+        & $par2 c -q "-b$blocks" -r5 -n1 -R parity-new.par2 * | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            Say "WARNING: par2 couldn't create parity data (exit code $LASTEXITCODE)"
+            Get-ChildItem -LiteralPath $AppDir -Filter 'parity-new*.par2' -File | Remove-Item -Force
+        }
+        else {
+            # (the index file last, as its presence says the set is complete)
+            $made = @(Get-ChildItem -LiteralPath $AppDir -Filter 'parity-new*.par2' -File | Sort-Object { $_.Name -eq 'parity-new.par2' })
+            foreach ($f in $made) { Rename-Item -LiteralPath $f.FullName -NewName ('parity' + $f.Name.Substring('parity-new'.Length)) }
+        }
     }
     finally { Pop-Location }
 }
@@ -1336,7 +1419,8 @@ function Move-OldLayout([string]$from) {
     $from = (Resolve-Path -LiteralPath $from).Path.TrimEnd('\')
     $appFolder = Split-Path -Parent $AppDir
     $isAppFolder = $from -eq $appFolder
-    $scripts = @('update.cmd', 'run.cmd', 'install.cmd', 'cli.cmd', '.gitkeep', 'placeholder.file', 'desktop.ini')
+    # (the app folder's own scripts, and what its build.cmd builds from source, stay where they are)
+    $scripts = @('update.cmd', 'run.cmd', 'install.cmd', 'cli.cmd', 'build.cmd', 'build.ps1', 'Built', '.gitkeep', 'placeholder.file', 'desktop.ini')
     $oldType = Join-Path $from (Split-Path -Leaf $AppDir)
     if (-not $isAppFolder -and (Test-Path -LiteralPath $oldType -PathType Container)) {
         # a renamed app folder that already has Installer / Portable / CLI folders (eg. "Nvida App"): take what's
@@ -1469,7 +1553,8 @@ function Write-Report([string]$status, [hashtable]$more = @{}) {
 Say $Name
 Say ('-' * 100)
 
-if ($MoveFrom) {
+# (-CheckOnly changes nothing)
+if ($MoveFrom -and -not $CheckOnly) {
     try { Move-OldLayout $MoveFrom }
     catch { Say "WARNING: couldn't move the old layout from ${MoveFrom}: $($_.Exception.Message)" }
 }
@@ -1607,6 +1692,14 @@ try {
     # became x86_x64), belong in its main build folder
     $movedRootFiles = $false
     if ($Into) { $movedRootFiles = Move-RootFiles (Join-Path $AppDir $Into) @($Into, $Into86, $IntoArm) }
+    if ($movedRootFiles) {
+        # (the moved files' old version record, checksums and parity data list them where they were; without them,
+        # the next run does a full update even if this one fails, eg. offline)
+        $script:movedNote = "files were moved into the $Into folder"
+        Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File | Remove-Item -Force
+        Remove-Item -LiteralPath (Join-Path $AppDir 'checksums.sfv') -Force -ErrorAction SilentlyContinue
+        Get-ChildItem -LiteralPath $AppDir -Filter '*.par2' -File | Remove-Item -Force
+    }
 
     # links scraped from a page or GitHub contain the version, so an unchanged link means nothing new
     $versionFile = Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File | Select-Object -First 1
@@ -1625,12 +1718,15 @@ try {
     }
     $oldKey = (($oldRecord -split "`r?`n") | Where-Object { $_ -and $_ -notlike 'built=*' }) -join "`r`n"
     # (a site's address doesn't change when its files do, so it's always copied and compared)
-    if (-not $Url -and -not $Site -and $oldRecord -and (-not $wingetKey -or $oldRecord.Contains($wingetKey))) {
+    # (whole lines are compared, so eg. winget's "1.2" isn't taken as the "1.2.3" recorded)
+    $oldLines = @($oldRecord -split "`r?`n")
+    if (-not $Url -and -not $Site -and $oldRecord -and (-not $wingetKey -or $oldLines -ccontains $wingetKey)) {
         # (a download whose link couldn't be found is got from MajorGeeks, so it's never unchanged)
-        $unchanged = @($jobs | Where-Object { $_.Link -and $oldRecord.Contains("link=$($_.Link)") }).Count -eq $jobs.Count
+        $unchanged = @($jobs | Where-Object { $_.Link -and $oldLines -ccontains "link=$($_.Link)" }).Count -eq $jobs.Count
         if ($unchanged -and (Test-AppFiles $jobs)) {
             Add-DataFolder $jobs
             Repair-OldVersionName $versionFile
+            Repair-Checksums
             Say "Already up to date"
             Write-Report 'current'
             exit 0
@@ -1644,6 +1740,7 @@ try {
         if ($unchanged -and (Test-AppFiles $jobs)) {
             Add-DataFolder $jobs
             Repair-OldVersionName $versionFile
+            Repair-Checksums
             Say "Already up to date"
             Write-Report 'current'
             exit 0
@@ -1735,6 +1832,7 @@ try {
     if ($versionFile -and $oldRecord -and @($installed).Count -eq $jobs.Count -and ($oldKey -eq $record -or $sameFiles) -and (Test-AppFiles $jobs -Quiet)) {
         Add-DataFolder $jobs
         Repair-OldVersionName $versionFile
+        Repair-Checksums
         Say "Already up to date"
         Write-Report 'current'
         exit 0
@@ -1785,6 +1883,10 @@ try {
     Say 'Applying update...'
     [IO.File]::WriteAllText($inProgress, "An update of this app was replacing its files. If this note is still here, the update was stopped part-way, so the next update redoes it.`r`n")
     $script:applying = $true
+    # (the old version's checksums and parity data no longer match; with them gone, an update stopped after the
+    # files are replaced but before new ones are written still gets them on its next run)
+    Remove-Item -LiteralPath (Join-Path $AppDir 'checksums.sfv') -Force -ErrorAction SilentlyContinue
+    Get-ChildItem -LiteralPath $AppDir -Filter '*.par2' -File | Remove-Item -Force
     $cleaned = @{}
     foreach ($job in $jobs) {
         if ($Clean -and -not $cleaned[$job.Folder]) {
@@ -1847,7 +1949,7 @@ try {
 }
 catch {
     $message = $_.Exception.Message
-    if ($message -match 'virus or potentially unwanted software') {
+    if (Test-DefenderBlock $_) {
         $message = 'Windows Defender blocked a file in this app as unwanted software (common for password-recovery and repair tools). ' +
             "Add a Defender exclusion for this app folder and $(Get-StagingFolder), or update it by hand."
     }
@@ -1857,6 +1959,7 @@ catch {
         Get-ChildItem -LiteralPath $AppDir -Filter '*.version' -File -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
         Say 'The update failed part-way through, so check this app folder.'
     }
+    elseif ($script:movedNote) { Say "Nothing was downloaded, but $($script:movedNote), so the next update downloads it again in full." }
     else { Say 'Nothing was changed; the old version (if there was one) is still in place.' }
     Write-Report 'failed' @{ message = $message; partWay = [bool]$script:applying }
     exit 1
