@@ -76,14 +76,14 @@ function Stop-Build($errorRecord) {
 }
 
 function Get-Text([string]$address) {
-    $text = & $script:curl -sSL --fail --retry 2 --connect-timeout 20 $address | Out-String
+    $text = & $script:curl -g -sSL --fail --retry 2 --connect-timeout 20 $address | Out-String
     if ($LASTEXITCODE -ne 0) { throw "Couldn't load $address (curl exit code $LASTEXITCODE)" }
     return $text
 }
 
 function Get-File([string]$address, [string]$outFile) {
     New-Item -ItemType Directory -Path (Split-Path -Parent $outFile) -Force | Out-Null
-    & $script:curl -L --fail --retry 2 --connect-timeout 20 --progress-bar -o $outFile $address
+    & $script:curl -g -L --fail --retry 2 --connect-timeout 20 --progress-bar -o $outFile $address
     if ($LASTEXITCODE -ne 0) { throw "Couldn't download $address (curl exit code $LASTEXITCODE)" }
 }
 
@@ -185,7 +185,7 @@ function Get-LatestGitHubTag([string]$repo, [switch]$Pre, [string]$Match) {
     }
     catch {
         if (-not ($Pre -or $Match)) {
-            $final = & $script:curl -sSIL --fail -o NUL -w '%{url_effective}' "https://github.com/$repo/releases/latest"
+            $final = & $script:curl -g -sSIL --fail -o NUL -w '%{url_effective}' "https://github.com/$repo/releases/latest"
             if ("$final" -match '/releases/tag/(.+)$') { return [Uri]::UnescapeDataString($Matches[1]) }
         }
         else {

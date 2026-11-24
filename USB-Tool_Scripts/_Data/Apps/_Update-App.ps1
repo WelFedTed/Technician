@@ -227,7 +227,7 @@ function Get-Sha256([string]$path) {
 
 function Get-Text([string]$address, [string]$cookieJar) {
     $jarArgs = if ($cookieJar) { @('-c', $cookieJar) } else { @() }
-    $text = & $curl -sSL --fail --retry 2 --connect-timeout 20 -A $userAgent @jarArgs $address | Out-String
+    $text = & $curl -g -sSL --fail --retry 2 --connect-timeout 20 -A $userAgent @jarArgs $address | Out-String
     if ($LASTEXITCODE -ne 0) { throw "Couldn't load $address (curl exit code $LASTEXITCODE)" }
     return $text
 }
@@ -299,7 +299,7 @@ function Get-GitHubRelease([string]$repo) {
     catch {
         Say "GitHub's API didn't answer ($($_.Exception.Message)), so reading the release page instead..."
         # /releases/latest redirects to /releases/tag/<tag>
-        $final = & $curl -sSIL --fail --retry 2 --connect-timeout 20 -A $userAgent -o NUL -w '%{url_effective}' "https://github.com/$repo/releases/latest"
+        $final = & $curl -g -sSIL --fail --retry 2 --connect-timeout 20 -A $userAgent -o NUL -w '%{url_effective}' "https://github.com/$repo/releases/latest"
         if ($LASTEXITCODE -ne 0 -or "$final" -notmatch '/releases/tag/(.+)$') { throw "Couldn't find the latest release of $repo" }
         return Get-GitHubReleaseFromPage $repo $Matches[1]
     }
@@ -471,7 +471,7 @@ function Get-MirrorDownload($job, [string]$temp) {
         # where MajorGeeks sends it: its own copy, or the maker's link, which has the file's name in it even when
         # the maker sends it on to an address without one (eg. GitHub's release downloads)
         $jarArgs = Get-CookieArgs $link
-        $sentTo = & $curl -s --connect-timeout 20 -A $userAgent @jarArgs -o NUL -w '%{redirect_url}' $link
+        $sentTo = & $curl -g -s --connect-timeout 20 -A $userAgent @jarArgs -o NUL -w '%{redirect_url}' $link
         if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp -Force }
         Say "Downloading $link"
         $finalUrl = Get-Download $link $temp
@@ -650,7 +650,7 @@ function Get-Download([string]$address, [string]$outFile) {
     $curlArgs = @('-L', '-R', '--fail', '--globoff', '--retry', '2', '--connect-timeout', '20', '--progress-bar', '-A', $userAgent, '-o', $outFile, '-w', '%{url_effective}')
     if ($Referer) { $curlArgs += @('-e', $Referer) }
     $curlArgs += Get-CookieArgs $address
-    $finalUrl = & $curl @curlArgs $address
+    $finalUrl = & $curl -g @curlArgs $address
     if ($LASTEXITCODE -ne 0) { throw "Download failed (curl exit code $LASTEXITCODE): $address" }
     return [Uri]::UnescapeDataString(($finalUrl | Select-Object -Last 1).Split('?')[0])
 }
@@ -693,9 +693,9 @@ function Save-Site([string]$page, [string]$folder) {
         $savedPreference = $ErrorActionPreference
         $ErrorActionPreference = 'Continue'
         try {
-            & $curl -sL -R --fail --retry 2 --connect-timeout 20 --create-dirs --parallel --parallel-max 8 -A $userAgent -K $list 2>$null
+            & $curl -g -sL -R --fail --retry 2 --connect-timeout 20 --create-dirs --parallel --parallel-max 8 -A $userAgent -K $list 2>$null
             # (an older curl, before --parallel: the same, a file at a time)
-            if ($LASTEXITCODE -eq 2) { & $curl -sL -R --fail --retry 2 --connect-timeout 20 --create-dirs -A $userAgent -K $list 2>$null }
+            if ($LASTEXITCODE -eq 2) { & $curl -g -sL -R --fail --retry 2 --connect-timeout 20 --create-dirs -A $userAgent -K $list 2>$null }
         }
         finally {
             $ErrorActionPreference = $savedPreference
@@ -821,7 +821,7 @@ function Get-RemoteStamp([string]$address) {
     # update; its stamp just comes back empty, and the download is checked as usual)
     $savedPreference = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
-    try { $out = & $curl @curlArgs $address 2>$null }
+    try { $out = & $curl -g @curlArgs $address 2>$null }
     finally { $ErrorActionPreference = $savedPreference }
     if ($LASTEXITCODE -ne 0) { return '' }
     $stamp = ($out | Out-String).Trim()
@@ -913,7 +913,7 @@ function Get-Tool([string]$exeName, [string]$address, [switch]$Zipped, [string]$
     Say "Downloading $exeName (one-off, cached in $toolsDir)..."
     $download = New-ToolTemp
     try {
-        & $curl -sSL --fail -A $userAgent -o $download $address
+        & $curl -g -sSL --fail -A $userAgent -o $download $address
         if ($LASTEXITCODE -ne 0) { throw "Couldn't download $exeName" }
         if ($Zipped) {
             $unzipped = New-ToolTemp
@@ -975,7 +975,7 @@ function Get-SevenZipFull {
     $download = New-ToolTemp
     $unpacked = New-ToolTemp
     try {
-        & $curl -sSL --fail -A $userAgent -o $download $installer.browser_download_url
+        & $curl -g -sSL --fail -A $userAgent -o $download $installer.browser_download_url
         if ($LASTEXITCODE -ne 0) { throw "Couldn't download 7-Zip" }
         & $sevenZip x $download "-o$unpacked" -y | Out-Null
         if (-not (Test-Path -LiteralPath (Join-Path $unpacked '7z.exe'))) { throw "Couldn't unpack 7-Zip" }
@@ -1021,7 +1021,7 @@ function Get-SevenZipA {
     $archive = New-ToolTemp
     $unpacked = New-ToolTemp
     try {
-        & $curl -sSL --fail -A $userAgent -o $archive $extra.browser_download_url
+        & $curl -g -sSL --fail -A $userAgent -o $archive $extra.browser_download_url
         if ($LASTEXITCODE -ne 0) { throw "Couldn't download 7-Zip Extra" }
         & $sevenZip x $archive "-o$unpacked" -y | Out-Null
         # the 32-bit 7za.exe at the top of the archive runs everywhere
@@ -1568,7 +1568,7 @@ if ($Manual) {
     if ($GitHub) {
         # (no -S: with 'Stop', Windows PowerShell treats curl's error message as a failure even when it's sent to $null;
         # offline, or GitHub refusing, just leaves $latest empty)
-        $final = & $curl -sIL --fail --retry 2 --connect-timeout 20 -A $userAgent -o NUL -w '%{url_effective}' "https://github.com/$GitHub/releases/latest" 2>$null
+        $final = & $curl -g -sIL --fail --retry 2 --connect-timeout 20 -A $userAgent -o NUL -w '%{url_effective}' "https://github.com/$GitHub/releases/latest" 2>$null
         if ($LASTEXITCODE -eq 0 -and "$final" -match '/releases/tag/(.+)$') { $latest = [regex]::Match([Uri]::UnescapeDataString($Matches[1]), '\d+(\.\d+)+').Value }
         $have = (Get-VersionFromName $script:oldVersionName).Version
         if ($latest -and $have -eq $latest) {
@@ -1674,7 +1674,7 @@ try {
                 $curlArgs = @('-sL', '--fail', '--connect-timeout', '20', '--max-time', '60', '-r', '0-1023', '-A', $userAgent, '-o', $sample, '-D', '-', '-w', '%{url_effective}')
                 if ($Referer) { $curlArgs += @('-e', $Referer) }
                 $curlArgs += Get-CookieArgs $check[0]
-                $out = @(& $curl @curlArgs $check[0] 2>&1 | ForEach-Object { "$_" })
+                $out = @(& $curl -g @curlArgs $check[0] 2>&1 | ForEach-Object { "$_" })
                 $ok = $LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $sample)
                 $kind = if ($ok) { Get-FileKind $sample } else { 'failed' }
                 $size = ($out | Where-Object { $_ -match '^content-range: bytes \d+-\d+/(\d+)' } | Select-Object -Last 1) -replace '^content-range: bytes \d+-\d+/(\d+).*$', '$1'
