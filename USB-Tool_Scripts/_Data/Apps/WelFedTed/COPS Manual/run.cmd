@@ -26,5 +26,5 @@ if not exist "%copy%\index.html" (
 )
 echo Opening the copy on the USB...
 rem (in a window of its own, minimised: closing it stops the copy's web server; it also stops by itself when unused)
-start "COPS Manual (offline copy)" /min powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Serve-Site.ps1" -Folder "%copy%" -Title "COPS Manual" -InPrivate
+start "COPS Manual (offline copy)" /min powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Serve-Site.ps1" -Folder "%copy%" -Title "COPS Manual" -InPrivate
 exit /b

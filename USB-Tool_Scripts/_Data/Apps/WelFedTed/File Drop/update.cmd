@@ -1,6 +1,6 @@
 @echo off
 
-title Updating OS Installer
+title Updating File Drop
 
 rem Updates this app with the shared helper _Data\Apps\_Update-App.ps1 (see that file for the options)
 rem Run it on its own, or let Update-Tool.cmd run it for every app
@@ -11,12 +11,12 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
-rem Portable (one exe for 64-bit Windows 10/11 and WinPE, with a window and a command line; so far only
-rem published as previews, which GitHub marks as pre-releases)
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
-    -Name "OS Installer" ^
-    -GitHub "WelFedTed/os-installer-releases" -PreRelease ^
-    -Asset "^os-installer\.exe$" -Into "x64" ^
+rem Portable
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
+    -Name "File Drop" ^
+    -GitHub "WelFedTed/file-drop" ^
+    -Asset "^file-drop\.exe$" -Into "x64" ^
+    -Extra "https://github.com/WelFedTed/file-drop/releases/latest/download/file-drop-win7.exe" ^
     -Clean
 call :result
 

@@ -6,7 +6,7 @@
 # (a/b is a/b.html, a/ is a/index.html), and opens it in the browser.
 # It keeps running while the site is in use, and stops by itself after -IdleMinutes without a request (or
 # close its window).
-#   -Folder <path>       the copy (eg. _Data\Apps\COPS Manual\Portable\Any)
+#   -Folder <path>       the copy (eg. _Data\Apps\WelFedTed\COPS Manual\Portable\Any)
 #   -Title <text>        for the window
 #   -InPrivate           open it in Microsoft Edge's InPrivate mode, rather than the default browser
 #   -Port <n>            use this port (default: a free one); -NoBrowser: don't open it (for testing)

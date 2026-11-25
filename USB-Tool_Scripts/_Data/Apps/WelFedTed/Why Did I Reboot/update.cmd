@@ -1,6 +1,6 @@
 @echo off
 
-title Updating File Drop
+title Updating Why Did I Reboot
 
 rem Updates this app with the shared helper _Data\Apps\_Update-App.ps1 (see that file for the options)
 rem Run it on its own, or let Update-Tool.cmd run it for every app
@@ -12,11 +12,10 @@ set "result=0"
 set "resultRank=0"
 
 rem Portable
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
-    -Name "File Drop" ^
-    -GitHub "WelFedTed/file-drop" ^
-    -Asset "^file-drop\.exe$" -Into "x64" ^
-    -Extra "https://github.com/WelFedTed/file-drop/releases/latest/download/file-drop-win7.exe" ^
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Portable" -MoveFrom "%~dp0." ^
+    -Name "Why Did I Reboot" ^
+    -GitHub "WelFedTed/why-did-i-reboot-releases" ^
+    -Asset "^why-did-i-reboot\.exe$" -Into "x64" ^
     -Clean
 call :result
 

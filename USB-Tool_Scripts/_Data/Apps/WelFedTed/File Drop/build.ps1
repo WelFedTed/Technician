@@ -1,5 +1,5 @@
 param([string]$Version, [string]$WorkDir, [switch]$KeepWork, [switch]$Yes)
-. "$PSScriptRoot\..\_Build-App.ps1"
+. "$PSScriptRoot\..\..\_Build-App.ps1"
 trap { Stop-Build $_ }
 
 # Builds File Drop from source (github.com/WelFedTed/file-drop) into Built\x64, the way its README's "Releasing"

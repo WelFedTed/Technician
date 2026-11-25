@@ -236,6 +236,10 @@ rem ----------------------------------------------------------------------------
 	for %%T in (Autoruns Disk2vhd NotMyFault "Process Explorer" "Process Monitor (ProcMon)" RootkitRevealer SDelete TCPView) do (
 		call :moveFolder "_Data\Apps\%%~T" "_Data\Apps\Microsoft\Sysinternals\%%~T"
 	)
+	rem WelFedTed's own apps, in their own folder
+	for %%T in ("COPS Manual" "File Drop" "OS Installer" "Why Did I Reboot" "remote-mixer") do (
+		call :moveFolder "_Data\Apps\%%~T" "_Data\Apps\WelFedTed\%%~T"
+	)
 	rem folders whose name only changed case: Windows sees them as the same folder, so just rename
 	call :renameCase "_Data\Apps" "RKill"
 

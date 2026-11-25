@@ -1,6 +1,6 @@
 @echo off
 
-title Updating remote-mixer
+title Updating COPS Manual
 
 rem Updates this app with the shared helper _Data\Apps\_Update-App.ps1 (see that file for the options)
 rem Run it on its own, or let Update-Tool.cmd run it for every app
@@ -11,13 +11,10 @@ set "PSModulePath="
 set "result=0"
 set "resultRank=0"
 
-rem Portable
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
-    -Name "remote-mixer" ^
-    -Page "https://github.com/WelFedTed/remote-mixer-releases/releases/latest" ^
-    -GitHub "WelFedTed/remote-mixer-releases" ^
-    -Asset "^remote-mixer\.exe$" -Into "x64" ^
-    -ExtraAsset "^remote-mixer-(extension\.zip|firefox\.xpi)$" ^
+rem Portable: a copy of the site, for when it can't be reached (run.cmd serves it to Edge from this PC)
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\_Update-App.ps1" -AppDir "%~dp0Portable" ^
+    -Name "COPS Manual (offline copy)" ^
+    -Site "https://welfedted.github.io/cops-manual/" -Into "Any" ^
     -Clean
 call :result
 
